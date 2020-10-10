@@ -1,0 +1,4 @@
+@clear
+@draw_scene opaque
+@draw_scene transparent_clip = rsort
+@draw_scene transparent_blend = rsort
