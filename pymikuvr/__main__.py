@@ -7,6 +7,7 @@ from api.player import player
 from api.script import scene_script
 from api.sys import sys, sys_internal
 from api.base import updater
+from api.ui import ui
 
 if len(argv) < 2:
     exit("please specify game script to load, e.g.: python3 pymikuvr test.py")
@@ -24,6 +25,8 @@ else:
     sys_internal.start_window(640, 480, title)
     print("starting windowed")
 os.chdir(path)
+
+ui.set_font("/font/SawarabiMincho-Regular.ttf", 32, 0.5)
 
 scene_script.load(argv[1], False)
 
