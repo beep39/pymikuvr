@@ -6,55 +6,43 @@ from api.vec2 import vec2
 from api.vec3 import vec3_c
 from api.quat import quat_c
 
-c_lib.sys_get_ctrl.restype = ctypes.c_ulonglong
+c_lib.sys_get_ctrl.restype = ctypes.c_uint
+c_lib.sys_get_tracker.restype = ctypes.c_char_p
 
-tmp_jx = ctypes.c_float(0)
-tmp_jy = ctypes.c_float(0)
-tmp_tx = ctypes.c_float(0)
-tmp_ty = ctypes.c_float(0)
+tmp_ax = ctypes.c_float(0)
+tmp_ay = ctypes.c_float(0)
 tmp_trigger = ctypes.c_float(0)
-tmp_pjx = ctypes.byref(tmp_jx)
-tmp_pjy = ctypes.byref(tmp_jy)
-tmp_ptx = ctypes.byref(tmp_tx)
-tmp_pty = ctypes.byref(tmp_ty)
+tmp_i = ctypes.c_int(0)
+tmp_pax = ctypes.byref(tmp_ax)
+tmp_pay = ctypes.byref(tmp_ay)
 tmp_ptrigger = ctypes.byref(tmp_trigger)
+tmp_pi = ctypes.byref(tmp_i)
 
-class ctrl_knuckle:
-    __slots__ = ('__right','__btn','stick','touch','trigger')
+class controller:
+    __slots__ = ('__right','__btn','axis','trigger')
     def __init__(self, right):
         self.__right = right
         self.__btn = 0
-        self.stick = vec2()
-        self.touch = vec2()
+        self.axis = vec2()
         self.trigger = 0
 
     def _update(self):
-        self.__btn = c_lib.sys_get_ctrl(self.__right, tmp_pjx, tmp_pjy, tmp_ptx, tmp_pty, tmp_ptrigger)
-        self.stick.x = tmp_jx.value
-        self.stick.y = tmp_jy.value
-        self.touch.x = tmp_tx.value
-        self.touch.y = tmp_ty.value
+        self.__btn = c_lib.sys_get_ctrl(self.__right, tmp_pax, tmp_pay, tmp_ptrigger)
+        self.axis.x = tmp_ax.value
+        self.axis.y = tmp_ay.value
         self.trigger = tmp_trigger.value
 
     @property
     def a(self):
-        return self.__btn & (1 << 2)
+        return self.__btn & (1 << 0)
 
     @property
     def b(self):
         return self.__btn & (1 << 1)
- 
+
     @property
-    def touch_btn(self):
-        return self.__btn & (1 << 32)
- 
-    @property
-    def trigger_btn(self):
-        return self.__btn & (1 << 33)
- 
-    @property
-    def stick_btn(self):
-        return self.__btn & (1 << 35)
+    def axis_btn(self):
+        return self.__btn & (1 << 16)
 
 class transform_ro(transform):
     __slots__ = ()
@@ -90,15 +78,26 @@ class transform_ro(transform):
     def __del__(self):
         return
 
+class named_transform(transform_ro):
+    __slots__ = ('__name')
+    def __init__(self, name, id, parent):
+        super().__init__(id, parent)
+        self.__name = name
+
+    @property
+    def name(self):
+        return self.__name
+
 class player_class(base):
-    __slots__ = ('head', 'left_hand', 'right_hand', 'left_ctrl', 'right_ctrl')
+    __slots__ = ('head', 'left_hand', 'right_hand', 'left_ctrl', 'right_ctrl', '__trackers')
     def __init__(self):
         super().__init__(c_lib.player_get_transform(b"origin"))
         self.head = transform_ro(c_lib.player_get_transform(b"head"), self)
         self.left_hand = transform_ro(c_lib.player_get_transform(b"lhand"), self)
         self.right_hand = transform_ro(c_lib.player_get_transform(b"rhand"), self)
-        self.left_ctrl = ctrl_knuckle(False)
-        self.right_ctrl = ctrl_knuckle(True)
+        self.left_ctrl = controller(False)
+        self.right_ctrl = controller(True)
+        self.__trackers = []
 
     def _update(self):
         self.left_ctrl._update()
@@ -116,6 +115,18 @@ class player_class(base):
         if reset_position:
             self.pos = vec3()
             self.rot = quat()
+
+    @property
+    def trackers(self):
+        count = c_lib.sys_get_trackers_count()
+        off = len(self.__trackers)
+        if off == count:
+            return tuple(self.__trackers);
+        for i in range(off, count):
+            name = c_lib.sys_get_tracker(i, tmp_pi).decode()
+            t = named_transform(name, tmp_i.value, self)
+            self.__trackers.append(t)
+        return tuple(self.__trackers);
 
     def __del__(self):
         return
