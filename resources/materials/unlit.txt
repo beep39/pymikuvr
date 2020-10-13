@@ -1,0 +1,25 @@
+@pass "opaque"
+shader="shaders/unlit.nsh"
+cull=ccw
+
+@pass "transparent_clip"
+shader="shaders/unlit.nsh"
+blend="src_alpha:inv_src_alpha"
+"alpha test"=-1.0,0.9
+cull=ccw
+
+@pass "transparent_blend"
+shader="shaders/unlit.nsh"
+blend="src_alpha:inv_src_alpha"
+"alpha test"=1.0,-0.9
+cull=ccw
+
+@pass "normals"
+shader="shaders/normals.nsh"
+"alpha test"=-1.0,0.9
+cull=ccw
+
+@pass "shadows"
+shader="shaders/shadows.nsh"
+"alpha test"=-1.0,0.9
+cull=ccw

@@ -1,0 +1,5 @@
+@pass "transparent_blend"
+shader="shaders/ui.nsh"
+cull=none
+zwrite = false
+blend="src_alpha:inv_src_alpha"

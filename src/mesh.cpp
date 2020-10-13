@@ -41,11 +41,21 @@ bool mesh::load(const char *name)
 {
     m_groups_visible.clear();
     m_groups_count = 0;
+    
+    const std::string mat_prefix = nya_scene::material_internal::get_resources_prefix();
+    const std::string sh_prefix = nya_scene::shader_internal::get_resources_prefix();
 
-    if(nya_resources::check_extension(name, "nms"))
-        load_relative(name, m_mesh);
+    bool result;
+    if (nya_resources::check_extension(name, "nms"))
+        result = load_relative(name, m_mesh);
     else
-        m_mesh.load(name);
+    {
+        if (nya_resources::check_extension(name, "pmx") || nya_resources::check_extension(name, "pmd"))
+            nya_scene::shader::set_resources_prefix("shaders/");
+        else
+            nya_scene::material::set_resources_prefix("materials/");
+        result = m_mesh.load(name);
+    }
 
     m_groups_count = m_mesh.get_groups_count();
 
@@ -129,13 +139,12 @@ bool mesh::load(const char *name)
         enable_phys();
     }
 
-    //m.set_param("light dir", instance().m_light_dir);
-
-    //todo: setup ssao materials
+    nya_scene::material::set_resources_prefix(mat_prefix.c_str());
+    nya_scene::shader::set_resources_prefix(sh_prefix.c_str());
 
     //m_meshes_cache[file] = mesh;
 
-    return true;
+    return result;
 }
 
 int mesh::get_origin() const { return m_origin; }

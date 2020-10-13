@@ -1,0 +1,20 @@
+/*
+@pass "transparent_clip"
+shader="shaders/addditive.nsh"
+blend="src_alpha:one"
+"alpha test"=-1.0,0.9
+cull=ccw
+
+@pass "transparent_blend"
+shader="shaders/addditive.nsh"
+blend="src_alpha:one"
+"alpha test"=1.0,-0.9
+zwrite = false
+cull=ccw
+*/
+
+@pass "transparent_blend"
+shader="shaders/unlit.nsh"
+blend="src_alpha:one"
+zwrite = false
+cull=ccw
