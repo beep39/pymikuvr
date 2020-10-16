@@ -39,6 +39,7 @@ static bool load_relative(const char *name, nya_scene::mesh &m)
 
 bool mesh::load(const char *name)
 {
+    m_phys.release();
     m_groups_visible.clear();
     m_groups_count = 0;
     

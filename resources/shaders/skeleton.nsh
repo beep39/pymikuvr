@@ -3,8 +3,8 @@
 
 @vertex
 
-uniform vec4 bones_pos[500];
-uniform vec4 bones_rot[500];
+uniform vec4 bones_pos[240];
+uniform vec4 bones_rot[240];
 
 vec3 tr(vec3 v, vec4 q) { return v + cross(q.xyz, cross(q.xyz, v) + v * q.w) * 2.0; }
 

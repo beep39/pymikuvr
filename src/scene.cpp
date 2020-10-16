@@ -21,7 +21,6 @@ void scene::init()
     m_has_context = true;
 
     nya_render::texture::set_default_aniso(4);
-    nya_render::set_ignore_platform_restrictions(true);
     
     sound::init();
     ui::init();
@@ -83,9 +82,7 @@ void scene::draw()
 {
     auto head = player::instance().head();
     m_camera->set_pos(head->get_pos());
-    auto r = head->get_rot();
-    r.v.xy()= -r.v.xy();
-    m_camera->set_rot(r);
+    m_camera->set_rot(head->get_rot());
 
     if (m_update_shadows)
     {
@@ -151,10 +148,10 @@ void scene::set_light_ambient(float r, float g, float b) { m_light_ambient->set(
 void scene::set_light_color(float r, float g, float b) { m_light_color->set(r, g, b, 1.0f); }
 void scene::set_light_dir(float x, float y, float z)
 {
-    nya_math::vec3 dir(-x, -y, -z);
+    nya_math::vec3 dir(x, y, z);
     dir.normalize();
-    m_light_dir->set(dir.x, dir.y, dir.z, 0.0f);
-    m_shadow_camera->set_rot(-dir.get_yaw(), -dir.get_pitch(), 0);
+    m_light_dir->set(-dir.x, -dir.y, -dir.z, 0.0f);
+    m_shadow_camera->set_rot(dir);
 }
 
 void scene::set_shadows_enabled(bool enabled)

@@ -71,10 +71,10 @@ void main()
 //    {
 //        float index = random(floor(vpos*1000.0), i);
 //        vec2 dtc = texture2D(shadow_poisson, vec2(index, 0.5)).xy;
-//        shadow -= 0.08 * step(texture2D(shadow_map, shad_xy + dtc).z - shad_z, 0.0);
+//        shadow -= 0.08 * step(texture2D(shadow_map, shad_xy + dtc).r - shad_z, 0.0);
 //    }
 
-    shadow -= 0.5 * step(texture2D(shadow_map, shad_xy).z - shad_z, 0.0);
+    shadow -= 0.5 * step(texture2D(shadow_map, shad_xy).r - shad_z, 0.0);
 
     vec2 b = step(vec2(0.0), shad_xy) * step(shad_xy, vec2(1.0));
     shadow = max(shadow, 1.0 - b.x * b.y);

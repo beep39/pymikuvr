@@ -86,9 +86,7 @@ void camera::render(texture *t)
     const auto prev_vp = nya_render::get_viewport();
 
     m_camera->set_pos(m_torigin->get_pos());
-    auto r = m_torigin->get_rot();
-    r.v.xy()= -r.v.xy();
-    m_camera->set_rot(r);
+    m_camera->set_rot(m_torigin->get_rot());
     nya_scene::set_camera(m_camera);
 
     nya_render::set_viewport(0, 0, w, h);

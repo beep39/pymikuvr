@@ -139,7 +139,7 @@ void ui::update_pre(int dt)
     }
 
     const auto vdir = m_torigin->get_pos() - nya_scene::get_camera().get_pos();
-    m_draw = m_torigin->get_rot().rotate(nya_math::vec3::forward()).dot(vdir) < 0;
+    m_draw = m_torigin->get_rot().rotate(nya_math::vec3::forward()).dot(vdir) > 0;
     if (!m_draw)
         return;
 
@@ -284,11 +284,11 @@ void ui::update_pre(int dt)
     auto dir = player::instance().rhand()->get_rot().rotate(nya_math::vec3::forward());
     dir = m_torigin->get_rot().rotate_inv(dir);
 
-    const float t = from.z / dir.z;
+    const float t = -from.z / dir.z;
     if (m_active_ui && t > m_active_ui_dist)
         return;
 
-    auto to_ = from - dir * t;
+    auto to_ = from + dir * t;
     auto to = to_ * ui_scale;
     if (to.x < size.x * (1.0f - m_px) && to.x > -size.x * m_px
         && to.y < size.y * m_py && to.y > size.y * (m_py - 1.0f))
