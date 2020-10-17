@@ -60,9 +60,9 @@ class script:
 
         self.__local_vars = {}
         self.__global_vars = None
+        updater.reset()
         render.reset()
         player.reset()
-        updater.reset()
         gc.collect()
 
         text = None

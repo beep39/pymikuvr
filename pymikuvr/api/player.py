@@ -1,6 +1,7 @@
 import ctypes
 from api.capi import c_lib
 from api.base import base
+from api.locomotion import locomotion
 from api.transform import transform
 from api.vec2 import vec2
 from api.vec3 import vec3_c
@@ -89,7 +90,7 @@ class named_transform(transform_ro):
         return self.__name
 
 class player_class(base):
-    __slots__ = ('head', 'left_hand', 'right_hand', 'left_ctrl', 'right_ctrl', '__trackers')
+    __slots__ = ('head', 'left_hand', 'right_hand', 'left_ctrl', 'right_ctrl', 'locomotion', '__trackers')
     def __init__(self):
         super().__init__(c_lib.player_get_transform(b"origin"))
         self.head = transform_ro(c_lib.player_get_transform(b"head"), self)
@@ -98,6 +99,7 @@ class player_class(base):
         self.left_ctrl = controller(False)
         self.right_ctrl = controller(True)
         self.__trackers = []
+        self.locomotion = locomotion(self)
 
     def _update(self):
         self.left_ctrl._update()
@@ -115,6 +117,7 @@ class player_class(base):
         if reset_position:
             self.pos = vec3()
             self.rot = quat()
+        self.locomotion = locomotion(self)
 
     @property
     def trackers(self):

@@ -26,9 +26,9 @@ class updater_class:
             self.remove_list.clear()
 
         for o in self.list:
-            if o._base__enabled:
+            if o.enabled:
                 try:
-                    o._base__update(o)
+                    o.update(o)
                 except Exception as e:
                     o.update = None
                     sys.error(str(e) + "\n" + traceback.format_exc())
