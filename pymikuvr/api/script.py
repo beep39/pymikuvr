@@ -44,21 +44,19 @@ def clamp(value, f, to):
     return max(f, min(value, to))
 
 class script:
-    __slots__ = ('autoreload', '__local_vars', '__global_vars', '__script_path', '__script_path_local', '__script_modified_time')
-    def __init__(self, name = None, local_fs = True):
+    __slots__ = ('autoreload', '__local_vars', '__global_vars',
+                 '__script_path', '__script_path_is_local', '__script_modified_time',)
+    def __init__(self):
         self.__local_vars = None
         self.__global_vars = None
         self.__script_path = None
-        self.__script_path_local = True
+        self.__script_path_is_local = True
         self.autoreload = True
-
-        if name is not None:
-            self.load(name, local_fs)
 
     def load(self, name, local_fs = True):
         print("loading script", name)
         self.__script_path = None
-        self.__script_path_local = local_fs
+        self.__script_path_is_local = local_fs
 
         self.__local_vars = {}
         self.__global_vars = None
@@ -83,16 +81,6 @@ class script:
             return
 
         sys.reset_resources()
-
-        try:
-            code = compile(text, name, 'exec')
-        except Exception as e:
-            err = traceback.format_exc().split("\n")
-            err.insert(0,str(e))
-            err.insert(0,"")
-            err = "\n| ".join(err)
-            print("Script parse error:", err)
-            return
 
         self.__script_path = name
         self.__script_modified_time = self.get_modified_time()
@@ -128,18 +116,20 @@ class script:
         }
 
         try:
+            code = compile(text, name, 'exec')
+        except Exception as e:
+            sys.error(str(e) + "\n" + traceback.format_exc())
+            return
+
+        try:
             exec(code, self.__global_vars, self.__local_vars)
         except Exception as e:
-            err = traceback.format_exc().split("\n")
-            err.insert(0,str(e))
-            err.insert(0,"")
-            err = "\n| ".join(err)
-            print("Script exception:", err)
+            sys.error(str(e) + "\n" + traceback.format_exc())
 
         gc.collect()
 
     def reload(self):
-        self.load(self.__script_path, self.__script_path_local)
+        self.load(self.__script_path, self.__script_path_is_local)
 
     def check_for_changes(self):
         if not self.autoreload or self.__script_path is None:
@@ -153,7 +143,7 @@ class script:
 
     def get_modified_time(self):
         #ToDo
-        if self.__script_path_local:
+        if self.__script_path_is_local:
             return
 
         try:

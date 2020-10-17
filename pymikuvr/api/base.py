@@ -31,11 +31,7 @@ class updater_class:
                     o._base__update(o)
                 except Exception as e:
                     o.update = None
-                    err = traceback.format_exc().split("\n")
-                    err.insert(0,str(e))
-                    err.insert(0,"")
-                    err = "\n| ".join(err)
-                    print("Update exception:", err)
+                    sys.error(str(e) + "\n" + traceback.format_exc())
 
     def reset(self):
         self.remove_list.clear()

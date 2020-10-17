@@ -44,7 +44,7 @@ void sound::update()
 
     const nya_math::vec3 orientation[] =
     {
-        h->get_rot().rotate(-nya_math::vec3::forward()),
+        h->get_rot().rotate(nya_math::vec3::forward()),
         h->get_rot().rotate(nya_math::vec3::up())
     };
     alListenerfv(AL_ORIENTATION, &orientation[0].x);
