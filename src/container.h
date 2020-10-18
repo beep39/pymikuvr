@@ -26,6 +26,7 @@ public:
 
     static t *get(int idx) { return get_list()[idx].get(); }
 
+    static std::shared_ptr<t> get_shared(int idx) { return get_list()[idx]; }
     static std::weak_ptr<t> get_weak(int idx) { return get_list()[idx]; }
 
     static int get_idx(t *obj)

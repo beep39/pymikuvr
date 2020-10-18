@@ -1,0 +1,4 @@
+@pass "transparent_blend"
+shader="shaders/unlit.nsh"
+blend="src_alpha:inv_src_alpha"
+zwrite=false

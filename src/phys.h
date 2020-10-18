@@ -23,6 +23,7 @@ public:
     void set_capsule(float r, float h, float m);
     void set_cylinder(float r, float h, float m);
     void set_cone(float r, float h, float m);
+    void set_tris(nya_math::vec3 *verts, int vcount, int *indices, int icount, float m);
 
     void clear();
     void add_mesh(int src);

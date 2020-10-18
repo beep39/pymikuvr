@@ -12,26 +12,22 @@ typedef nya_math::vec3 vec3;
 
 void navigation::set_debug(bool enable)
 {
-    m_shape.set_color(0.0f, 1.0f, 1.0f, enable ? 0.4f : 0.0f);
-}
-
-bool navigation::load(const char *name)
-{
-    auto data = nya_resources::read_data(name);
-
-    m_navmesh = dtAllocNavMesh();
-    if (!m_navmesh->init((unsigned char *)data.get_data(), (int)data.get_size(), true))
+    if (!enable)
     {
-        dtFreeNavMesh(m_navmesh);
-        data.free();
-        m_navmesh = 0;
-        return false;
+        if (m_debug_material)
+            m_shape.set_color(0.0f, 0.0f, 0.0f, 0.0f);
+        return;
     }
-    data.free();
 
-    //ToDo: initialize m_shape
-
-    return true;
+    if (enable && !m_debug_material)
+    {
+        const int idx = material::add();
+        m_debug_material = material::get_shared(idx);
+        m_debug_material->load("materials/debug.txt");
+        m_shape.set_material(idx);
+        material::remove(idx);
+    }
+    m_shape.set_color(0.0f, 1.0f, 1.0f, 0.4f);
 }
 
 bool navigation::trace(const nya_math::vec3 &origin, const nya_math::vec3 &dir, float &result) const
@@ -54,7 +50,11 @@ bool navigation::nearest_point(const nya_math::vec3 &origin, float radius, nya_m
     if (m_navquery->findNearestPoly(&origin.x, extends, m_filter, &poly, 0) != DT_SUCCESS)
         return false;
 
-    return m_navquery->closestPointOnPoly(poly, &origin.x, &result.x, 0) == DT_SUCCESS;
+    if (m_navquery->closestPointOnPoly(poly, &origin.x, &result.x, 0) != DT_SUCCESS)
+        return false;
+
+    fix_height(result);
+    return true;
 }
 
 bool navigation::farthest_point(const vec3 &origin, const vec3 &dir_, float radius, vec3 &result) const
@@ -77,9 +77,9 @@ bool navigation::farthest_point(const vec3 &origin, const vec3 &dir_, float radi
     int result_count;
     if (m_navquery->findPolysAroundCircle(from_poly, &start.x, radius, m_filter, poly, 0, 0, &result_count, max_count) != DT_SUCCESS)
         return false;
-    
+
     nya_math::vec3 dir = vec3::normalize(dir_);
-    
+
     float result_dist = -1;
 
     vec3 end = start + dir * radius;
@@ -88,7 +88,7 @@ bool navigation::farthest_point(const vec3 &origin, const vec3 &dir_, float radi
         vec3 tmp_end;
         if (m_navquery->closestPointOnPoly(poly[i], &end.x, &tmp_end.x, 0) != DT_SUCCESS)
             continue;
-        
+
         const float dist = (tmp_end - start).length();
         if (dist > result_dist && dist < radius + 0.01f)
         {
@@ -97,6 +97,7 @@ bool navigation::farthest_point(const vec3 &origin, const vec3 &dir_, float radi
         }
     }
 
+    fix_height(result);
     return result_dist > 0;
 }
 
@@ -114,7 +115,7 @@ int navigation::path(const nya_math::vec3 &from, const nya_math::vec3 &to, float
     dtPolyRef to_poly;
     if (m_navquery->findNearestPoly(&to.x, extends, m_filter, &to_poly, 0) != DT_SUCCESS)
         return false;
-    
+
     std::vector<dtPolyRef> path(result_array_size/3);
 
     int count = 0;
@@ -125,6 +126,8 @@ int navigation::path(const nya_math::vec3 &from, const nya_math::vec3 &to, float
     if (m_navquery->findStraightPath(&from.x, &to.x, path.data(), count, result, 0, 0, &vcount, result_array_size/3) != DT_SUCCESS)
         return false;
 
+    for (int i = 0; i < vcount; ++i)
+        fix_height(((vec3 *&)result)[i]);
     return vcount;
 }
 
@@ -241,7 +244,6 @@ bool navigation::build(const params &params_)
     // the are type for each of the meshes and rasterize them.
     rcMarkWalkableTriangles(&ctx, walkable_slope_angle, &rc_verts.data()->x, rc_nverts, rc_tris.data(), rc_ntris, triareas.data());
     rcRasterizeTriangles(&ctx, &rc_verts.data()->x, rc_nverts, rc_tris.data(), triareas.data(), rc_ntris, *solid, walkable_climb);
-    triareas.clear();
 
     // Step 3. Filter walkables surfaces.
     
@@ -253,7 +255,7 @@ bool navigation::build(const params &params_)
     rcFilterWalkableLowHeightSpans(&ctx, walkable_height, *solid);
 
     // Step 4. Partition walkable surface to simple regions.
-    
+
     // Compact the heightfield so that it is faster to handle from now on.
     // This will result more cache coherent data as well as the neighbours
     // between walkable cells will be calculated.
@@ -423,6 +425,20 @@ bool navigation::build(const params &params_)
 
     ctx.stopTimer(RC_TIMER_TOTAL);
 
+    std::vector<int> height_inds;
+    for (int i = 0, to = (int)triareas.size(); i < to; ++i)
+    {
+        if (triareas[i] > 0)
+        {
+            const int ind = i * 3;
+            height_inds.push_back(rc_tris[ind]);
+            height_inds.push_back(rc_tris[ind + 1]);
+            height_inds.push_back(rc_tris[ind + 2]);
+        }
+    }
+
+    m_height_mesh.set_tris(rc_verts.data(), (int)rc_verts.size(), height_inds.data(), (int)height_inds.size(), 0.0f);
+
     create_debug_mesh(*pmesh);
     rcFreePolyMesh(pmesh);
     rcFreePolyMeshDetail(dmesh);
@@ -432,6 +448,7 @@ bool navigation::build(const params &params_)
 navigation::navigation()
 {
     set_debug(false);
+    m_height_mesh.set_enabled(false);
     m_filter = new dtQueryFilter();
     m_filter->setIncludeFlags(0xFFFF);
     m_filter->setExcludeFlags(0);
@@ -459,6 +476,13 @@ void navigation::release()
     }
 }
 
+void navigation::fix_height(vec3 &pos) const
+{
+    float h;
+    if (m_height_mesh.trace(pos, vec3(0, -1, 0), &h, 100.0f))
+        pos.y -= h;
+}
+
 void navigation::create_debug_mesh(const struct rcPolyMesh &mesh)
 {
     const int nvp = mesh.nvp;
@@ -483,8 +507,8 @@ void navigation::create_debug_mesh(const struct rcPolyMesh &mesh)
                     if (p[j] == RC_MESH_NULL_IDX)
                         break;
                     vi[0] = p[0];
-                    vi[1] = p[j];
-                    vi[2] = p[j-1];
+                    vi[1] = p[j-1];
+                    vi[2] = p[j];
                     for (int k = 0; k < 3; ++k)
                     {
                         const unsigned short* v = &mesh.verts[vi[k]*3];

@@ -23,14 +23,9 @@ tmp_zp = ctypes.byref(tmp_z)
 
 class navigation:
     __slots__ = ('__id', '__debug')
-    def __init__(self, resname = None):
+    def __init__(self):
         self.__id = c_lib.navigation_create()
         self.__debug = False
-        if resname is not None:
-            self.load(resname)
-
-    def load(self, resname):
-        return c_lib.navigation_load(self.__id, resname.encode())
 
     class params:
         __slots__ = ('cell_size', 'cell_height', 'agent_height', 'agent_radius', 'max_climb', 'max_slope', 'min_region_size', 'merged_region_size', 'max_edge_length', 'max_edge_error')

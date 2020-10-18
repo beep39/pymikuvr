@@ -160,6 +160,23 @@ void phys::set_cone(float r, float h, float m)
     set(new btConeShape(r, h), m);
 }
 
+void phys::set_tris(vec3 *verts, int vcount, int *indices, int icount, float m)
+{
+    m_verts.resize(vcount);
+    memcpy(m_verts.data(), verts, vcount*sizeof(vec3));
+    m_indices.resize(icount);
+    memcpy(m_indices.data(), indices, icount*sizeof(int));
+
+    const auto vdata = (btScalar *)&m_verts.data()->x;
+    const int nverts = (int)m_verts.size();
+    const int vstride = (int)sizeof(vec3);
+    const int ntris = icount / 3;
+    const int tstride = (int)sizeof(int) * 3;
+
+    m_tri_array = new btTriangleIndexVertexArray(ntris, m_indices.data(), tstride, nverts, vdata, vstride);
+    set(new btBvhTriangleMeshShape(m_tri_array, true, true), 0.0f, true);
+}
+
 void phys::set(btCollisionShape *shape, float m, bool static_)
 {
     m_kinetic = m < 0.00001f;
@@ -185,7 +202,9 @@ void phys::set(btCollisionShape *shape, float m, bool static_)
         m_rigid_body->setCollisionFlags(m_rigid_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
         m_rigid_body->setActivationState(DISABLE_DEACTIVATION);
     }
-    m_world->addRigidBody(m_rigid_body);
+
+    if (m_enabled)
+        m_world->addRigidBody(m_rigid_body);
 }
 
 void phys::clear()

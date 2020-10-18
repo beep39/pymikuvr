@@ -92,7 +92,6 @@ EX  void mesh_remove(int id) { mesh::remove(id); }
 
 EX  int navigation_create() { return navigation::add(); }
 EX  void navigation_set_debug(int id, bool enable) { navigation::get(id)->set_debug(enable); }
-EX  bool navigation_load(int id, const char *name) { return navigation::get(id)->load(name); }
 EX  void navigation_clear(int id) { navigation::get(id)->clear(); }
 EX  void navigation_add_shape(int id, int idx) { navigation::get(id)->add_shape(idx); }
 EX  void navigation_add_mesh(int id, int idx) { navigation::get(id)->add_mesh(idx); }

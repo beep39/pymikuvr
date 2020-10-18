@@ -4,6 +4,7 @@
 
 #include "container.h"
 #include "shape.h"
+#include "phys.h"
 
 class dtNavMesh;
 class dtNavMeshQuery;
@@ -13,11 +14,10 @@ struct rcPolyMesh;
 class navigation: public container<navigation>
 {
     typedef nya_math::vec3 vec3;
-    
+
 public:
     void set_debug(bool enable);
 
-    bool load(const char *name);
     bool trace(const vec3 &origin, const vec3 &dir, float &result) const;
     bool nearest_point(const vec3 &origin, float radius, vec3 &result) const;
     bool farthest_point(const vec3 &origin, const vec3 &dir, float radius, vec3 &result) const;
@@ -49,6 +49,7 @@ public:
     ~navigation();
 
 private:
+    void fix_height(vec3 &pos) const;
     void create_debug_mesh(const struct rcPolyMesh& mesh);
     void release();
 
@@ -57,5 +58,7 @@ private:
     dtNavMeshQuery *m_navquery = 0;
     dtQueryFilter *m_filter = 0;
     shape m_shape;
+    phys m_height_mesh;
+    std::shared_ptr<material> m_debug_material;
     bool m_building = false;
 };
