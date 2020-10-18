@@ -143,8 +143,6 @@ bool mesh::load(const char *name)
     nya_scene::material::set_resources_prefix(mat_prefix.c_str());
     nya_scene::shader::set_resources_prefix(sh_prefix.c_str());
 
-    //m_meshes_cache[file] = mesh;
-
     return result;
 }
 

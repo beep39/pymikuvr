@@ -54,7 +54,14 @@ class script:
         self.autoreload = True
 
     def load(self, name, local_fs = True):
-        print("loading script", name)
+        
+        cache = None
+        if name == self.__script_path and local_fs == self.__script_path_is_local:
+            cache = (self.__local_vars, self.__global_vars)
+            print("reloading script", name)
+        else:
+            print("loading script", name)
+
         self.__script_path = None
         self.__script_path_is_local = local_fs
 
@@ -63,7 +70,9 @@ class script:
         updater.reset()
         render.reset()
         player.reset()
-        gc.collect()
+
+        if cache is None:
+            gc.collect()
 
         text = None
 
@@ -126,6 +135,7 @@ class script:
         except Exception as e:
             sys.error(str(e) + "\n" + traceback.format_exc())
 
+        cache = None
         gc.collect()
 
     def reload(self):
@@ -138,7 +148,6 @@ class script:
         mtime = self.get_modified_time()
         if mtime != self.__script_modified_time:
             self.__script_modified_time = mtime
-            print("reloading script")
             self.reload()
 
     def get_modified_time(self):
