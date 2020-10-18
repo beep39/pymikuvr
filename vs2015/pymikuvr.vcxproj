@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\deps\imgui\imgui.cpp" />
+    <ClCompile Include="..\deps\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\deps\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\deps\nya-engine\extensions\system_openvr.cpp" />
+    <ClCompile Include="..\deps\nya-engine\extensions\texture_il.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_pmd.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_pmx.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_vmd.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_x.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_xps.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\mmd_mesh.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\mmd_phys.cpp" />
+    <ClCompile Include="..\deps\nya-engine\tests\shared\string_encoding.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourAlloc.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourAssert.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourCommon.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNavMesh.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNavMeshBuilder.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNavMeshQuery.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNode.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\Recast.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastAlloc.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastArea.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastAssert.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastContour.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastFilter.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastLayers.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastMesh.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastMeshDetail.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastRasterization.cpp" />
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastRegion.cpp" />
+    <ClCompile Include="..\src\animation.cpp" />
+    <ClCompile Include="..\src\camera.cpp" />
+    <ClCompile Include="..\src\capi.cpp" />
+    <ClCompile Include="..\src\material.cpp" />
+    <ClCompile Include="..\src\mesh.cpp" />
+    <ClCompile Include="..\src\navigation.cpp" />
+    <ClCompile Include="..\src\phys.cpp" />
+    <ClCompile Include="..\src\player.cpp" />
+    <ClCompile Include="..\src\scene.cpp" />
+    <ClCompile Include="..\src\shape.cpp" />
+    <ClCompile Include="..\src\sound.cpp" />
+    <ClCompile Include="..\src\sys.cpp" />
+    <ClCompile Include="..\src\texture.cpp" />
+    <ClCompile Include="..\src\transform.cpp" />
+    <ClCompile Include="..\src\ui.cpp" />
+    <ClCompile Include="..\src\video.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\deps\imgui\imconfig.h" />
+    <ClInclude Include="..\deps\imgui\imgui.h" />
+    <ClInclude Include="..\deps\imgui\imgui_internal.h" />
+    <ClInclude Include="..\deps\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\deps\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\deps\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\deps\nya-engine\extensions\system_openvr.h" />
+    <ClInclude Include="..\deps\nya-engine\extensions\texture_il.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_pmd.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_pmx.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_vmd.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_x.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_xps.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\mmd_mesh.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\mmd_phys.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\moonspeak.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\string_encoding.h" />
+    <ClInclude Include="..\deps\nya-engine\tests\shared\texture_bgra_bmp.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourAlloc.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourAssert.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourCommon.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourMath.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNavMesh.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNavMeshBuilder.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNavMeshQuery.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNode.h" />
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourStatus.h" />
+    <ClInclude Include="..\deps\recastnavigation\Recast\Include\Recast.h" />
+    <ClInclude Include="..\deps\recastnavigation\Recast\Include\RecastAlloc.h" />
+    <ClInclude Include="..\deps\recastnavigation\Recast\Include\RecastAssert.h" />
+    <ClInclude Include="..\src\animation.h" />
+    <ClInclude Include="..\src\camera.h" />
+    <ClInclude Include="..\src\container.h" />
+    <ClInclude Include="..\src\material.h" />
+    <ClInclude Include="..\src\mesh.h" />
+    <ClInclude Include="..\src\navigation.h" />
+    <ClInclude Include="..\src\phys.h" />
+    <ClInclude Include="..\src\player.h" />
+    <ClInclude Include="..\src\scene.h" />
+    <ClInclude Include="..\src\shape.h" />
+    <ClInclude Include="..\src\singleton.h" />
+    <ClInclude Include="..\src\sound.h" />
+    <ClInclude Include="..\src\sys.h" />
+    <ClInclude Include="..\src\texture.h" />
+    <ClInclude Include="..\src\transform.h" />
+    <ClInclude Include="..\src\ui.h" />
+    <ClInclude Include="..\src\video.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{d3b08da5-0259-4e4f-b571-e1f86b59ddc4}</ProjectGuid>
+    <Keyword>DynamicLibrary</Keyword>
+    <RootNamespace>pymikuvr</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\deps\nya-engine\build\vs2015\nya_engine.vcxitems" Label="Shared" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <GenerateManifest>false</GenerateManifest>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <OutDir>$(SolutionDir)\..\$(MSBuildProjectName)d\</OutDir>
+    <IntDir>$(SolutionDir)\..\tmp\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <GenerateManifest>false</GenerateManifest>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <OutDir>$(SolutionDir)\..\lib\</OutDir>
+    <IntDir>$(SolutionDir)\..\tmp\$(Configuration)\</IntDir>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <PrecompiledHeaderFile />
+      <PrecompiledHeaderOutputFile />
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../deps/openal-soft/include/;$(SolutionDir)/../deps/DevIL/include/;$(SolutionDir)/../deps/bullet/include/;$(SolutionDir)/../deps/openvr/include/;$(SolutionDir)/../deps/nya-engine/;$(SolutionDir)/../deps/glfw/include/;$(SolutionDir)/../deps/imgui/;$(SolutionDir)/../deps/libvlc/include;$(SolutionDir)/../deps/recastnavigation/Detour/Include/;$(SolutionDir)/../deps/recastnavigation/Recast/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(DefiningProjectName)/</ObjectFileName>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/DevIL/DevIL.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;$(SolutionDir)/../deps/glfw/glfw3dll.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y $(ProjectDir)..\deps\openvr\openvr_api.dll  $(OutDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <PrecompiledHeaderFile />
+      <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>$(SolutionDir)/../deps/openal-soft/include/;$(SolutionDir)/../deps/DevIL/include/;$(SolutionDir)/../deps/bullet/include/;$(SolutionDir)/../deps/openvr/include/;$(SolutionDir)/../deps/nya-engine/;$(SolutionDir)/../deps/glfw/include/;$(SolutionDir)/../deps/imgui/;$(SolutionDir)/../deps/libvlc/include;$(SolutionDir)/../deps/recastnavigation/Detour/Include/;$(SolutionDir)/../deps/recastnavigation/Recast/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ObjectFileName>$(IntDir)%(DefiningProjectName)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <ManifestFile />
+      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/DevIL/DevIL.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;$(SolutionDir)/../deps/glfw/glfw3dll.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <BuildLog>
+      <Path>$(IntDir)$(MSBuildProjectName).log</Path>
+    </BuildLog>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>xcopy /y $(ProjectDir)..\deps\openvr\openvr_api.dll  $(OutDir)
+xcopy /y $(ProjectDir)..\deps\glfw\glfw3.dll  $(OutDir)
+xcopy /y $(ProjectDir)..\deps\libvlc\libvlc*.dll  $(OutDir)
+xcopy /y $(ProjectDir)..\deps\libvlc\plugins  $(OutDir)\plugins\ /e
+copy $(ProjectDir)..\deps\openal-soft\soft_oal.dll  $(OutDir)\OpenAL32.dll
+xcopy /y $(ProjectDir)..\deps\DevIL\DevIL.dll  $(OutDir)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

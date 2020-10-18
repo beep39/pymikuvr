@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pymikuvr", "pymikuvr.vcxproj", "{D3B08DA5-0259-4E4F-B571-E1F86B59DDC4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nya_engine (files)", "..\deps\nya-engine\build\vs2015\nya_engine.vcxitems", "{95DA0ACF-03E6-47EB-B369-3082DCDBBC84}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\deps\nya-engine\build\vs2015\nya_engine.vcxitems*{95da0acf-03e6-47eb-b369-3082dcdbbc84}*SharedItemsImports = 9
+		..\deps\nya-engine\build\vs2015\nya_engine.vcxitems*{d3b08da5-0259-4e4f-b571-e1f86b59ddc4}*SharedItemsImports = 4
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D3B08DA5-0259-4E4F-B571-E1F86B59DDC4}.Debug|x64.ActiveCfg = Debug|x64
+		{D3B08DA5-0259-4E4F-B571-E1F86B59DDC4}.Debug|x64.Build.0 = Debug|x64
+		{D3B08DA5-0259-4E4F-B571-E1F86B59DDC4}.Debug|x86.ActiveCfg = Debug|x64
+		{D3B08DA5-0259-4E4F-B571-E1F86B59DDC4}.Release|x64.ActiveCfg = Release|x64
+		{D3B08DA5-0259-4E4F-B571-E1F86B59DDC4}.Release|x64.Build.0 = Release|x64
+		{D3B08DA5-0259-4E4F-B571-E1F86B59DDC4}.Release|x86.ActiveCfg = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tga;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="deps">
+      <UniqueIdentifier>{f9a7259f-b609-4864-b8f9-6fe5132ece7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{0b3fd13c-4d36-402a-b67b-fd5566a5b39a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\imgui">
+      <UniqueIdentifier>{e2a0c7b5-36d8-47f5-b6d8-29ae9b9a04fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\nya">
+      <UniqueIdentifier>{1f46e957-4111-46e2-ad12-a24ffd4596a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\nya\mmd">
+      <UniqueIdentifier>{4d1fe00b-2574-4b03-ba66-13a145b02bd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\recastnavigation">
+      <UniqueIdentifier>{00214141-0b1d-4079-a5a2-9ace18169404}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\recastnavigation\detour">
+      <UniqueIdentifier>{fe58b619-c5b8-479a-bfdb-b09ede46bfb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\recastnavigation\recast">
+      <UniqueIdentifier>{2a2dfe2d-5327-404e-8860-0504f8664a50}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\scene.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\shape.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sound.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sys.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\texture.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\transform.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\video.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\animation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\camera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\capi.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\material.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mesh.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\navigation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\phys.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\player.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\imgui\imgui.cpp">
+      <Filter>deps\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\imgui\imgui_draw.cpp">
+      <Filter>deps\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\imgui\imgui_widgets.cpp">
+      <Filter>deps\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\extensions\system_openvr.cpp">
+      <Filter>deps\nya</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\extensions\texture_il.cpp">
+      <Filter>deps\nya</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_pmd.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_pmx.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_vmd.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_x.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\load_xps.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\mmd_mesh.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\mmd_phys.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\nya-engine\tests\shared\string_encoding.cpp">
+      <Filter>deps\nya\mmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourAssert.cpp">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourCommon.cpp">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNavMesh.cpp">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNavMeshBuilder.cpp">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNavMeshQuery.cpp">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourNode.cpp">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Detour\Source\DetourAlloc.cpp">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastFilter.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastLayers.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastMesh.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastMeshDetail.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastRasterization.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastRegion.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\Recast.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastAlloc.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastArea.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastAssert.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastContour.cpp">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\scene.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\shape.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\singleton.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sound.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sys.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\texture.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\transform.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\video.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\animation.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\camera.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\container.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\material.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mesh.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\navigation.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\phys.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\player.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\imgui\imstb_truetype.h">
+      <Filter>deps\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\imgui\imconfig.h">
+      <Filter>deps\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\imgui\imgui.h">
+      <Filter>deps\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\imgui\imgui_internal.h">
+      <Filter>deps\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\imgui\imstb_rectpack.h">
+      <Filter>deps\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\imgui\imstb_textedit.h">
+      <Filter>deps\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\extensions\system_openvr.h">
+      <Filter>deps\nya</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\extensions\texture_il.h">
+      <Filter>deps\nya</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_pmd.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_pmx.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_vmd.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_x.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\load_xps.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\mmd_mesh.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\mmd_phys.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\moonspeak.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\string_encoding.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\nya-engine\tests\shared\texture_bgra_bmp.h">
+      <Filter>deps\nya\mmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Recast\Include\RecastAlloc.h">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Recast\Include\RecastAssert.h">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Recast\Include\Recast.h">
+      <Filter>deps\recastnavigation\recast</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNavMesh.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNavMeshBuilder.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNavMeshQuery.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourNode.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourStatus.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourAlloc.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourAssert.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourCommon.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deps\recastnavigation\Detour\Include\DetourMath.h">
+      <Filter>deps\recastnavigation\detour</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
