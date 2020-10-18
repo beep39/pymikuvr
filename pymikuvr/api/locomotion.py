@@ -4,23 +4,30 @@ from api.vec2 import vec2
 from api.vec3 import vec3
 from api.sys import sys
 
+import math
+
 class locomotion:
-    __slots__ = ('_target', 'enabled', 'update')
+    __slots__ = ('enabled', 'update', '_target', '_walk_update', '_turn_update')
     def __init__(self, target):
         self._target = target
         self.enabled = True
-        def empty(o):
+        def empty():
             return
-        self.update = empty
+        self._walk_update = empty
+        self._turn_update = empty
+        def update(o):
+            o._walk_update()
+            o._turn_update()
+        self.update = update
         updater.register(self)
 
-    def walk(self, speed, source, area=None):
+    def walk(self, source, speed=3, area=None):
         if area is not None:
             raise NotImplementedError
 
         pos = self._target.pos
         head = self._target.head
-        def walk_update(o):
+        def update():
             s = vec2(source)
             l = s.length()
             if l > 1:
@@ -29,18 +36,52 @@ class locomotion:
             s = s.rotated(head.rot.yaw) * (sys.dt * speed)
             pos.x += s.x
             pos.z += s.y
-        self.update = walk_update
+        self._walk_update = update
 
-    def fly(self, speed, source, area=None):
+    def fly(self, source, speed=3, area=None):
         if area is not None:
             raise NotImplementedError
 
         t = self._target
         head = self._target.head
-        def fly_update(o):
+        def update():
             s = vec3(source.x, 0, -source.y)
             l = s.length()
             if l > 1:
                 s /= l
             t.pos += head.rot * s * (sys.dt * speed)
-        self.update = fly_update
+        self._walk_update = update
+
+    def turn(self, source, speed=1, fixed_angle=None):
+        speed *= 360
+        t = self._target
+        if fixed_angle is None:
+            def update():
+                t.rot.yaw -= source.x * sys.dt * speed
+            self._turn_update = update
+            return
+
+        rotating = False
+        rotating_delta = 0
+        def update():
+            nonlocal rotating
+            nonlocal rotating_delta
+            lr = source.x
+            if not rotating:
+                if abs(lr) > 0.5:
+                    rotating_delta = -math.copysign(fixed_angle, lr)
+                    rotating = True
+            elif abs(lr) < 0.2:
+                rotating = False
+            else:
+                 rotating = True
+            if rotating_delta != 0:
+                drot = sys.dt * speed
+                if abs(rotating_delta) > drot:
+                    drot = math.copysign(drot, rotating_delta)
+                    t.rot.yaw += drot
+                    rotating_delta -= drot
+                else:
+                    t.rot.yaw += rotating_delta
+                    rotating_delta = 0
+        self._turn_update = update

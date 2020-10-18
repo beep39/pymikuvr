@@ -12,4 +12,5 @@ sr = shape.sphere(0.05)
 sr.color.set(0, 1, 0, 0.5)
 sr.set_parent(player.right_hand)
 
-player.locomotion.walk(3, player.left_ctrl.axis)
+player.locomotion.walk(player.left_ctrl.axis, speed=3)
+player.locomotion.turn(player.right_ctrl.axis, fixed_angle=90, speed=2)
