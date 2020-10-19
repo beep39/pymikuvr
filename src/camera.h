@@ -35,8 +35,11 @@ private:
     float m_fov = 60.0f;
 
     nya_scene::camera_proxy m_camera;
-    nya_render::fbo m_fbo;
     texture *m_texture = 0;
+    
+    nya_render::fbo m_fbo[2];
+    nya_scene::texture m_textures[2];
+    int m_current_idx = 0;
     nya_render::texture m_depth;
 
     static std::vector<camera *> m_update_list;
