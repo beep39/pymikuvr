@@ -164,6 +164,7 @@ void mesh::enable_phys()
 void mesh::set_animation(nya_scene::animation_proxy anim, int layer)
 {
     m_mesh.set_anim(anim, layer, true);
+    update_pre(0);
 }
 
 int mesh::get_anim_time(int layer)
@@ -174,6 +175,7 @@ int mesh::get_anim_time(int layer)
 void mesh::set_anim_time(int layer, int time)
 {
     m_mesh.set_anim_time(time, layer);
+    update_pre(0);
 }
 
 bool mesh::is_anim_finished(int layer)

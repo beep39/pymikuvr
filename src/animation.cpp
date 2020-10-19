@@ -12,6 +12,18 @@ void animation::set_mesh(int mesh_idx, int layer)
     m->set_anim_time(m_layer, m_time);
 }
 
+int animation::load(const char *name)
+{
+    const int result = anim->load(name) ? anim->get_duration() : -1;
+    auto m = m_mesh.lock();
+    if (m)
+    {
+        m->set_animation(anim, m_layer);
+        m->set_anim_time(m_layer, 0);
+    }
+    return result;
+}
+
 int animation::get_time()
 {
     auto m = m_mesh.lock();

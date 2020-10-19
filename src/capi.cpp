@@ -26,14 +26,7 @@
 extern "C"
 {
 EX  int animation_create() { return animation::add(); }
-EX  int animation_load(int id, const char *name)
-    {
-        auto a = animation::get(id);
-        if (!a->anim->load(name))
-            return -1;
-        else
-            return a->anim->get_duration();
-    }
+EX  int animation_load(int id, const char *name) { return animation::get(id)->load(name); }
 EX  int animation_get_time(int id) { return animation::get(id)->get_time(); }
 EX  void animation_set_time(int id, int time) { animation::get(id)->set_time(time); }
 EX  void animation_finished(int id, int time) { animation::get(id)->is_finished(); }

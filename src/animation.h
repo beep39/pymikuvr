@@ -11,6 +11,7 @@ public:
     animation() { anim.create(); anim->set_loop(false); }
 
     void set_mesh(int mesh_idx, int layer);
+    int load(const char *name);
     int get_time();
     void set_time(int time);
     int set_range(int from, int to);
