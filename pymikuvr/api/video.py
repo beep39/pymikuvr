@@ -84,3 +84,6 @@ class video:
     @property
     def texture(self):
         return self.__texture
+
+    def __del__(self):
+        c_lib.video_remove(self.__id)
