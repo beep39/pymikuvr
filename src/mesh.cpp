@@ -108,26 +108,32 @@ bool mesh::load(const char *name)
             }
             if (!edge)
             {
+                auto shadow_param = nya_math::vec4(1.0f, 0.0f, 0.0f, 0.3f);
+                
                 m.set_param("light ambient", scene::instance().get_light_ambient());
                 m.set_param("light color", scene::instance().get_light_color());
                 m.set_param("light dir", scene::instance().get_light_dir());
                 m.set_param_array("shadow tr", scene::instance().get_shadow_tr());
                 m.set_texture("shadow", scene::instance().get_shadow_tex());
                 m.set_texture("shadow poisson", scene::instance().get_shadow_poisson());
-                m.set_param("shadow param", 0.0f, 0.0f, 0.0f, 0.3f);
 
                 if (pmx)
                 {
                     auto &pmx_mat = pmx->materials[i];
                     if (!pmx_mat.shadow_cast)
+                    {
                         m.remove_pass("shadows");
-                    
+                        if (pmx_mat.shadow_receive)
+                            shadow_param.x = 0.0f;
+                    }
+
                     if (!pmx_mat.shadow_receive)
                     {
                         m.set_texture("shadow", scene::instance().white_texture());
-                        m.set_param("shadow param", 0.0f, 0.0f, 0.0f, 0.0f);
+                        shadow_param = nya_math::vec4();
                     }
                 }
+                m.set_param("shadow param", shadow_param);
             }
             m.set_name(om.get_name());
             m_mesh.set_material(i, m);

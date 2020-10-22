@@ -57,7 +57,7 @@ void main()
         vec2 b = step(vec2(0.0), shad_xy) * step(shad_xy, vec2(1.0));
         shadow = max(shadow, 1.0 - b.x * b.y);
 
-        shadow = min(1.0 - step(ndl, 0.0), shadow);
+        shadow = min(1.0 - step(ndl, 0.0) * shadow_param.r, shadow);
     }
 
     c.rgb *= clamp(amb_k.rgb + (diff_k.rgb) * light_color.rgb, vec3(0.0), vec3(1.0));
