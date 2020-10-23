@@ -19,32 +19,6 @@ tmp_pay = ctypes.byref(tmp_ay)
 tmp_ptrigger = ctypes.byref(tmp_trigger)
 tmp_pi = ctypes.byref(tmp_i)
 
-class controller:
-    __slots__ = ('__right','__btn','axis','trigger')
-    def __init__(self, right):
-        self.__right = right
-        self.__btn = 0
-        self.axis = vec2()
-        self.trigger = 0
-
-    def _update(self):
-        self.__btn = c_lib.sys_get_ctrl(self.__right, tmp_pax, tmp_pay, tmp_ptrigger)
-        self.axis.x = tmp_ax.value
-        self.axis.y = tmp_ay.value
-        self.trigger = tmp_trigger.value
-
-    @property
-    def a(self):
-        return self.__btn & (1 << 0)
-
-    @property
-    def b(self):
-        return self.__btn & (1 << 1)
-
-    @property
-    def axis_btn(self):
-        return self.__btn & (1 << 16)
-
 class transform_ro(transform):
     __slots__ = ()
     def __init__(self, id, parent):
@@ -79,6 +53,41 @@ class transform_ro(transform):
     def __del__(self):
         return
 
+class controller(transform_ro):
+    __slots__ = ('__right','__btn','axis','trigger')
+    def __init__(self, id, parent, right):
+        super().__init__(id, parent)
+        self.__right = right
+        self.__btn = 0
+        self.axis = vec2()
+        self.trigger = 0
+
+    def _update(self):
+        self.__btn = c_lib.sys_get_ctrl(self.__right, tmp_pax, tmp_pay, tmp_ptrigger)
+        self.axis.x = tmp_ax.value
+        self.axis.y = tmp_ay.value
+        self.trigger = tmp_trigger.value
+
+    @property
+    def hold(self):
+        return self.__btn & (1 << 0) > 0
+
+    @property
+    def grip(self):
+        return self.__btn & (1 << 1) > 0
+
+    @property
+    def menu(self):
+        return self.__btn & (1 << 2) > 0
+
+    @property
+    def axis_btn(self):
+        return self.__btn & (1 << 16) > 0
+
+    @property
+    def trigger_btn(self):
+        return self.__btn & (1 << 17) > 0
+
 class named_transform(transform_ro):
     __slots__ = ('__name')
     def __init__(self, name, id, parent):
@@ -90,20 +99,18 @@ class named_transform(transform_ro):
         return self.__name
 
 class player_class(base):
-    __slots__ = ('head', 'left_hand', 'right_hand', 'left_ctrl', 'right_ctrl', 'locomotion', '__trackers')
+    __slots__ = ('head', 'left_hand', 'right_hand', 'locomotion', '__trackers')
     def __init__(self):
         super().__init__(c_lib.player_get_transform(b"origin"))
         self.head = transform_ro(c_lib.player_get_transform(b"head"), self)
-        self.left_hand = transform_ro(c_lib.player_get_transform(b"lhand"), self)
-        self.right_hand = transform_ro(c_lib.player_get_transform(b"rhand"), self)
-        self.left_ctrl = controller(False)
-        self.right_ctrl = controller(True)
+        self.left_hand = controller(c_lib.player_get_transform(b"lhand"), self, False)
+        self.right_hand = controller(c_lib.player_get_transform(b"rhand"), self, True)
         self.__trackers = []
         self.locomotion = locomotion(self)
 
     def _update(self):
-        self.left_ctrl._update()
-        self.right_ctrl._update()
+        self.left_hand._update()
+        self.right_hand._update()
 
     def reset(self, reset_position = False):
         self.enabled = True

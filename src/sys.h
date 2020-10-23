@@ -86,10 +86,11 @@ private:
         std::vector<nya_math::vec2> axes;
         enum btn
         {
-            btn_a,
-            btn_b,
+            btn_hold,
+            btn_grip,
+            btn_menu,
             btn_axis0 = 16,
-            //...
+            btn_axis1,
         };
 
         uint32_t buttons = 0;

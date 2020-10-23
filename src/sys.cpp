@@ -257,10 +257,16 @@ bool sys::update()
                 if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::EVRButtonId(vr::k_EButton_Axis0 + i)))
                     buttons |= (1 << (controller::btn_axis0 + i));
             }
-            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_IndexController_A))
-                buttons |= (1 << controller::btn_a);
-            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_IndexController_B))
-                buttons |= (1 << controller::btn_b);
+            if (state.ulButtonTouched & vr::ButtonMaskFromId(vr::k_EButton_Grip))
+                buttons |= (1 << controller::btn_hold);
+            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip))
+                buttons |= (1 << controller::btn_grip);
+            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_ApplicationMenu))
+                buttons |= (1 << controller::btn_menu);
+            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Axis0))
+                buttons |= (1 << controller::btn_axis0);
+            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Axis1))
+                buttons |= (1 << controller::btn_axis1);
             d.second.buttons = buttons;
         }
 #endif
@@ -480,12 +486,16 @@ void sys::emulate_vr_input()
     m_controller_right->axes[1].x = ax2;
 
     uint32_t buttons = 0;
+    if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        buttons |= (1 << controller::btn_hold);
     if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
-        buttons |= (1 << controller::btn_a);
+        buttons |= (1 << controller::btn_grip);
     if (glfwGetKey(m_window, GLFW_KEY_TAB) == GLFW_PRESS)
-        buttons |= (1 << controller::btn_b);
+        buttons |= (1 << controller::btn_menu);
     if (glfwGetKey(m_window, GLFW_KEY_ENTER) == GLFW_PRESS)
         buttons |= (1 << controller::btn_axis0);
+    if(m_controller_right->axes[1].x>0.5f)
+        buttons |= (1 << controller::btn_axis1);
     m_controller_right->buttons = buttons;
 }
 
