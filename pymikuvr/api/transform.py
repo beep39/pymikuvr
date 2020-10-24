@@ -49,8 +49,11 @@ class transform:
         self.__local_rot = quat_o(update_local_rot)
 
     def __del__(self):
+        if self.__parent is not None:
+            self.__parent.__children.remove(self)
         for c in list(self.__children):
-            c.parent = None
+            c.__parent = None
+            c_lib.transform_set_parent(c.__id, -1)
         c_lib.transform_remove(self.__id)
 
     @property
@@ -65,19 +68,22 @@ class transform:
         if parent is self.__parent:
             return
 
-        if parent is None:
+        if self.__parent is not None:
             self.__parent.__children.remove(self)
             self.__parent = None
-            c_lib.transform_set_parent(self.__id, -1)
-        else:
-            if not isinstance(parent, transform):
-                raise ValueError('parent is not a transform')
 
-            if c_lib.transform_set_parent(self.__id, parent.__id):
-                self.__parent = parent
-                parent.__children.append(self)
-            else:
-                raise ValueError('unable to set parent')
+        if parent is None:
+            c_lib.transform_set_parent(self.__id, -1)
+            return
+
+        if not isinstance(parent, transform):
+            raise ValueError('parent is not a transform')
+
+        if c_lib.transform_set_parent(self.__id, parent.__id):
+            self.__parent = parent
+            parent.__children.append(self)
+        else:
+            raise ValueError('unable to set parent')
 
     def set_parent(self, parent, reset_local_transform = True):
         if parent is not None:

@@ -234,8 +234,5 @@ class mesh(base):
         return self.__materials
 
     def __del__(self):
-        for c in list(self._transform__children):
-            if isinstance(c, bone_transform):
-                self._transform__children.remove(c)
         c_lib.mesh_remove(self.__id)
         super().__del__()
