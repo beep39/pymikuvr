@@ -49,6 +49,8 @@ class transform:
         self.__local_rot = quat_o(update_local_rot)
 
     def __del__(self):
+        for c in list(self.__children):
+            c.parent = None
         c_lib.transform_remove(self.__id)
 
     @property

@@ -195,7 +195,7 @@ class mesh(base):
 
     def bone(self, name, pos = None, rot = None, additive = False):
         if pos is None and rot is None:
-            return c_lib.mesh_get_bone(self.__id, name.encode())
+            return self.bones[name]
         if pos is not None:
             c_lib.mesh_set_bone_pos(self.__id, name.encode(), pos.x, pos.y, pos.z, additive)
         if rot is not None:
@@ -234,5 +234,8 @@ class mesh(base):
         return self.__materials
 
     def __del__(self):
+        for c in list(self._transform__children):
+            if isinstance(c, bone_transform):
+                self._transform__children.remove(c)
         c_lib.mesh_remove(self.__id)
         super().__del__()

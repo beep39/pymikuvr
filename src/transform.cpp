@@ -126,7 +126,10 @@ void transform::set_local_rot(const nya_math::quat &r)
 
 bool transform::set_parent(transform *parent, bool relative)
 {
-    if (m_parent == parent || parent == this)
+    if (m_parent == parent)
+        return true;
+
+    if (parent == this)
         return false;
 
     if (m_parent)
@@ -202,4 +205,12 @@ void transform::set_rel_pos(const nya_math::vec3 &p)
 void transform::set_rel_rot(const nya_math::quat &r)
 {
     m_rot_offset = nya_math::quat::invert(m_parent->get_rot()) * r;
+}
+
+transform::~transform()
+{
+    if (m_parent)
+        set_parent(0, false);
+    for (auto &c: m_children)
+        c->set_parent(0);
 }

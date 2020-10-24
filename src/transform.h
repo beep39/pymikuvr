@@ -25,6 +25,8 @@ public:
 
     bool set_parent(transform *parent, bool relative = true);
 
+    ~transform();
+
 private:
     void set_dirty();
 
