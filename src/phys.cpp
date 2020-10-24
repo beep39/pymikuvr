@@ -34,6 +34,8 @@ void phys::init()
     m_solver = new btSequentialImpulseConstraintSolver();
     m_world = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_col_conf);
     m_world->setGravity(btVector3(0, -9.8f, 0));
+
+    set_ground(0.0f, true);
 }
 
 void phys::update(int dt)
@@ -105,9 +107,9 @@ void phys::set_debug(bool enable)
 
 void phys::set_ground(float y, bool enable)
 {
-    if(!enable)
+    if (!enable)
     {
-        if(!m_ground)
+        if (!m_ground)
             return;
 
         m_world->removeRigidBody(m_ground);
@@ -118,7 +120,7 @@ void phys::set_ground(float y, bool enable)
         return;
     }
 
-    if(m_ground)
+    if (m_ground)
         set_ground(y, false);
 
     m_ground_state = new btDefaultMotionState();

@@ -38,7 +38,7 @@ class phys_class:
     __slots__ = ('__debug', '__ground')
     def __init__(self):
         self.__debug = False
-        self.__ground = None
+        self.__ground = 0.0
 
     def box(self, x, y, z, mass):
         if mass is None:
