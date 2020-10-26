@@ -3,7 +3,7 @@ from api.capi import c_lib
 from api.color import color
 from api.base import base
 
-c_lib.ui_set_font.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.c_float)
+c_lib.ui_set_font.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.c_float, ctypes.c_char_p)
 c_lib.ui_set_pivot.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float)
 c_lib.ui_set_size.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float)
 c_lib.ui_add_slider.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_float, ctypes.c_float)
@@ -185,8 +185,10 @@ class ui(base):
         super().__del__()
 
     @staticmethod
-    def set_font(resname, size, scale):
-        return c_lib.ui_set_font(resname.encode(), size, scale)
+    def set_font(resname, size, scale, additional_gliphs = None):
+        if additional_gliphs is None:
+            additional_gliphs = ""
+        return c_lib.ui_set_font(resname.encode(), size, scale, additional_gliphs.encode())
 
     @property
     def px(self):

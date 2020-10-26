@@ -56,7 +56,7 @@ void ui::init()
     ImGui::SetCurrentContext(0);
 }
 
-bool ui::set_font(const char *path_, int size, float scale)
+bool ui::set_font(const char *path_, int size, float scale, const char *additional_gliphs)
 {
     auto path = sys::instance().get_path(path_);
     if (path.empty())
@@ -65,7 +65,14 @@ bool ui::set_font(const char *path_, int size, float scale)
     ImGui::SetCurrentContext(m_main_context);
     auto& io = ImGui::GetIO();
     m_font_atlas->Clear();
-    auto font = io.Fonts->AddFontFromFileTTF(path.c_str(), size, NULL, io.Fonts->GetGlyphRangesJapanese());
+
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+    if (additional_gliphs && additional_gliphs[0])
+        builder.AddText(additional_gliphs);
+    ImVector<ImWchar> ranges;
+    builder.BuildRanges(&ranges);
+    auto font = io.Fonts->AddFontFromFileTTF(path.c_str(), size, NULL, ranges.begin());
     if (!font)
     {
         ImGui::SetCurrentContext(0);

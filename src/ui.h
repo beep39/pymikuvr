@@ -14,7 +14,7 @@ class ui: public container<ui>, private scene::iobject
 {
 public:
     static void init();
-    static bool set_font(const char *path, int size, float scale);
+    static bool set_font(const char *path, int size, float scale, const char *additional_gliphs);
     static void release();
 
 public:

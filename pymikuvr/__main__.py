@@ -26,7 +26,8 @@ else:
     print("starting windowed")
 os.chdir(path)
 
-ui.set_font("/font/SawarabiMincho-Regular.ttf", 32, 0.5)
+additional_glyphs = "伊弥皐睦叢磯朧曙漣霞嵐藤萩曾隈那珂阿矧笠智耶筑鹿榛洲捉瑞鶴葛鳳鷹龍驤翔"
+ui.set_font("/font/SawarabiGothic-Regular.ttf", 32, 0.5, additional_glyphs)
 
 scene_script.load(argv[1], False)
 
