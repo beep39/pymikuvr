@@ -272,7 +272,7 @@ EX  void transform_get_local_rot(int id, float *x, float *y, float *z, float *w)
     }
 EX  void transform_remove(int id) { transform::remove(id); }
 
-EX  bool ui_set_font(const char *path, int size, float scale) { return ui::set_font(path, size, scale); }
+EX  bool ui_set_font(const char *path, int size, float scale, const char *add) { return ui::set_font(path, size, scale, add); }
 EX  int ui_create() { return ui::add(); }
 EX  int ui_get_origin(int id) { return ui::get(id)->get_origin(); }
 EX  void ui_set_enabled(int id, bool enable) { return ui::get(id)->set_enable(enable); }
