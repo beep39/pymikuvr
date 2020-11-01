@@ -26,7 +26,7 @@ class updater_class:
             self.remove_list.clear()
 
         for o in self.list:
-            if o.enabled:
+            if o.enabled and o.update is not None:
                 try:
                     o.update(o)
                 except Exception as e:
