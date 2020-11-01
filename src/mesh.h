@@ -53,6 +53,8 @@ private:
     float zorder() const;
 
 private:
+    void update_bones();
+
     void enable_phys(mmd_phys_world &w)
     {
         auto pos = m_mesh.get_pos();
@@ -93,6 +95,7 @@ private:
     float m_zorder = 0;
     std::vector<bool> m_groups_visible;
     int m_groups_count = 0;
+    bool m_first_update = false;
 
     struct bone
     {

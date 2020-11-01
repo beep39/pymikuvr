@@ -43,6 +43,7 @@ bool mesh::load(const char *name)
     m_bones.clear();
     m_groups_visible.clear();
     m_groups_count = 0;
+    m_first_update = true;
     
     const std::string mat_prefix = nya_scene::material_internal::get_resources_prefix();
     const std::string sh_prefix = nya_scene::shader_internal::get_resources_prefix();
@@ -171,7 +172,8 @@ void mesh::enable_phys()
 void mesh::set_animation(nya_scene::animation_proxy anim, int layer)
 {
     m_mesh.set_anim(anim, layer, true);
-    update_pre(0);
+    m_mesh.update(0);
+    update_bones();
 }
 
 int mesh::get_anim_time(int layer)
@@ -182,7 +184,8 @@ int mesh::get_anim_time(int layer)
 void mesh::set_anim_time(int layer, int time)
 {
     m_mesh.set_anim_time(time, layer);
-    update_pre(0);
+    m_mesh.update(0);
+    update_bones();
 }
 
 bool mesh::is_anim_finished(int layer)
@@ -399,6 +402,18 @@ void mesh::copy_to_shape(shape *s) const
         s->add_tris(verts.data(), vcount, (uint16_t *)0, icount);
 }
 
+void mesh::update_bones()
+{
+    bool bone_deleted = false;
+    for (auto &b: m_bones)
+    {
+        if (!b.update(m_mesh))
+            bone_deleted = true;
+    }
+    if (bone_deleted)
+        m_bones.erase(std::remove_if(m_bones.begin(), m_bones.end(), bone::expired),m_bones.end());
+}
+
 void mesh::update_pre(int dt)
 {
     if(!m_enabled)
@@ -408,20 +423,17 @@ void mesh::update_pre(int dt)
     m_mesh.set_rot(m_torigin->get_rot());
 
     m_mesh.update(dt);
-
-    bool bone_deleted = false;
-    for (auto &b: m_bones)
-    {
-        if (!b.update(m_mesh))
-            bone_deleted = true;
-    }
-    if (bone_deleted)
-        m_bones.erase(std::remove_if(m_bones.begin(), m_bones.end(), bone::expired),m_bones.end());
+    update_bones();
 
     auto pos = m_mesh.get_pos();
     auto scale = m_mesh.get_scale();
     m_mesh.set_pos(pos / scale);
     m_mesh.set_scale(nya_math::vec3::one());
+    if (m_first_update)
+    {
+        m_phys.reset();
+        m_first_update = false;
+    }
     m_phys.update_pre();
     m_mesh.set_pos(pos);
     m_mesh.set_scale(scale);
