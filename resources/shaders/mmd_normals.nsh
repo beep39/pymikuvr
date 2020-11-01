@@ -1,5 +1,19 @@
 @sampler base "diffuse"
+@uniform alpha_test "alpha test"
 @uniform diff_k "diff k"
+
+@all
+varying vec2 tc;
+varying vec3 normal;
+
+@vertex
+
+void main()
+{
+    tc = gl_MultiTexCoord0.xy;
+    normal = normalize((gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz);
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+}
 
 @fragment
 uniform sampler2D base;

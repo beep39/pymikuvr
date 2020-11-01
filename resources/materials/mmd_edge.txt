@@ -1,4 +1,5 @@
 @pass "transparent_blend"
-shader="pmx_edge.nsh"
+shader="shaders/mmd_edge.nsh"
 blend="src_alpha:inv_src_alpha"
 "alpha test"=-1.0,0.9
+cull=cw

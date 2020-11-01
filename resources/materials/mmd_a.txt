@@ -1,18 +1,18 @@
 @pass "transparent_clip"
-shader="pmx.nsh"
+shader="shaders/mmd.nsh"
 blend="src_alpha:inv_src_alpha"
 "alpha test"=-1.0,0.9
 
 @pass "transparent_blend"
-shader="pmx.nsh"
+shader="shaders/mmd.nsh"
 blend="src_alpha:inv_src_alpha"
 "alpha test"=1.0,-0.9
 //zwrite=false
 
 @pass "normals"
-shader="pmx_normals.nsh"
+shader="shaders/mmd_normals.nsh"
 "alpha test"=-1.0,0.9
 
 @pass "shadows"
-shader="pmx_shadow.nsh"
+shader="shaders/mmd_shadow.nsh"
 "alpha test"=-1.0,0.9

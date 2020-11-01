@@ -46,17 +46,13 @@ bool mesh::load(const char *name)
     m_first_update = true;
     
     const std::string mat_prefix = nya_scene::material_internal::get_resources_prefix();
-    const std::string sh_prefix = nya_scene::shader_internal::get_resources_prefix();
 
     bool result;
     if (nya_resources::check_extension(name, "nms"))
         result = load_relative(name, m_mesh);
     else
     {
-        if (nya_resources::check_extension(name, "pmx") || nya_resources::check_extension(name, "pmd"))
-            nya_scene::shader::set_resources_prefix("shaders/");
-        else
-            nya_scene::material::set_resources_prefix("materials/");
+        nya_scene::material::set_resources_prefix("materials/");
         result = m_mesh.load(name);
     }
 
@@ -71,7 +67,7 @@ bool mesh::load(const char *name)
         for (int i = 0; i < m_mesh.get_groups_count(); ++i)
         {
             const auto &om = m_mesh.get_material(i);
-            const auto &op = om.get_pass(nya_scene::material::default_pass);
+            const auto &op = om.get_pass("opaque");
             const auto &os = op.get_state();
 
             const bool edge = i >= m_groups_count;
@@ -89,16 +85,9 @@ bool mesh::load(const char *name)
 
             //ToDo: material morphs disables opaque
 
-            auto m = nya_scene::material(edge ? "materials/mmd_e.txt" : (opaque ? "materials/mmd.txt" : "materials/mmd_a.txt"));
-            for (int j = 0; j < m.get_passes_count(); ++j)
-            {
-                auto &p = m.get_pass(j);
-                p.get_state().set_cull_face(os.cull_face, os.cull_order);
-            }
-
+            auto m = nya_scene::material(edge ? "mmd_edge.txt" : (opaque ? "mmd.txt" : "mmd_a.txt"));
             for (int j = 0; j < om.get_textures_count(); ++j)
                 m.set_texture(om.get_texture_semantics(j), om.get_texture(j));
-
             for (int j = 0; j < om.get_params_count(); ++j)
             {
                 auto &p = om.get_param(j);
@@ -110,8 +99,14 @@ bool mesh::load(const char *name)
             }
             if (!edge)
             {
+                for (int j = 0; j < m.get_passes_count(); ++j)
+                {
+                    auto &p = m.get_pass(j);
+                    p.get_state().set_cull_face(os.cull_face, os.cull_order);
+                }
+
                 auto shadow_param = nya_math::vec4(1.0f, 0.0f, 0.0f, 0.3f);
-                
+
                 m.set_param("light ambient", scene::instance().get_light_ambient());
                 m.set_param("light color", scene::instance().get_light_color());
                 m.set_param("light dir", scene::instance().get_light_dir());
@@ -144,12 +139,13 @@ bool mesh::load(const char *name)
 
     if (m_mesh.is_mmd())
     {
-        m_mesh.set_scale(mmd_scale());
+        m_mesh.set_scale(-mmd_scale(),mmd_scale(),-mmd_scale());
         enable_phys();
     }
+    else
+        m_mesh.set_scale(-1.0f,1.0f,-1.0f);
 
     nya_scene::material::set_resources_prefix(mat_prefix.c_str());
-    nya_scene::shader::set_resources_prefix(sh_prefix.c_str());
 
     return result;
 }
@@ -198,9 +194,12 @@ bool mesh::bone::update(mmd_mesh &mesh)
     auto t = transform.lock();
     if (!t)
         return false;
-    
+
     t->set_local_pos(mesh.get_bone_pos(bone_idx, true) * mesh.get_scale());
-    t->set_local_rot(mesh.get_bone_rot(bone_idx, true));
+    auto r = mesh.get_bone_rot(bone_idx, true);
+    r.v.x = -r.v.x;
+    r.v.z = -r.v.z;
+    t->set_local_rot(r);
     return true;
 }
 
@@ -236,7 +235,10 @@ void mesh::set_bone_pos(const char *name, const nya_math::vec3 &pos, bool additi
 
 void mesh::set_bone_rot(const char *name, const nya_math::quat &rot, bool additive)
 {
-    m_mesh.set_bone_rot(m_mesh.get_bone_idx(name), rot, additive);
+    auto r = rot;
+    r.v.x = -r.v.x;
+    r.v.z = -r.v.z;
+    m_mesh.set_bone_rot(m_mesh.get_bone_idx(name), r, additive);
 }
 
 int mesh::get_morphs_count() { return m_mesh.get_morphs_count(); }

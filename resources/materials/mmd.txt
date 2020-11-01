@@ -1,8 +1,8 @@
 @pass "opaque"
-shader="pmx.nsh"
+shader="shaders/mmd.nsh"
 
 @pass "normals"
-shader="pmx_normals.nsh"
+shader="shaders/mmd_normals.nsh"
 
 @pass "shadows"
-shader="pmx_shadow.nsh"
+shader="shaders/mmd_shadow.nsh"
