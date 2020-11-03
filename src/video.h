@@ -36,12 +36,12 @@ private:
 private:
     void swap_chain()
     {
-        m_texture_chain_idx = (m_texture_chain_idx + 1) % (sizeof(m_texture_chain) / sizeof(m_texture_chain[0]));
-        m_texture.set(m_texture_chain[m_texture_chain_idx]);
+        nya_scene::texture t=m_texture.get();
+        m_texture.set(m_texture_swap.get());
+        m_texture_swap.set(t);
     }
-    int m_texture_chain_idx = 0;
-    nya_scene::texture m_texture_chain[2];
     nya_scene::texture_proxy m_texture;
+    nya_scene::texture_proxy m_texture_swap;
 
     float m_volume = 1.0f;
     int m_length = 0;

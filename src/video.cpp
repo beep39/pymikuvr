@@ -51,6 +51,7 @@ void video::set_texture(int texture)
 {
     m_texture = texture::get(texture)->tex;
     m_texture->build("\x00\x00\x00", 1, 1, nya_render::texture::color_rgb);
+    m_texture_swap.create();
 }
 
 inline bool starts_with(const std::string &str, const std::string &search)
