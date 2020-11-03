@@ -1,5 +1,7 @@
 # pymikuvr
 
+[![Build status](https://ci.appveyor.com/api/projects/status/nty2fpvlc5vldqua?svg=true)](https://ci.appveyor.com/project/beep39/pymikuvr)
+
 create interactive VR apps with mmd models in Python
 
 Example: <code>python pymikuvr example.py</code>
