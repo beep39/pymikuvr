@@ -7,6 +7,16 @@ class classproperty(property):
     def __get__(self, cls, owner):
         return classmethod(self.fget).__get__(None, owner)()
 
+class static_or_instance(property):
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self.fget
+        def result():
+            a = self.fget(instance)
+            instance.set(a.x,a.y,a.z)
+            return instance
+        return result
+
 def unpack_vec3(init_f):
     def _wrapper(self, *args, **kws):
         if args and isinstance(args[0], vec3):
@@ -35,19 +45,12 @@ class vec3:
     def length(a):
         return math.sqrt(vec3.dot(a, a))
 
-    @staticmethod
+    @static_or_instance
     def normalize(a):
         l = a.length()
         if l == 0.0:
             return vec3()
         return a / l
-
-    def normalize(self):
-        l = self.length()
-        if l == 0.0:
-            return self
-        self.set(self.x / l, self.y / l, self.z / l)
-        return self
 
     def dot(a, b):
         return a.x * b.x + a.y * b.y + a.z * b.z
