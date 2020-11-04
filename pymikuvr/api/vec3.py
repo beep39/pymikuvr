@@ -63,6 +63,8 @@ class vec3:
 
     def tend(value, target, speed):
         diff = target - value
+        if speed <= 0:
+            return value
         dist = diff.length()
         if dist < speed:
             return target
@@ -95,11 +97,11 @@ class vec3:
         l = a.length()
         eps = 0.0001
         if l > eps:
-            return -math.asin(a.y / l)
+            return math.asin(a.y / l)
         if a.y > eps:
-            return -math.pi * 0.5
-        if a.y < -eps:
             return math.pi * 0.5
+        if a.y < -eps:
+            return -math.pi * 0.5
         return 0
 
     @property

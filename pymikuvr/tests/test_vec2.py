@@ -7,7 +7,11 @@ def compare(a, b):
 
 class test_vec2(unittest.TestCase):
     def assertAlmostEqual(self, a, b):
-        return self.assertTrue(abs(a-b) < 0.00001)
+        if isinstance(a, vec2):
+            unittest.TestCase.assertAlmostEqual(self, a.x, b.x)
+            unittest.TestCase.assertAlmostEqual(self, a.y, b.y)
+        else:
+            unittest.TestCase.assertAlmostEqual(self, a, b)
 
     def test_eq(self):
         a = vec2(1,2)
