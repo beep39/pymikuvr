@@ -29,6 +29,9 @@
     <Filter Include="deps\recastnavigation\recast">
       <UniqueIdentifier>{2a2dfe2d-5327-404e-8860-0504f8664a50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="deps\glfw">
+      <UniqueIdentifier>{fec4ea45-c1b1-4fe3-86ea-5928dbb2c23b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\scene.cpp">
@@ -171,6 +174,51 @@
     </ClCompile>
     <ClCompile Include="..\deps\recastnavigation\Recast\Source\RecastContour.cpp">
       <Filter>deps\recastnavigation\recast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\win32_init.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\win32_window.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\context.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\input.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\monitor.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\wgl_context.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\win32_monitor.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\window.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\egl_context.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\win32_joystick.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\vulkan.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\win32_time.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\init.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\win32_thread.c">
+      <Filter>deps\glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\glfw\src\osmesa_context.c">
+      <Filter>deps\glfw</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

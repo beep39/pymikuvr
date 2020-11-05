@@ -11,6 +11,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\deps\glfw\src\context.c" />
+    <ClCompile Include="..\deps\glfw\src\egl_context.c" />
+    <ClCompile Include="..\deps\glfw\src\init.c" />
+    <ClCompile Include="..\deps\glfw\src\input.c" />
+    <ClCompile Include="..\deps\glfw\src\monitor.c" />
+    <ClCompile Include="..\deps\glfw\src\osmesa_context.c" />
+    <ClCompile Include="..\deps\glfw\src\vulkan.c" />
+    <ClCompile Include="..\deps\glfw\src\wgl_context.c" />
+    <ClCompile Include="..\deps\glfw\src\win32_init.c" />
+    <ClCompile Include="..\deps\glfw\src\win32_joystick.c" />
+    <ClCompile Include="..\deps\glfw\src\win32_monitor.c" />
+    <ClCompile Include="..\deps\glfw\src\win32_thread.c" />
+    <ClCompile Include="..\deps\glfw\src\win32_time.c" />
+    <ClCompile Include="..\deps\glfw\src\win32_window.c" />
+    <ClCompile Include="..\deps\glfw\src\window.c" />
     <ClCompile Include="..\deps\imgui\imgui.cpp" />
     <ClCompile Include="..\deps\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\deps\imgui\imgui_widgets.cpp" />
@@ -183,7 +198,7 @@
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
       <AdditionalIncludeDirectories>$(SolutionDir)/../deps/openal-soft/include/;$(SolutionDir)/../deps/DevIL/include/;$(SolutionDir)/../deps/bullet/include/;$(SolutionDir)/../deps/openvr/include/;$(SolutionDir)/../deps/nya-engine/;$(SolutionDir)/../deps/glfw/include/;$(SolutionDir)/../deps/imgui/;$(SolutionDir)/../deps/libvlc/include;$(SolutionDir)/../deps/recastnavigation/Detour/Include/;$(SolutionDir)/../deps/recastnavigation/Recast/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_GLFW_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -194,7 +209,7 @@
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <ManifestFile />
-      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/DevIL/DevIL.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;$(SolutionDir)/../deps/glfw/glfw3dll.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/DevIL/DevIL.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
     <BuildLog>
@@ -206,7 +221,6 @@
     </CustomBuildStep>
     <PostBuildEvent>
       <Command>xcopy /y $(ProjectDir)..\deps\openvr\openvr_api.dll  $(OutDir)
-xcopy /y $(ProjectDir)..\deps\glfw\glfw3.dll  $(OutDir)
 xcopy /y $(ProjectDir)..\deps\libvlc\libvlc*.dll  $(OutDir)
 xcopy /y $(ProjectDir)..\deps\libvlc\plugins  $(OutDir)\plugins\ /e
 copy $(ProjectDir)..\deps\openal-soft\soft_oal.dll  $(OutDir)\OpenAL32.dll
