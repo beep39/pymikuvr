@@ -14,6 +14,16 @@ def unpack_quat(init_f):
             return init_f(self, *args, **kws)
     return _wrapper
 
+class static_or_instance(property):
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self.fget
+        def result():
+            a = self.fget(instance)
+            instance.set(a.x,a.y,a.z,a.w)
+            return instance
+        return result
+
 class quat:
     __slots__ = ('x', 'y', 'z', 'w', '__observer_callback')
     @unpack_quat
@@ -33,6 +43,9 @@ class quat:
         self.z = z
         self.w = w
         return self
+
+    def copy(self):
+        return quat(self.x, self.y, self.z, self.w)
 
     def set_pyr_rad(self, pitch, yaw, roll):
         hp = pitch * 0.5
@@ -59,37 +72,27 @@ class quat:
         return self.set_pyr_rad(pitch * d2r, yaw * d2r, roll * d2r)
 
     def get_pyr_rad(self):
-        x2 = self.x + self.x
-        y2 = self.y + self.y
-        z2 = self.z + self.z
-        yz2 = self.y * z2
-        wx2 = self.w * x2
+        yz = self.y * self.z
+        wx = self.w * self.x
+        yy = self.y * self.y
+        xy = self.x * self.y
+        zz = self.z * self.z
+        wz = self.w * self.z
 
-        temp = wx2 - yz2
+        temp = wx - yz
+        temp = temp + temp
         if temp >= 1.0:
-            temp = 1.0
-        elif temp <= -1.0:
-            temp = -1.0
+            return pyr(math.pi * 0.5, math.atan2(xy - wz, 0.5 - yy - zz), 0)
+        if temp <= -1.0:
+            return pyr(-math.pi * 0.5, -math.atan2(xy - wz, 0.5 - yy - zz), 0)
+
+        xz = self.x * self.z
+        wy = self.w * self.y
+        xx = self.x * self.x
 
         pitch = math.asin(temp)
-        yaw = 0.0
-        roll = 0.0
-
-        yy2 = self.y * y2
-        xy2 = self.x * y2
-        zz2 = self.z * z2
-        wz2 = self.w * z2
-
-        if pitch >= math.pi * 0.5:
-            yaw = math.atan2(xy2 - wz2, 1.0 - yy2 - zz2)
-        elif pitch < -math.pi * 0.5:
-            yaw = -math.atan2(xy2 - wz2, 1.0 - yy2 - zz2)
-        else:
-            xz2 = self.x * z2
-            wy2 = self.w * y2
-            xx2 = self.x * x2
-            yaw = math.atan2(xz2 + wy2, 1.0 - yy2 - xx2)
-            roll = math.atan2(xy2 + wz2, 1.0 - xx2 - zz2)
+        yaw = math.atan2(xz + wy, 0.5 - yy - xx)
+        roll = math.atan2(xy + wz, 0.5 - xx - zz)
         return pyr(pitch, yaw, roll)
 
     def get_pyr(self):
@@ -98,16 +101,12 @@ class quat:
 
     @property
     def pitch(self):
-        x2 = self.x + self.x
-        z2 = self.z + self.z
-        yz2 = self.y * z2
-        wx2 = self.w * x2
-
-        temp = wx2 - yz2
+        temp = self.w * self.x - self.y * self.z
+        temp = temp + temp
         if temp >= 1.0:
-            temp = 1.0
+            return 90
         elif temp <= -1.0:
-            temp = -1.0
+            return -90
         return math.asin(temp) * r2d
 
     @pitch.setter
@@ -126,14 +125,17 @@ class quat:
 
     @property
     def roll(self):
-        return self.get_pyr().roll
+        tmp = self.x * self.y + self.w * self.z
+        if abs(tmp) < 1e-10:
+            return 0
+        return math.atan2(tmp, 0.5 - self.x * self.x - self.z * self.z) * r2d
 
     @roll.setter
     def roll(self, v):
         pyr = self.get_pyr()
         self.set_pyr(pyr.pitch, pyr.yaw, v)
 
-    @staticmethod
+    @static_or_instance
     def invert(v):
         return quat(-v.x, -v.y, -v.z, v.w)
 
@@ -209,6 +211,14 @@ class quat:
             return b + vec3.cross(t, vec3.cross(t, b) + b * a.w) * 2.0
 
         raise ValueError("unable to multiply quat by " + type(b))
+
+    @static_or_instance
+    def normalize(a):
+        l = math.sqrt(a.x * a.x + a.y * a.y + a.z + a.z + a.w * a.w)
+        if l == 0.0:
+            return quat()
+        l = 1 / l
+        return quat(a.x * l, a.y * l, a.z * l, a.w * l)
 
     def __str__(self):
         return 'quat({:.2f},{:.2f},{:.2f},{:.2f})'.format(self.x, self.y, self.z, self.w)

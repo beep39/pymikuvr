@@ -28,11 +28,15 @@ class test_vec3(unittest.TestCase):
 
         d = vec3(b)
         self.assertFalse(d is b)
-        self.assertEqual(b, c)
+        self.assertEqual(d, b)
 
         e = vec3()
         e.set(1,2,3)
         self.assertEqual(e, b)
+
+        f = e.copy()
+        self.assertFalse(f is e)
+        self.assertEqual(f, e)
 
     def test_eq(self):
         a = vec3(1,2,3)
@@ -75,6 +79,7 @@ class test_vec3(unittest.TestCase):
 
     def test_arifmetic(self):
         a = vec3(1,2,3)
+        a2 = vec3(1*2,2*2,3*2)
         b = vec3(-4,5,-6)
         self.assertAlmostEqual(a + b - a, b)
         self.assertAlmostEqual(-a + b + a, b)
@@ -83,8 +88,10 @@ class test_vec3(unittest.TestCase):
         self.assertAlmostEqual(a / 2, vec3(a.x / 2, a.y / 2, a.z / 2))
         self.assertAlmostEqual(a * 1, a)
         self.assertAlmostEqual(a * 0, vec3())
-        self.assertAlmostEqual(a * 2, vec3(a.x * 2, a.y * 2, a.z * 2))
-        #self.assertEqual(1 * a, a) #ToDo
+        self.assertAlmostEqual(a * 2, a2)
+        self.assertAlmostEqual(0 * a, vec3())
+        self.assertEqual(1 * a, a)
+        self.assertEqual(2 * a, a2)
 
     def test_lerp(self):
         a = vec3(1,2,3)
