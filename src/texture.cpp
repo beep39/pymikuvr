@@ -44,9 +44,9 @@ static bool load_gdi_plus(nya_scene::shared_texture &res,nya_scene::resource_dat
 
     nya_render::bitmap_argb_to_rgba((uint8_t *)buf.get_data(), w, h);
 
-    if(nya_render::bitmap_is_full_alpha(buf.get_data(), w, h))
+    if(nya_render::bitmap_is_full_alpha((uint8_t *)buf.get_data(), w, h))
     {
-        nya_render::bitmap_rgba_to_rgb(buf.get_data(), w, h);
+        nya_render::bitmap_rgba_to_rgb((uint8_t *)buf.get_data(), w, h);
         return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_rgb);
     }
 
