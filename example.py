@@ -1,5 +1,3 @@
-render.shadows.size = 12
-
 room = shape.box(-10, -4, -8, s=2, t=2, normalize_tc=False)
 room.texture = texture("prototype.png")
 room.pos.y = 2
