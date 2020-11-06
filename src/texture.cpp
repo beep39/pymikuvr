@@ -1,7 +1,7 @@
 //
 
 #include "texture.h"
-#include "formats/tga.h"
+#include "render/bitmap.h"
 #include "tests/shared/texture_bgra_bmp.h"
 
 #ifndef _WIN32
@@ -26,29 +26,29 @@ static bool load_gdi_plus(nya_scene::shared_texture &res,nya_scene::resource_dat
         return false;
 
     IStream *stream = SHCreateMemStream((BYTE *)data.get_data(), data.get_size());
-    Gdiplus::Bitmap* image = new Gdiplus::Bitmap(stream);
+    Gdiplus::Bitmap image(stream);
     stream->Release();
 
-    const int w = (int)image->GetWidth();
-    const int h = (int)image->GetHeight();
+    const int w = (int)image.GetWidth();
+    const int h = (int)image.GetHeight();
     Gdiplus::Rect rc(0, 0, w, h);
 
-    Gdiplus::BitmapData bitmapData;
-    image->LockBits(&rc, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmapData);
+    Gdiplus::BitmapData bitmap_data;
+    image.LockBits(&rc, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmap_data);
 
     nya_memory::tmp_buffer_scoped buf(w*h*4);
     auto col=(uint32_t *)buf.get_data();
     for (int y = 0; y < h; ++y)
+        memcpy(col, (char*)bitmap_data.Scan0 + bitmap_data.Stride * (h-y-1), w * 4);
+    image.UnlockBits(&bitmap_data);
+
+    nya_render::bitmap_argb_to_rgba((uint8_t *)buf.get_data(), w, h);
+
+    if(nya_render::bitmap_is_full_alpha(buf.get_data(), w, h))
     {
-        memcpy(col, (char*)bitmapData.Scan0 + bitmapData.Stride * (h-y-1), w * 4);
-        for (int x = 0; x < w; ++x)
-        {
-            const uint32_t c = *col;
-            *col++ = (c & 0xff00ff00) | ((c & 0xff) << 16) | ((c & 0xff0000) >> 16);
-        }
+        nya_render::bitmap_rgba_to_rgb(buf.get_data(), w, h);
+        return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_rgb);
     }
-    image->UnlockBits(&bitmapData);
-    delete image;
 
     return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_rgba);
 }
