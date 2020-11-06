@@ -30,7 +30,6 @@
     <ClCompile Include="..\deps\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\deps\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\deps\nya-engine\extensions\system_openvr.cpp" />
-    <ClCompile Include="..\deps\nya-engine\extensions\texture_il.cpp" />
     <ClCompile Include="..\deps\nya-engine\tests\shared\load_pmd.cpp" />
     <ClCompile Include="..\deps\nya-engine\tests\shared\load_pmx.cpp" />
     <ClCompile Include="..\deps\nya-engine\tests\shared\load_vmd.cpp" />
@@ -82,7 +81,6 @@
     <ClInclude Include="..\deps\imgui\imstb_textedit.h" />
     <ClInclude Include="..\deps\imgui\imstb_truetype.h" />
     <ClInclude Include="..\deps\nya-engine\extensions\system_openvr.h" />
-    <ClInclude Include="..\deps\nya-engine\extensions\texture_il.h" />
     <ClInclude Include="..\deps\nya-engine\tests\shared\load_pmd.h" />
     <ClInclude Include="..\deps\nya-engine\tests\shared\load_pmx.h" />
     <ClInclude Include="..\deps\nya-engine\tests\shared\load_vmd.h" />
@@ -184,11 +182,15 @@
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/DevIL/DevIL.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;$(SolutionDir)/../deps/glfw/glfw3dll.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y $(ProjectDir)..\deps\openvr\openvr_api.dll  $(OutDir)</Command>
+      <Command>xcopy /y $(ProjectDir)..\deps\openvr\openvr_api.dll  $(OutDir)
+xcopy /y $(ProjectDir)..\deps\libvlc\libvlc*.dll  $(OutDir)
+xcopy /y $(ProjectDir)..\deps\libvlc\plugins  $(OutDir)\plugins\ /e
+copy $(ProjectDir)..\deps\openal-soft\soft_oal.dll  $(OutDir)\OpenAL32.dll
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -197,7 +199,7 @@
       <CompileAsWinRT>false</CompileAsWinRT>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>$(SolutionDir)/../deps/openal-soft/include/;$(SolutionDir)/../deps/DevIL/include/;$(SolutionDir)/../deps/bullet/include/;$(SolutionDir)/../deps/openvr/include/;$(SolutionDir)/../deps/nya-engine/;$(SolutionDir)/../deps/glfw/include/;$(SolutionDir)/../deps/imgui/;$(SolutionDir)/../deps/libvlc/include;$(SolutionDir)/../deps/recastnavigation/Detour/Include/;$(SolutionDir)/../deps/recastnavigation/Recast/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../deps/openal-soft/include/;$(SolutionDir)/../deps/bullet/include/;$(SolutionDir)/../deps/openvr/include/;$(SolutionDir)/../deps/nya-engine/;$(SolutionDir)/../deps/glfw/include/;$(SolutionDir)/../deps/imgui/;$(SolutionDir)/../deps/libvlc/include;$(SolutionDir)/../deps/recastnavigation/Detour/Include/;$(SolutionDir)/../deps/recastnavigation/Recast/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_GLFW_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <StringPooling>true</StringPooling>
@@ -209,7 +211,7 @@
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <ManifestFile />
-      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/DevIL/DevIL.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)/../deps/openvr/openvr_api.lib;$(SolutionDir)/../deps/openal-soft/OpenAL32.lib;$(SolutionDir)/../deps/libvlc/libvlc.lib;$(SolutionDir)/../deps/bullet/LinearMath.lib;$(SolutionDir)/../deps/bullet/BulletCollision.lib;$(SolutionDir)/../deps/bullet/BulletDynamics.lib;OpenGL32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
     <BuildLog>
@@ -224,7 +226,7 @@
 xcopy /y $(ProjectDir)..\deps\libvlc\libvlc*.dll  $(OutDir)
 xcopy /y $(ProjectDir)..\deps\libvlc\plugins  $(OutDir)\plugins\ /e
 copy $(ProjectDir)..\deps\openal-soft\soft_oal.dll  $(OutDir)\OpenAL32.dll
-xcopy /y $(ProjectDir)..\deps\DevIL\DevIL.dll  $(OutDir)</Command>
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

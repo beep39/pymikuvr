@@ -1,11 +1,77 @@
 //
 
 #include "texture.h"
-#include "extensions/texture_il.h"
+#include "formats/tga.h"
+#include "tests/shared/texture_bgra_bmp.h"
+
+#ifndef _WIN32
+    #include "extensions/texture_il.h"
+#else
+namespace Gdiplus {  using std::min; using std::max; }
+#include <windows.h>
+#include <gdiplus.h>
+#include <shlwapi.h>
+#pragma comment(lib, "gdiplus.lib")
+#pragma comment(lib, "shlwapi.lib")
+
+namespace
+{
+    Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+    ULONG_PTR gdiplusToken;
+}
+
+static bool load_gdi_plus(nya_scene::shared_texture &res,nya_scene::resource_data &data,const char* name)
+{
+    if(!data.get_size())
+        return false;
+
+    IStream *stream = SHCreateMemStream((BYTE *)data.get_data(), data.get_size());
+    Gdiplus::Bitmap* image = new Gdiplus::Bitmap(stream);
+    stream->Release();
+
+    const int w = (int)image->GetWidth();
+    const int h = (int)image->GetHeight();
+    Gdiplus::Rect rc(0, 0, w, h);
+
+    Gdiplus::BitmapData bitmapData;
+    image->LockBits(&rc, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmapData);
+
+    nya_memory::tmp_buffer_scoped buf(w*h*4);
+    auto col=(uint32_t *)buf.get_data();
+    for (int y = 0; y < h; ++y)
+    {
+        memcpy(col, (char*)bitmapData.Scan0 + bitmapData.Stride * (h-y-1), w * 4);
+        for (int x = 0; x < w; ++x)
+        {
+            const uint32_t c = *col;
+            *col++ = (c & 0xff00ff00) | ((c & 0xff) << 16) | ((c & 0xff0000) >> 16);
+        }
+    }
+    image->UnlockBits(&bitmapData);
+    delete image;
+
+    return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_rgba);
+}
+#endif
+
+void texture::init()
+{
+    nya_scene::texture::register_load_function(nya_scene::load_texture_bgra_bmp, false);
+#ifdef _WIN32
+    Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+    nya_scene::texture::register_load_function(load_gdi_plus, false);
+#else
+    nya_scene::texture::register_load_function(nya_scene::load_texture_il, false);
+#endif
+}
 
 bool texture::save(const char *name)
 {
+#ifdef _WIN32
+    return false;
+#else
     return nya_scene::save_texture_il(tex.get(), name);
+#endif
 }
 
 void texture::build(int w, int h, float r, float g, float b, float a)

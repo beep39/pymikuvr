@@ -94,9 +94,6 @@
     <ClCompile Include="..\deps\nya-engine\extensions\system_openvr.cpp">
       <Filter>deps\nya</Filter>
     </ClCompile>
-    <ClCompile Include="..\deps\nya-engine\extensions\texture_il.cpp">
-      <Filter>deps\nya</Filter>
-    </ClCompile>
     <ClCompile Include="..\deps\nya-engine\tests\shared\load_pmd.cpp">
       <Filter>deps\nya\mmd</Filter>
     </ClCompile>
@@ -292,9 +289,6 @@
       <Filter>deps\imgui</Filter>
     </ClInclude>
     <ClInclude Include="..\deps\nya-engine\extensions\system_openvr.h">
-      <Filter>deps\nya</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deps\nya-engine\extensions\texture_il.h">
       <Filter>deps\nya</Filter>
     </ClInclude>
     <ClInclude Include="..\deps\nya-engine\tests\shared\load_pmd.h">

@@ -13,8 +13,6 @@
 #include "tests/shared/load_xps.h"
 #include "tests/shared/load_vmd.h"
 #include "tests/shared/mmd_mesh.h"
-#include "tests/shared/texture_bgra_bmp.h"
-#include "extensions/texture_il.h"
 
 void scene::init()
 {
@@ -30,13 +28,13 @@ void scene::init()
 
     phys::init();
 
+    texture::init();
+
     nya_scene::mesh::register_load_function(nya_scene::mesh::load_nms, true);
     //nya_scene::mesh::register_load_function(pmd_loader::load, false);
     nya_scene::mesh::register_load_function(pmx_loader::load, false);
     nya_scene::mesh::register_load_function(xps_loader::load_mesh, false);
     nya_scene::mesh::register_load_function(xps_loader::load_mesh_ascii, false);
-    nya_scene::texture::register_load_function(nya_scene::load_texture_bgra_bmp, false);
-    nya_scene::texture::register_load_function(nya_scene::load_texture_il, false);
     nya_scene::animation::register_load_function(vmd_loader::load, true);
     nya_scene::animation::register_load_function(vmd_loader::load_pose, false);
     nya_scene::animation::register_load_function(nya_scene::animation::load_nan, false);
