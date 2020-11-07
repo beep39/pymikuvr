@@ -90,6 +90,8 @@ class script:
             return
 
         sys.reset_resources()
+        if not local_fs:
+            sys.add_resources_folder(os.path.dirname(name))
 
         self.__script_path = name
         self.__script_modified_time = self.get_modified_time()
