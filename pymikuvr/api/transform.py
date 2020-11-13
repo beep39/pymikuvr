@@ -62,11 +62,22 @@ class transform:
 
     @parent.setter
     def parent(self, parent):
-        if self is parent:
-            raise ValueError('unable to set parent to itself')
-
         if parent is self.__parent:
             return
+
+        if parent is not None:
+            if self is parent:
+                raise ValueError('unable to set parent to itself')
+
+            def find_parent(p, c):
+                if p is c:
+                    return True
+                if p.parent is None:
+                    return False
+                return find_parent(p.parent, c)
+
+            if find_parent(parent, self):
+                raise ValueError('unable to set parent, cyclic hierarchy detected')
 
         if self.__parent is not None:
             self.__parent.__children.remove(self)

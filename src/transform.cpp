@@ -85,9 +85,6 @@ void transform::set_local_pos(const nya_math::vec3 &p)
         fabsf(p.z - m_pos_offset.z) < precision)
         return;
 
-    if (memcmp(&p, &m_pos_offset, sizeof(p)) == 0)
-        return;
-
     if (m_parent)
     {
         m_pos_offset = p;
@@ -126,17 +123,8 @@ void transform::set_local_rot(const nya_math::quat &r)
 
 bool transform::set_parent(transform *parent, bool relative)
 {
-    if (m_parent == parent)
-        return true;
-
-    if (parent == this)
-        return false;
-
     if (m_parent)
     {
-        if (find_parent(parent))
-            return false;
-
         for (int i = 0; i < (int)m_parent->m_children.size(); ++i)
         {
             if (m_parent->m_children[i] == this)
@@ -184,17 +172,6 @@ void transform::set_dirty()
     ++m_version;
     for (auto &c: m_children)
         c->set_dirty();
-}
-
-bool transform::find_parent(transform *t)
-{
-    if (!m_parent)
-        return false;
-    
-    if (m_parent == t)
-        return true;
-
-    return m_parent->find_parent(t);
 }
 
 void transform::set_rel_pos(const nya_math::vec3 &p)

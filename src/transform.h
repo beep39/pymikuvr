@@ -33,8 +33,6 @@ private:
     void set_rel_pos(const nya_math::vec3 &p);
     void set_rel_rot(const nya_math::quat &r);
 
-    bool find_parent(transform *t);
-
 private:
     unsigned int m_version = 0;
     

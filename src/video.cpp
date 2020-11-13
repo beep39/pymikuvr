@@ -189,7 +189,10 @@ unsigned int video::format_callback(void **object, char *chroma, unsigned *width
     self->m_pixel_buffer.resize((*width) * (*height) * 3);
     self->m_mutex.unlock();
 
-    memcpy(chroma, "RV24", sizeof("RV24") - 1);
+    chroma[0] = 'R';
+    chroma[1] = 'V';
+    chroma[2] = '2';
+    chroma[3] = '4';
     *pitches = *width * 3;
     *lines = *height;
     return 1;
