@@ -56,6 +56,24 @@ private:
     bool m_enabled = true;
     nya_scene::transform m_transform;
     float m_zorder = 0;
+    
+    enum type
+    {
+        type_none,
+        type_sphere,
+        type_cylinder,
+        type_box,
+        type_plane,
+        type_triangles,
+    };
+
+    type m_type = type_none;
+
+    union
+    {
+        float radius_sq;
+    }
+    m_size;
 
     std::vector<vertex> m_vertices;
     std::vector<uint16_t> m_indices2b;

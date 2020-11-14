@@ -84,6 +84,8 @@ void shape::set_sphere(float radius, float s, float t, bool ntc)
         }
     }
 
+    m_type = type_sphere;
+    m_size.radius_sq = radius * radius;
     m_update = true;
 }
 
@@ -189,6 +191,7 @@ void shape::set_cylinder(float radius, float height, float s, float t, bool ntc)
         }
     }
 
+    m_type = type_cylinder;
     m_update = true;
 }
 
@@ -331,6 +334,7 @@ void shape::set_box(float x, float y, float z, float s, float t, bool ntc)
         }
     }
 
+    m_type = type_box;
     m_update = true;
 }
 
@@ -367,6 +371,8 @@ void shape::set_plane(float w, float h, float s, float t, bool ntc)
     m_vertices.push_back(v);
 
     m_indices2b = {0, 1, 2, 0, 2, 3};
+
+    m_type = type_plane;
     m_update = true;
 }
 
@@ -392,6 +398,8 @@ void shape::add_shape(shape *other)
         m_vertices[i].pos = other_mat * m_vertices[i].pos;
         m_vertices[i].normal = other_rot_mat * m_vertices[i].normal;
     }
+    
+    m_type = type_triangles;
     m_update = true;
 }
 
@@ -399,7 +407,8 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint16_t *inds,
 {
     if (!vcount)
         return;
-    
+
+    m_type = type_triangles;
     m_update = true;
 
     if (!icount)
@@ -451,6 +460,9 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint32_t *inds,
 {
     if (!vcount)
         return;
+
+    m_type = type_triangles;
+    m_update = true;
 
     if (!icount)
     {
@@ -562,47 +574,75 @@ inline bool tri_intersect(const vec3 &vert0, const vec3 &vert1, const vec3 &vert
     return result > eps;
 }
 
-bool shape::trace(const vec3 &origin_, const vec3 &dir_, float &result) const
+bool shape::trace(const vec3 &origin, const vec3 &dir, float &result) const
 {
-    //ToDo: specialised solutions for basic shapes
-
-    const auto &r = m_torigin->get_rot();
-    const vec3 origin = r.rotate_inv(origin_ - m_torigin->get_pos());
-    const vec3 dir = r.rotate_inv(vec3::normalize(dir_));
-
-    bool hit = false;
-    result = INFINITY;
-
-    const vertex *verts = m_vertices.data();
-    float len;
-
-    if (m_indices4b.empty())
+    switch (m_type)
     {
-        const auto *inds = m_indices2b.data();
-        const auto *to = inds + m_indices2b.size();
+        case type_none: return false;
 
-        for (; inds < to; inds += 3)
-        if (tri_intersect(verts[ inds[0] ].pos, m_vertices[ inds[1] ].pos, m_vertices[ inds[2] ].pos, origin, dir, len))
+        case type_sphere:
         {
-            hit = true;
-            if ( result > len)
-                result = len;
+            const vec3 l = m_torigin->get_pos() - origin;
+            const float d = vec3::dot(l, dir);
+            const float l_sq = l.length_sq();
+            if (d < 0 && l_sq > m_size.radius_sq)
+                return false;
+
+            const float m_sq = l_sq - d * d;
+            const float rm_sq = m_size.radius_sq - m_sq;
+            if (rm_sq < 0)
+                return false;
+
+            result = d - sqrt(rm_sq);
+            return true;
+        }
+
+        //ToDo
+        case type_cylinder:
+        case type_box:
+        case type_plane:
+
+        case type_triangles:
+        {
+            const auto &r = m_torigin->get_rot();
+            const vec3 origin_ = r.rotate_inv(origin - m_torigin->get_pos());
+            const vec3 dir_ = r.rotate_inv(vec3::normalize(dir));
+
+            bool hit = false;
+            result = INFINITY;
+
+            const vertex *verts = m_vertices.data();
+            float len;
+
+            if (m_indices4b.empty())
+            {
+                const auto *inds = m_indices2b.data();
+                const auto *to = inds + m_indices2b.size();
+
+                for (; inds < to; inds += 3)
+                if (tri_intersect(verts[ inds[0] ].pos, m_vertices[ inds[1] ].pos, m_vertices[ inds[2] ].pos, origin_, dir_, len))
+                {
+                    hit = true;
+                    if ( result > len)
+                        result = len;
+                }
+            }
+            else
+            {
+                const auto *inds = m_indices4b.data();
+                const auto *to = inds + m_indices4b.size();
+
+                for (; inds < to; inds += 3)
+                if (tri_intersect(verts[ inds[0] ].pos, m_vertices[ inds[1] ].pos, m_vertices[ inds[2] ].pos, origin_, dir_, len))
+                {
+                    hit = true;
+                    if ( result > len)
+                        result = len;
+                }
+            }
+            return hit;
         }
     }
-    else
-    {
-        const auto *inds = m_indices4b.data();
-        const auto *to = inds + m_indices4b.size();
-
-        for (; inds < to; inds += 3)
-        if (tri_intersect(verts[ inds[0] ].pos, m_vertices[ inds[1] ].pos, m_vertices[ inds[2] ].pos, origin, dir, len))
-        {
-            hit = true;
-            if ( result > len)
-                result = len;
-        }
-    }
-    return hit;
 }
 
 shape::shape()
