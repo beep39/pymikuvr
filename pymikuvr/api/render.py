@@ -60,12 +60,24 @@ class directional_light:
         self.__dir.set(v.x, v.y, v.z)
 
 class shadows:
-    slots = ('__resolution', '__size')
+    slots = ('__enabled', '__resolution', '__size')
     def __init__(self):
+        self.__enabled = True
         self.__resolution = 0
         self.resolution = 2048
         self.__size = 0
         self.size = 20
+
+    @property
+    def enabled(self):
+        return self.__enabled
+
+    @enabled.setter
+    def enabled(self, v):
+        if self.__enabled == v:
+            return
+        self.__enabled = v
+        c_lib.render_shadows_enabled(v)
 
     @property
     def resolution(self):

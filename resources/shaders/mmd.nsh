@@ -4,7 +4,7 @@
 @uniform env_p "env param"
 @uniform alpha_test "alpha test"
 
-@uniform light_dir "light dir"=-0.4,0.82,0.4
+@uniform light_dir "light dir":local_rot=-0.4,0.82,0.4
 @uniform light_color "light color"=0.6,0.6,0.6
 @predefined cam_pos "nya camera position":local
 
@@ -12,6 +12,7 @@
 @uniform diff_k "diff k"
 @uniform spec_k "spec k"
 
+@uniform shadow_tr "shadow tr"
 @sampler shadow_map "shadow"
 @sampler shadow_poisson "shadow poisson"
 @uniform shadow_param "shadow param"
@@ -26,7 +27,6 @@ varying vec4 shadow_tc;
 
 @vertex
 uniform vec4 shadow_tr[4];
-uniform vec4 model_scale;
 
 void main()
 {
@@ -41,6 +41,9 @@ void main()
     vec4 wpos = gl_ModelViewProjectionMatrix * gl_Vertex;
     shadow_tc = mat4(shadow_tr[0], shadow_tr[1], shadow_tr[2], shadow_tr[3]) * wpos;
     shadow_tc.xyz = 0.5 * (shadow_tc.xyz + shadow_tc.w);
+
+    normal.xz = -normal.xz; //ToDo
+
     gl_Position = wpos;
 }
 
@@ -78,12 +81,8 @@ void main()
     if(c.a*alpha_test.x+alpha_test.y>0.0)
         discard;
 
-    float ndl = dot(light_dir.xyz, normal);
-    float s = 0.0;
-    float l = 0.5 + 0.5 * ndl;
-    vec3 t = texture2D(toon,vec2(s, l)).rgb;
+    float ndl = clamp(dot(light_dir.xyz, normalize(normal)), 0.0, 1.0);
 
-    ndl = clamp(ndl, 0.0, 1.0);
     float bias = 0.0025 * tan(acos(ndl));
     bias = clamp(bias, 0.0, 0.005);
 
@@ -111,14 +110,12 @@ void main()
 
         vec2 b = step(vec2(0.0), shad_xy) * step(shad_xy, vec2(1.0));
         shadow = max(shadow, 1.0 - b.x * b.y);
-
-        shadow = min(1.0 - step(ndl, 0.0) * shadow_param.r, shadow);
     }
 
+    vec3 t = texture2D(toon,vec2(0.0, min(ndl, shadow))).rgb;
+
     c.rgb *= clamp(amb_k.rgb + (diff_k.rgb) * light_color.rgb, vec3(0.0), vec3(1.0));
-    c.rgb *= mix(1.0, shadow, shadow_param.a);
     c.rgb += spec * light_color.rgb;
     c.rgb *= t;
-
     gl_FragColor = c;
 }
