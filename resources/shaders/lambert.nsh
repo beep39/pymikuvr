@@ -2,7 +2,7 @@
 @uniform color "color"=1,1,1,1
 @uniform alpha_test "alpha test"
 
-@uniform light_dir "light dir":local_rot=-0.4,0.82,0.4
+@uniform light_dir "light dir":local_rot_scale=-0.4,0.82,0.4
 @uniform light_ambient "light ambient"=0.4,0.4,0.4
 @uniform light_color "light color"=0.6,0.6,0.6
 
@@ -59,7 +59,7 @@ void main()
     if (c.a * alpha_test.x + alpha_test.y > 0.0)
         discard;
 
-    float ndl = clamp(dot(light_dir.xyz, normalize(normal)), 0.0, 1.0);
+    float ndl = clamp(dot(normalize(light_dir.xyz), normalize(normal)), 0.0, 1.0);
     float bias = 0.0025 * tan(acos(ndl));
     bias = clamp(bias, 0.0, 0.005);
 

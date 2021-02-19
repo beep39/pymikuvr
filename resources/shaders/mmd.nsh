@@ -4,7 +4,7 @@
 @uniform env_p "env param"
 @uniform alpha_test "alpha test"
 
-@uniform light_dir "light dir":local_rot=-0.4,0.82,0.4
+@uniform light_dir "light dir":local_rot_scale=-0.4,0.82,0.4
 @uniform light_color "light color"=0.6,0.6,0.6
 @predefined cam_pos "nya camera position":local
 
@@ -24,9 +24,11 @@ varying vec2 env_tc;
 varying vec3 normal;
 varying vec3 pos;
 varying vec4 shadow_tc;
+varying vec3 ldir;
 
 @vertex
 uniform vec4 shadow_tr[4];
+uniform vec4 light_dir;
 
 void main()
 {
@@ -42,7 +44,7 @@ void main()
     shadow_tc = mat4(shadow_tr[0], shadow_tr[1], shadow_tr[2], shadow_tr[3]) * wpos;
     shadow_tc.xyz = 0.5 * (shadow_tc.xyz + shadow_tc.w);
 
-    normal.xz = -normal.xz; //ToDo
+    ldir = normalize(light_dir.xyz);
 
     gl_Position = wpos;
 }
@@ -53,7 +55,6 @@ uniform sampler2D toon;
 uniform sampler2D env;
 uniform vec4 env_p;
 
-uniform vec4 light_dir;
 uniform vec4 light_color;
 uniform vec4 cam_pos;
 
@@ -81,7 +82,8 @@ void main()
     if(c.a*alpha_test.x+alpha_test.y>0.0)
         discard;
 
-    float ndl = clamp(dot(light_dir.xyz, normalize(normal)), 0.0, 1.0);
+    vec3 n = normalize(normal);
+    float ndl = clamp(dot(ldir, n), 0.0, 1.0);
 
     float bias = 0.0025 * tan(acos(ndl));
     bias = clamp(bias, 0.0, 0.005);
@@ -91,7 +93,7 @@ void main()
     c.rgb+=env_p.y*e.rgb;
 
     vec3 eye = normalize(cam_pos.xyz - pos);
-    float ndh = dot(normal, normalize(light_dir.xyz + eye));
+    float ndh = dot(n, normalize(ldir + eye));
     vec3 spec = spec_k.rgb * max(pow(ndh, spec_k.a), 0.0);
 
     vec2 shad_xy = shadow_tc.xy / shadow_tc.w;
