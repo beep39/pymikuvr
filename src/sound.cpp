@@ -338,7 +338,7 @@ std::shared_ptr<sound::buffer> sound::get_snd(const char *name)
     if (s != m_sound_buffers.end())
         return s->second;
 
-    auto b = std::shared_ptr<sound::buffer>(new buffer);
+    auto b = std::make_shared<sound::buffer>();
     if (b->load(name))
     {
         m_sound_buffers[name] = b;
@@ -354,7 +354,7 @@ std::shared_ptr<sound::source> sound::create_src(const char *name, float volume)
     if (!snd)
         return std::shared_ptr<source>();
 
-    std::shared_ptr<source> s(new source());
+    auto s = std::make_shared<source>();
     s->buffer = snd;
     ALuint id;
     alGenSources(1, &id);
@@ -362,8 +362,6 @@ std::shared_ptr<sound::source> sound::create_src(const char *name, float volume)
     alSourcef(id, AL_GAIN, volume);
     alSourcePlay(id);
     s->sourceid = id;
-
-    m_tmp_sources.push_back(s);
     return s;
 }
 
