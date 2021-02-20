@@ -23,8 +23,11 @@ from api.video import video
 import gc
 import random
 import math
+import imp
 import traceback
 import os.path
+from sys import meta_path
+from sys import modules
 
 def tend(value, target, speedup, speeddn = None):
     if isinstance(target, vec3):
@@ -43,6 +46,69 @@ def tend(value, target, speedup, speeddn = None):
 def clamp(value, f, to):
     return max(f, min(value, to))
 
+def load_text(name, local_fs):
+    text = None
+    if local_fs:
+        text = sys.load_text(name)
+    else:
+        try:
+            with open(name, encoding='utf-8') as file:
+                text = file.read()
+        except Exception as e:
+            print("Script load error:", e)
+    return text
+
+class importer_class(object):
+    def __init__(self, local_fs, path, global_vars, local_vars):
+        self.local_fs = local_fs
+        self.path = path
+        self.global_vars = global_vars
+        self.local_vars = local_vars
+        self.modules = []
+
+    def full_path(self, name):
+        return os.path.join(self.path, name + '.py')
+
+    def find_module(self, name, path):
+        if self.local_fs:
+            raise NotImplementedError
+        elif os.path.exists(self.full_path(name)):
+            return self
+        return None
+
+    def load_module(self, name):
+        text = load_text(self.full_path(name), self.local_fs)
+        if text is None:
+            raise ImportError(name)
+
+        code = None
+        try:
+            code = compile(text, name, 'exec')
+        except Exception as e:
+            sys.error(str(e) + "\n" + traceback.format_exc())
+
+        if code is None:
+            raise ImportError(name)
+
+        new_module = imp.new_module(name)
+
+        try:
+            exec(code, self.global_vars, new_module.__dict__)
+        except Exception as e:
+            sys.error(str(e) + " in module " + name + "\n" + traceback.format_exc())
+            new_module = None
+
+        if new_module is None:
+            raise ImportError(name)
+
+        modules[name] = new_module
+        self.modules.append(name);
+        return new_module
+
+    def cleanup(self):
+        for m in self.modules:
+            modules.pop(m)
+
 class script:
     __slots__ = ('autoreload', '__local_vars', '__global_vars',
                  '__script_path', '__script_path_is_local', '__script_modified_time',)
@@ -54,7 +120,6 @@ class script:
         self.autoreload = True
 
     def load(self, name, local_fs = True):
-        
         cache = None
         if name == self.__script_path and local_fs == self.__script_path_is_local:
             cache = (self.__local_vars, self.__global_vars)
@@ -74,17 +139,7 @@ class script:
         if cache is None:
             gc.collect()
 
-        text = None
-
-        if local_fs:
-            text = sys.load_text(name)
-        else:
-            try:
-                with open(name, encoding='utf-8') as file:
-                    text = file.read()
-            except Exception as e:
-                print("Script load error:", e)
-
+        text = load_text(name, local_fs)
         if text is None:
             print("Script not found:", name)
             return
@@ -132,10 +187,16 @@ class script:
             sys.error(str(e) + "\n" + traceback.format_exc())
             return
 
+        importer = importer_class(local_fs, os.path.dirname(name), self.__global_vars, self.__local_vars)
+        meta_path.append(importer)
+
         try:
             exec(code, self.__global_vars, self.__local_vars)
         except Exception as e:
             sys.error(str(e) + "\n" + traceback.format_exc())
+
+        meta_path.remove(importer)
+        importer.cleanup()
 
         cache = None
         gc.collect()
