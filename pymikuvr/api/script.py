@@ -67,16 +67,26 @@ class importer_class(object):
         self.modules = []
 
     def full_path(self, name):
-        return os.path.join(self.path, name + '.py')
+        return os.path.join(self.path, name.replace('.','/') + '.py')
+
+    def full_folder_path(self, name):
+        return os.path.join(self.path, name.replace('.','/'), '__init__.py')
 
     def find_module(self, name, path):
         if self.local_fs:
             raise NotImplementedError
-        elif os.path.exists(self.full_path(name)):
+        elif os.path.exists(self.full_path(name)) or os.path.exists(self.full_folder_path(name)):
             return self
         return None
 
     def load_module(self, name):
+        if os.path.exists(self.full_folder_path(name)):
+            new_module = imp.new_module(name)
+            new_module.__path__ = name
+            modules[name] = new_module
+            self.modules.append(name);
+            return new_module
+
         text = load_text(self.full_path(name), self.local_fs)
         if text is None:
             raise ImportError(name)
