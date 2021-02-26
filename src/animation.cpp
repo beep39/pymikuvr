@@ -1,7 +1,6 @@
 //
 
 #include "animation.h"
-#include "sound.h"
 
 void animation::set_mesh(int mesh_idx, int layer)
 {

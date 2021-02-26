@@ -27,7 +27,7 @@ varying vec4 shadow_tc;
 varying vec3 ldir;
 
 @vertex
-uniform vec4 shadow_tr[4];
+uniform mat4 shadow_tr;
 uniform vec4 light_dir;
 
 void main()
@@ -41,7 +41,7 @@ void main()
     env_tc=0.5*r.xy/length(r) + 0.5;
 
     vec4 wpos = gl_ModelViewProjectionMatrix * gl_Vertex;
-    shadow_tc = mat4(shadow_tr[0], shadow_tr[1], shadow_tr[2], shadow_tr[3]) * wpos;
+    shadow_tc = shadow_tr * wpos;
     shadow_tc.xyz = 0.5 * (shadow_tc.xyz + shadow_tc.w);
 
     ldir = normalize(light_dir.xyz);

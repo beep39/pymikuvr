@@ -18,7 +18,7 @@ varying vec3 vpos;
 varying vec4 shadow_tc;
 
 @vertex
-uniform vec4 shadow_tr[4];
+uniform mat4 shadow_tr;
 uniform vec4 model_scale;
 
 void main()
@@ -27,7 +27,7 @@ void main()
     normal = gl_Normal;
 
     vec4 wpos = gl_ModelViewProjectionMatrix * gl_Vertex;
-    shadow_tc = mat4(shadow_tr[0], shadow_tr[1], shadow_tr[2], shadow_tr[3]) * wpos;
+    shadow_tc = shadow_tr * wpos;
     shadow_tc.xyz = 0.5 * (shadow_tc.xyz + shadow_tc.w);
     vpos = (gl_Vertex * model_scale).xyz;
     gl_Position = wpos;
