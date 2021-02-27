@@ -10,4 +10,6 @@ Running tests: <code>python -m unittest discover pymikuvr</code>
 
 This project is licensed under MIT license except for deps/ and resources/font/ (optional)
 
+[Latest build](https://ci.appveyor.com/project/beep39/pymikuvr/build/artifacts)
+
 [Plans](https://github.com/beep39/pymikuvr/wiki/Plans)
