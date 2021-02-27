@@ -45,6 +45,8 @@ private:
     void update_pre(int dt) {}
     void update_post();
     float zorder() const;
+    
+    void calculate_aabb();
 
 public:
     shape();
@@ -83,4 +85,5 @@ private:
     nya_render::vbo m_mesh;
     material *m_material = 0;
     nya_scene::texture_proxy m_texture;
+    nya_math::aabb m_aabb_src, m_aabb;
 };

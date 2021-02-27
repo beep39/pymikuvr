@@ -86,6 +86,8 @@ void shape::set_sphere(float radius, float s, float t, bool ntc)
 
     m_type = type_sphere;
     m_size.radius_sq = radius * radius;
+    m_aabb_src.origin = nya_math::vec3::zero();
+    m_aabb_src.delta = nya_math::vec3(radius, radius, radius);
     m_update = true;
 }
 
@@ -192,6 +194,8 @@ void shape::set_cylinder(float radius, float height, float s, float t, bool ntc)
     }
 
     m_type = type_cylinder;
+    m_aabb_src.origin = nya_math::vec3::zero();
+    m_aabb_src.delta = nya_math::vec3(radius, height * 0.5f, radius);
     m_update = true;
 }
 
@@ -335,6 +339,8 @@ void shape::set_box(float x, float y, float z, float s, float t, bool ntc)
     }
 
     m_type = type_box;
+    m_aabb_src.origin = nya_math::vec3::zero();
+    m_aabb_src.delta = nya_math::vec3(x, y, z) * 0.5f;
     m_update = true;
 }
 
@@ -373,6 +379,8 @@ void shape::set_plane(float w, float h, float s, float t, bool ntc)
     m_indices2b = {0, 1, 2, 0, 2, 3};
 
     m_type = type_plane;
+    m_aabb_src.origin = nya_math::vec3::zero();
+    m_aabb_src.delta = nya_math::vec3(w * 0.5f, 0.0f, h * 0.5f);
     m_update = true;
 }
 
@@ -400,6 +408,7 @@ void shape::add_shape(shape *other)
     }
     
     m_type = type_triangles;
+    calculate_aabb();
     m_update = true;
 }
 
@@ -417,6 +426,7 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint16_t *inds,
         for (uint16_t i = 0; i < (uint16_t)vcount; ++i)
             inds[i] = i;
         add_tris(verts, vcount, inds.data(), vcount);
+        calculate_aabb();
         return;
     }
 
@@ -430,6 +440,7 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint16_t *inds,
     {
         m_indices2b.resize(icount);
         memcpy(m_indices2b.data(), inds, icount * 2);
+        calculate_aabb();
         return;
     }
 
@@ -439,6 +450,7 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint16_t *inds,
         m_indices2b.resize(ioff + icount);
         for (int i = 0; i < icount; ++i)
             m_indices2b[i + ioff] = inds[i] + voff;
+        calculate_aabb();
         return;
     }
 
@@ -454,6 +466,7 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint16_t *inds,
 
     for (int i = 0; i < icount; ++i)
         m_indices4b[i + ioff] = inds[i] + voff;
+    calculate_aabb();
 }
 
 void shape::add_tris(const vertex *verts, uint32_t vcount, const uint32_t *inds, uint32_t icount)
@@ -470,6 +483,7 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint32_t *inds,
         for (uint32_t i = 0; i < (uint32_t)vcount; ++i)
             inds[i] = i;
         add_tris(verts, vcount, inds.data(), vcount);
+        calculate_aabb();
         return;
     }
 
@@ -488,6 +502,7 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint32_t *inds,
 
     for (int i = 0; i < icount; ++i)
         m_indices4b[i + ioff] = inds[i] + voff;
+    calculate_aabb();
 }
 
 const std::vector<shape::vertex> &shape::verts() { return m_vertices; }
@@ -512,6 +527,9 @@ void shape::update_post()
 {
     m_transform.set_pos(m_torigin->get_pos());
     m_transform.set_rot(m_torigin->get_rot());
+
+    m_aabb = nya_math::aabb(m_aabb_src, m_transform.get_pos(), m_transform.get_rot(), m_transform.get_scale());
+
     m_zorder = (nya_scene::get_camera().get_pos() - m_transform.get_pos()).length();
 }
 
@@ -523,6 +541,9 @@ void shape::draw(const char *pass)
         return;
 
     if (m_vertices.empty())
+        return;
+
+    if (!nya_scene::get_camera().get_frustum().test_intersect(m_aabb))
         return;
 
     nya_scene::transform::set(m_transform);
@@ -643,6 +664,28 @@ bool shape::trace(const vec3 &origin, const vec3 &dir, float &result) const
             return hit;
         }
     }
+
+    return false;
+}
+
+void shape::calculate_aabb()
+{
+    if (m_vertices.empty())
+    {
+        m_aabb_src = nya_math::aabb();
+        return;
+    }
+    
+    auto vmin = m_vertices[0].pos;
+    auto vmax = m_vertices[0].pos;
+
+    for (auto &v: m_vertices)
+    {
+        vmin = nya_math::vec3::min(vmin, v.pos);
+        vmax = nya_math::vec3::max(vmax, v.pos);
+    }
+
+    m_aabb_src = nya_math::aabb(vmin, vmax);
 }
 
 shape::shape()
