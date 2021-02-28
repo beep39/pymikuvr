@@ -277,7 +277,11 @@ void ui::update_pre(int dt)
 
     auto size = ImGui::GetWindowSize();
     ImGui::End();
-    
+
+    m_aabb.origin = nya_math::vec3::zero();
+    m_aabb.delta = nya_math::vec3(size.x / ui_scale * 0.5f, 0.0f, size.y / ui_scale * 0.5f);
+    m_aabb = nya_math::aabb(m_aabb, m_torigin->get_pos(), m_torigin->get_rot(), nya_math::vec3(1.0f, 1.0f, 1.0f));
+
     if (m_ignore_input)
         return;
 
@@ -343,8 +347,6 @@ void ui::update_post()
 
     ImGui::Render();
 }
-
-float ui::zorder() const { return m_zorder; }
 
 void ui::draw(const char *pass)
 {

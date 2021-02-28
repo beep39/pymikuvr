@@ -42,7 +42,7 @@ bool sys::start_vr()
 #ifdef USE_VR
     auto eError = vr::VRInitError_None;
     m_vr = vr::VR_Init(&eError, vr::VRApplication_Scene);
-    
+
     if (eError != vr::VRInitError_None || !vr::VRCompositor())
     {
         m_vr = NULL;
@@ -90,6 +90,7 @@ bool sys::start_vr()
 
     scene::instance().init();
     scene::instance().resize(m_width, m_height);
+    scene::instance().set_proj(m_lproj_mat, m_rproj_mat);
     m_time = nya_system::get_time();
     return true;
 }

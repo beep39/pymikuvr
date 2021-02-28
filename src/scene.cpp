@@ -76,6 +76,77 @@ void scene::update(int dt)
     m_update_cameras = true;
 }
 
+bool scene::set_shadow_proj(const nya_math::mat4 &view, float near, float far)
+{
+    const auto shadow_view = m_shadow_camera->get_view_matrix();
+
+    nya_math::vec3 vmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    nya_math::vec3 vmax = -vmin;
+
+    for (const auto &proj: m_proj)
+    {
+        const auto vnear = proj * nya_math::vec4(0.0f, 0.0f, -near, 1.0f);
+        const auto vfar = proj * nya_math::vec4(0.0f, 0.0f, -far, 1.0f);
+
+        const float pnear = std::max(vnear.z / vnear.w, -1.0f);
+        const float pfar = std::min(vfar.z / vfar.w, 1.0f);
+
+        const auto mvp_inv=(view * proj).invert();
+
+        const auto frustum_corners =
+        {
+            nya_math::vec4( 1.0f,  1.0f, pnear, 1.0f),
+            nya_math::vec4(-1.0f,  1.0f, pnear, 1.0f),
+            nya_math::vec4( 1.0f, -1.0f, pnear, 1.0f),
+            nya_math::vec4(-1.0f, -1.0f, pnear, 1.0f),
+
+            nya_math::vec4( 1.0f,  1.0f, pfar, 1.0f),
+            nya_math::vec4(-1.0f,  1.0f, pfar, 1.0f),
+            nya_math::vec4( 1.0f, -1.0f, pfar, 1.0f),
+            nya_math::vec4(-1.0f, -1.0f, pfar, 1.0f),
+        };
+
+        for (auto &c: frustum_corners)
+        {
+            auto v = shadow_view * (mvp_inv * c);
+            v.xyz() /= v.w;
+            vmin = nya_math::vec3::min(vmin, v.xyz());
+            vmax = nya_math::vec3::max(vmax, v.xyz());
+        }
+    }
+
+    //ToDo
+    auto sproj = nya_math::mat4().ortho(vmin.x, vmax.x, vmin.y, vmax.y, -1024.0f, 1024.0f);
+    const auto frustum = nya_math::frustum(shadow_view * sproj);
+    float zmin = std::numeric_limits<float>::max();
+    float zmax = -zmin;
+    for (auto &r: m_objects)
+    {
+        const auto &aabb = r->get_aabb();
+        if (!frustum.test_intersect(aabb))
+            continue;
+
+        const auto v = shadow_view * aabb.origin;
+        const float d = aabb.delta.length();
+        zmax = nya_math::max(zmax, v.z + d);
+        zmin = nya_math::min(zmin, v.z - d);
+    }
+
+    if (zmin >= zmax) //No objects inside shadow frustum
+        return false;
+
+    sproj = nya_math::mat4().ortho(vmin.x, vmax.x, vmin.y, vmax.y, zmin, zmax);
+    const float zdist = zmax - zmin;
+    m_shadow_dist_bias->w = 0.004f / zdist;
+    if (zdist > 500.0f)
+        m_shadow_dist_bias->w *= 2;
+    if (zdist > 1000.0f)
+        m_shadow_dist_bias->w *= 2;
+
+    m_shadow_camera->set_proj(sproj);
+    return true;
+}
+
 void scene::draw()
 {
     auto head = player::instance().head();
@@ -85,16 +156,17 @@ void scene::draw()
     if (m_update_shadows)
     {
         auto prev_camera = nya_scene::get_camera_proxy();
-        auto vdir = nya_scene::get_camera().get_dir();
-        nya_math::vec3 spos = player::instance().origin()->get_pos() + nya_math::vec3(vdir.x, 0, vdir.z).normalize() * m_shadows_size * 0.4;
-        m_shadow_camera->set_pos(spos);
-        nya_scene::set_camera(m_shadow_camera);
         auto prev_viewport = nya_render::get_viewport();
         auto prev_fbo = nya_render::fbo::get_current();
+
+        const bool draw = set_shadow_proj(prev_camera->get_view_matrix(), 0.0f, m_shadows_size);
+
+        nya_scene::set_camera(m_shadow_camera);
         nya_render::set_viewport(0, 0, m_shadow_tex->get_width(), m_shadow_tex->get_height());
         m_shadow_fbo.bind();
-        nya_render::clear(true, true);
-        draw_scene("shadows", nya_scene::tags());
+        nya_render::clear(false, true);
+        if (draw)
+            draw_scene("shadows", nya_scene::tags());
         prev_fbo.bind();
         nya_render::set_viewport(prev_viewport);
         nya_scene::set_camera(prev_camera);
@@ -110,11 +182,7 @@ void scene::draw()
     auto cam = nya_scene::get_camera_proxy();
     auto sm = (cam->get_view_matrix() * cam->get_proj_matrix()).invert() *
     (m_shadow_camera->get_view_matrix() * m_shadow_camera->get_proj_matrix());
-    for (int j = 0; j < 4; ++j)
-    {
-        //set_shader_param(("shadow tr"+std::to_string(j)).c_str(), nya_math::vec4(sm[j]));
-        m_shadow_tr->set(j, nya_math::vec4(sm[j]));
-    }
+    memcpy(m_shadow_tr->get_buf(), sm.m, sizeof(sm));
 
     postprocess::draw(0);
     phys::debug_draw();
@@ -125,6 +193,7 @@ void scene::resize(int w, int h)
     nya_render::set_viewport(0, 0, w, h);
 
     m_camera->set_proj(60.0, w / float(h), 0.01f, 300.0f);
+    m_proj = { m_camera->get_proj_matrix() };
 }
 
 void scene::release()
@@ -141,6 +210,8 @@ void scene::release()
     //phys::release();
     //m_mmd_phys.release();
 }
+
+void scene::set_proj(const nya_math::mat4 &left, const nya_math::mat4 &right) { m_proj = {left, right}; }
 
 void scene::set_light_ambient(float r, float g, float b) { m_light_ambient->set(r, g, b, 1.0f); }
 void scene::set_light_color(float r, float g, float b) { m_light_color->set(r, g, b, 1.0f); }
@@ -170,7 +241,7 @@ void scene::set_shadows_resolution(int resolution)
 
     m_shadows_enabled = true;
     m_shadow_tex.set(nya_scene::texture());
-    m_shadow_tex->build(0, resolution, resolution, nya_render::texture::depth32);
+    m_shadow_tex->build(0, resolution, resolution, nya_render::texture::depth16);
     auto stex = m_shadow_tex->internal().get_shared_data()->tex;
     stex.set_wrap(nya_render::texture::wrap_clamp, nya_render::texture::wrap_clamp);
     //m_shadow_fbo.release();
@@ -206,14 +277,13 @@ void scene::set_shadows_resolution(int resolution)
 void scene::set_shadows_size(float size)
 {
     m_shadows_size = size;
-    const float sh = size * 0.5;
-    m_shadow_camera->set_proj(-sh, sh, -sh, sh, -sh * 1.5f, sh);
 }
 
 const nya_scene::material::param_proxy &scene::get_light_ambient() const { return m_light_ambient; }
 const nya_scene::material::param_proxy &scene::get_light_color() const { return m_light_color; }
 const nya_scene::material::param_proxy &scene::get_light_dir() const { return m_light_dir; }
 const nya_scene::material::param_array_proxy &scene::get_shadow_tr() const { return m_shadow_tr; }
+const nya_scene::material::param_proxy &scene::get_shadow_dist_bias() const { return m_shadow_dist_bias; }
 const nya_scene::texture_proxy &scene::get_shadow_tex() const { return m_shadow_tex; }
 const nya_scene::texture_proxy &scene::get_shadow_poisson() const { return m_shadow_poisson; }
 
@@ -254,6 +324,7 @@ scene::scene()
 
     m_shadow_tr.create();
     m_shadow_tr->set_count(4);
+    m_shadow_dist_bias.create();
     m_shadow_camera.create();
     m_shadow_tex.create();
     m_shadow_poisson.create();

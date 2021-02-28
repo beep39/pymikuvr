@@ -111,6 +111,7 @@ bool mesh::load(const char *name)
                 m.set_param("light color", scene::instance().get_light_color());
                 m.set_param("light dir", scene::instance().get_light_dir());
                 m.set_param_array("shadow tr", scene::instance().get_shadow_tr());
+                m.set_param("shadow dist bias", scene::instance().get_shadow_dist_bias());
                 m.set_texture("shadow", scene::instance().get_shadow_tex());
                 m.set_texture("shadow poisson", scene::instance().get_shadow_poisson());
 
@@ -474,8 +475,6 @@ void mesh::draw(const char *pass)
             m_mesh.draw_group(i, pass);
     }
 }
-
-float mesh::zorder() const { return m_zorder; }
 
 mesh::mesh()
 {

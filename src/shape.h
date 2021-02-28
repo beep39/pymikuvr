@@ -44,8 +44,9 @@ private:
     void draw(const char *pass);
     void update_pre(int dt) {}
     void update_post();
-    float zorder() const;
-    
+    float zorder() const { return m_zorder; }
+    const nya_math::aabb &get_aabb() const { return m_aabb; }
+
     void calculate_aabb();
 
 public:

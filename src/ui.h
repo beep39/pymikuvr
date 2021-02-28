@@ -35,7 +35,8 @@ private:
     void draw(const char *pass);
     void update_pre(int dt);
     void update_post();
-    float zorder() const;
+    float zorder() const { return m_zorder; }
+    const nya_math::aabb &get_aabb() const { return m_aabb; }
 
 public:
     int add_text(const char *text);
@@ -126,6 +127,7 @@ private:
     bool m_draw = true;
     int m_origin;
     float m_zorder = 0;
+    nya_math::aabb m_aabb;
     transform *m_torigin;
     bool m_ignore_input = false;
 

@@ -533,8 +533,6 @@ void shape::update_post()
     m_zorder = (nya_scene::get_camera().get_pos() - m_transform.get_pos()).length();
 }
 
-float shape::zorder() const { return m_zorder; }
-
 void shape::draw(const char *pass)
 {
     if(!m_enabled || !m_material)

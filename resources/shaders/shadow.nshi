@@ -1,4 +1,5 @@
 @uniform shadow_tr "shadow tr"
+@uniform shadow_dist_bias "shadow dist bias"
 @sampler shadow_map "shadow"
 //@sampler shadow_poisson "shadow poisson"
 //@predefined model_scale "nya model scale"
@@ -20,6 +21,7 @@ void shadow(vec4 wpos)
 
 @fragment
 uniform sampler2D shadow_map;
+uniform vec4 shadow_dist_bias;
 
 //uniform sampler2D shadow_poisson;
 //
@@ -32,11 +34,8 @@ uniform sampler2D shadow_map;
 
 float shadow(float ndl01)
 {
-    float bias = 0.0025 * tan(acos(ndl01));
-    bias = clamp(bias, 0.0, 0.005);
-
     vec2 shad_xy = shadow_tc.xy / shadow_tc.w;
-    float shad_z = (shadow_tc.z - bias) / shadow_tc.w;
+    float shad_z = shadow_tc.z / shadow_tc.w - shadow_dist_bias.a;
     float shadow = 1.0;
 //    for (int i = 0; i < 6; ++i)
 //    {
