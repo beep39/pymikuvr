@@ -150,7 +150,7 @@ void scene::draw()
     if (m_update_shadows)
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(0.5f, 0.5f);
+        glPolygonOffset(1.0f, 7.0f);
 
         auto prev_camera = nya_scene::get_camera_proxy();
         auto prev_viewport = nya_render::get_viewport();
