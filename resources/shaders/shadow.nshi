@@ -38,7 +38,8 @@ float shadow(float ndl01)
     vec2 offset = vec2(0.5 * step(0.5, float(mod(d, 2.0))), 0.5 * step(1.5, d));
     int i = int(d);
 
-    vec2 shad_xy = shadow_tc[i].xy / shadow_tc[i].w * 0.5 + offset;
+    float scale = step(abs(shadow_cascades.y-shadow_cascades.z), 0.01) * 0.5 + 0.5;
+    vec2 shad_xy = shadow_tc[i].xy / shadow_tc[i].w * scale + offset;
     float shad_z = shadow_tc[i].z / shadow_tc[i].w;
     float shadow = 1.0;
 

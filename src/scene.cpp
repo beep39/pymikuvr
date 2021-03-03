@@ -175,16 +175,32 @@ void scene::draw()
 
             const bool draw = set_shadow_proj(view_matrix, prevz, dist);
             prevz = dist;
+            
+            nya_render::rect r;
 
-            const auto &off = offsets[i];
-            const nya_math::vec3 moff(-1.0f + off.x * 2.0f, -1.0f + off.y * 2.0f, 0.0f);
-            m_shadow_matrices[i] = m_shadow_camera->get_proj_matrix() * nya_math::mat4().scale(0.5f, 0.5f, 1.0f).translate(moff);
+            if (m_shadow_cascades_dist[1] > 0)
+            {
+                const auto &off = offsets[i];
+                const nya_math::vec3 moff(-1.0f + off.x * 2.0f, -1.0f + off.y * 2.0f, 0.0f);
+                m_shadow_matrices[i] = m_shadow_camera->get_proj_matrix() * nya_math::mat4().scale(0.5f, 0.5f, 1.0f).translate(moff);
+                r.x = off.x * width;
+                r.y = off.y * height;
+                r.width = width;
+                r.height = height;
+            }
+            else
+            {
+                m_shadow_matrices[i] = m_shadow_camera->get_proj_matrix();
+                r.width = width * 2.0f;
+                r.height = height * 2.0f;
+            }
+
             if (!draw)
                 continue;
 
             m_shadow_camera->set_proj(m_shadow_matrices[i]);
-            nya_render::set_viewport(off.x * width, off.y * height, width, height);
-            nya_render::scissor::enable(off.x * width, off.y * height, width, height);
+            nya_render::set_viewport(r);
+            nya_render::scissor::enable(r);
             draw_scene("shadows", nya_scene::tags());
         }
         nya_render::scissor::disable();
