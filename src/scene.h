@@ -26,13 +26,13 @@ public:
 
     void set_shadows_enabled(bool enabled);
     void set_shadows_resolution(int resolution);
-    void set_shadows_size(float size);
+    void set_shadows_cascades(float c0, float c1, float c2, float c3);
 
     const nya_scene::material::param_proxy &get_light_ambient() const;
     const nya_scene::material::param_proxy &get_light_color() const;
     const nya_scene::material::param_proxy &get_light_dir() const;
     const nya_scene::material::param_array_proxy &get_shadow_tr() const;
-    const nya_scene::material::param_proxy &get_shadow_dist_bias() const;
+    const nya_scene::material::param_proxy &get_shadow_cascades() const;
     const nya_scene::texture_proxy &get_shadow_tex() const;
     const nya_scene::texture_proxy &get_shadow_poisson() const;
 
@@ -71,17 +71,18 @@ private:
     nya_scene::material::param_proxy m_light_ambient, m_light_color, m_light_dir;
     nya_scene::camera_proxy m_shadow_camera;
     nya_scene::material::param_array_proxy m_shadow_tr;
-    nya_scene::material::param_proxy m_shadow_dist_bias;
+    nya_scene::material::param_proxy m_shadow_cascades;
     nya_scene::texture_proxy m_shadow_tex, m_shadow_poisson;
     nya_render::fbo m_shadow_fbo;
     std::vector<nya_math::mat4> m_proj;
+    float m_shadow_cascades_dist[4] = {10.0f, -1.0f, -1.0f, -1.0f};
+    nya_math::mat4 m_shadow_matrices[4];
 
     bool m_has_context = false;
     std::vector<iobject *> m_objects;
     bool m_shadows_enabled = false;
     bool m_update_shadows = false;
     bool m_update_cameras = false;
-    float m_shadows_size = 0;
     int m_shadows_resolution = 0;
     std::string m_pipeline;
 

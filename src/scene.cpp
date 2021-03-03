@@ -14,12 +14,14 @@
 #include "tests/shared/load_vmd.h"
 #include "tests/shared/mmd_mesh.h"
 
+#include "render/render_opengl_ext.h"
+
 void scene::init()
 {
     m_has_context = true;
 
     nya_render::texture::set_default_aniso(4);
-    
+
     sound::init();
     ui::init();
 
@@ -135,15 +137,7 @@ bool scene::set_shadow_proj(const nya_math::mat4 &view, float near, float far)
     if (zmin >= zmax) //No objects inside shadow frustum
         return false;
 
-    sproj = nya_math::mat4().ortho(vmin.x, vmax.x, vmin.y, vmax.y, zmin, zmax);
-    const float zdist = zmax - zmin;
-    m_shadow_dist_bias->w = 0.004f / zdist;
-    if (zdist > 500.0f)
-        m_shadow_dist_bias->w *= 2;
-    if (zdist > 1000.0f)
-        m_shadow_dist_bias->w *= 2;
-
-    m_shadow_camera->set_proj(sproj);
+    m_shadow_camera->set_proj(nya_math::mat4().ortho(vmin.x, vmax.x, vmin.y, vmax.y, zmin, zmax));
     return true;
 }
 
@@ -155,22 +149,51 @@ void scene::draw()
 
     if (m_update_shadows)
     {
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(0.5f, 0.5f);
+
         auto prev_camera = nya_scene::get_camera_proxy();
         auto prev_viewport = nya_render::get_viewport();
         auto prev_fbo = nya_render::fbo::get_current();
+        
+        const auto view_matrix = prev_camera->get_view_matrix();
 
-        const bool draw = set_shadow_proj(prev_camera->get_view_matrix(), 0.0f, m_shadows_size);
-
-        nya_scene::set_camera(m_shadow_camera);
-        nya_render::set_viewport(0, 0, m_shadow_tex->get_width(), m_shadow_tex->get_height());
         m_shadow_fbo.bind();
         nya_render::clear(false, true);
-        if (draw)
+        nya_scene::set_camera(m_shadow_camera);
+
+        float prevz = 0.0f;
+        const float width = m_shadow_tex->get_width() * 0.5f;
+        const float height = m_shadow_tex->get_height() * 0.5f;
+        const static nya_math::vec2 offsets[] = { nya_math::vec2(), nya_math::vec2(1.0f, 0.0f),
+                                                  nya_math::vec2(0.0f, 1.0f), nya_math::vec2(1.0f, 1.0f) };
+        for (int i = 0; i < 4; ++i)
+        {
+            const float dist = m_shadow_cascades_dist[i];
+            if (dist <= 0)
+                break;
+
+            const bool draw = set_shadow_proj(view_matrix, prevz, dist);
+            prevz = dist;
+
+            const auto &off = offsets[i];
+            const nya_math::vec3 moff(-1.0f + off.x * 2.0f, -1.0f + off.y * 2.0f, 0.0f);
+            m_shadow_matrices[i] = m_shadow_camera->get_proj_matrix() * nya_math::mat4().scale(0.5f, 0.5f, 1.0f).translate(moff);
+            if (!draw)
+                continue;
+
+            m_shadow_camera->set_proj(m_shadow_matrices[i]);
+            nya_render::set_viewport(off.x * width, off.y * height, width, height);
+            nya_render::scissor::enable(off.x * width, off.y * height, width, height);
             draw_scene("shadows", nya_scene::tags());
+        }
+        nya_render::scissor::disable();
         prev_fbo.bind();
         nya_render::set_viewport(prev_viewport);
         nya_scene::set_camera(prev_camera);
         m_update_shadows = false;
+        
+        glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
     if (m_update_cameras)
@@ -180,9 +203,12 @@ void scene::draw()
     }
 
     auto cam = nya_scene::get_camera_proxy();
-    auto sm = (cam->get_view_matrix() * cam->get_proj_matrix()).invert() *
-    (m_shadow_camera->get_view_matrix() * m_shadow_camera->get_proj_matrix());
-    memcpy(m_shadow_tr->get_buf(), sm.m, sizeof(sm));
+
+    nya_math::mat4 matrices[4];
+    const auto imvpshv = (cam->get_view_matrix() * cam->get_proj_matrix()).invert() * m_shadow_camera->get_view_matrix();
+    for (int i = 0; i < 4; ++i)
+        matrices[i] = imvpshv * m_shadow_matrices[i];
+    memcpy(m_shadow_tr->get_buf(), matrices, sizeof(matrices));
 
     postprocess::draw(0);
     phys::debug_draw();
@@ -268,22 +294,28 @@ void scene::set_shadows_resolution(int resolution)
         nya_math::vec3( 0.14383161,  -0.14100790, 0)
     };
     for (auto &s: shadow_poisson)
-        s *= 3.0f / resolution;
+        s *= 1.0f / resolution;
     m_shadow_poisson->build(shadow_poisson, 16, 1, nya_render::texture::color_rgb32f);
     stex = m_shadow_poisson->internal().get_shared_data()->tex;
     stex.set_filter(nya_render::texture::filter_nearest, nya_render::texture::filter_nearest, nya_render::texture::filter_nearest);
 }
 
-void scene::set_shadows_size(float size)
+void scene::set_shadows_cascades(float c0, float c1, float c2, float c3)
 {
-    m_shadows_size = size;
+    m_shadow_cascades_dist[0] = c0;
+    m_shadow_cascades_dist[1] = c1;
+    m_shadow_cascades_dist[2] = c2;
+    m_shadow_cascades_dist[3] = c3;
+
+    const float max_dist = 1000000.0f;
+    m_shadow_cascades->set(c0 <= 0 ? max_dist : c0, c1 <= 0 ? max_dist : c1, c2 <= 0 ? max_dist : c2, c3 <= 0 ? max_dist : c3);
 }
 
 const nya_scene::material::param_proxy &scene::get_light_ambient() const { return m_light_ambient; }
 const nya_scene::material::param_proxy &scene::get_light_color() const { return m_light_color; }
 const nya_scene::material::param_proxy &scene::get_light_dir() const { return m_light_dir; }
 const nya_scene::material::param_array_proxy &scene::get_shadow_tr() const { return m_shadow_tr; }
-const nya_scene::material::param_proxy &scene::get_shadow_dist_bias() const { return m_shadow_dist_bias; }
+const nya_scene::material::param_proxy &scene::get_shadow_cascades() const { return m_shadow_cascades; }
 const nya_scene::texture_proxy &scene::get_shadow_tex() const { return m_shadow_tex; }
 const nya_scene::texture_proxy &scene::get_shadow_poisson() const { return m_shadow_poisson; }
 
@@ -323,8 +355,8 @@ scene::scene()
     m_light_dir.create();
 
     m_shadow_tr.create();
-    m_shadow_tr->set_count(4);
-    m_shadow_dist_bias.create();
+    m_shadow_tr->set_count(4 * 4);
+    m_shadow_cascades.create();
     m_shadow_camera.create();
     m_shadow_tex.create();
     m_shadow_poisson.create();

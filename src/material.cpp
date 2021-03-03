@@ -19,7 +19,7 @@ bool material::load(const char *name)
         mat.set_param("light color", scene::instance().get_light_color());
         mat.set_param("light dir", scene::instance().get_light_dir());
         mat.set_param_array("shadow tr", scene::instance().get_shadow_tr());
-        mat.set_param("shadow dist bias", scene::instance().get_shadow_dist_bias());
+        mat.set_param("shadow cascades", scene::instance().get_shadow_cascades());
         mat.set_texture("shadow", scene::instance().get_shadow_tex());
         mat.set_texture("shadow poisson", scene::instance().get_shadow_poisson());
         auto c = mat.get_param("color");

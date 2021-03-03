@@ -41,9 +41,8 @@ void main()
         discard;
 
     float ndl = clamp(dot(normalize(light_dir.xyz), normalize(normal)), 0.0, 1.0);
-    float shadow = shadow(ndl);
-    shadow = min(1.0 - step(ndl, 0.0), shadow);
+    ndl = min(ndl, shadow(ndl));
 
-    c.rgb *= (light_ambient.rgb + light_color.rgb * ndl * shadow);
+    c.rgb *= (light_ambient.rgb + light_color.rgb * ndl);
     gl_FragColor = c;
 }

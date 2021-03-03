@@ -6,7 +6,7 @@ from api.vec3 import vec3_o
 c_lib.render_light_ambient.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_light_color.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_light_dir.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
-c_lib.render_shadows_size.argtypes = [ctypes.c_float]
+c_lib.render_shadows_cascades.argtypes = [ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float]
 
 class directional_light:
     slots = ('__ambient', '__color', '__intensity', '__dir')
@@ -64,9 +64,9 @@ class shadows:
     def __init__(self):
         self.__enabled = True
         self.__resolution = 0
-        self.resolution = 2048
-        self.__size = 0
-        self.size = 20
+        self._resolution = 4096
+        self.__cascades = None
+        self._cascades = (2.5, 10, 50)
 
     @property
     def enabled(self):
@@ -80,11 +80,11 @@ class shadows:
         c_lib.render_shadows_enabled(v)
 
     @property
-    def resolution(self):
+    def _resolution(self):
         return self.__resolution
 
-    @resolution.setter
-    def resolution(self, v):
+    @_resolution.setter
+    def _resolution(self, v):
         v = int(v)
         if self.__resolution == v:
             return
@@ -92,15 +92,20 @@ class shadows:
         c_lib.render_shadows_resolution(v)
 
     @property
-    def size(self):
+    def _cascades(self):
         return self.__size
 
-    @size.setter
-    def size(self, v):
-        if self.__size == v:
-            return
-        self.__size = v
-        c_lib.render_shadows_size(v)
+    @_cascades.setter
+    def _cascades(self, v):
+        if len(v) > 4:
+            raise ValueError('shadow cascades count is limited to 4')
+
+        self.__cascades = tuple(v)
+
+        c = [0, 0, 0, 0]
+        for i in range(len(v)):
+            c[i] = v[i]
+        c_lib.render_shadows_cascades(c[0], c[1], c[2], c[3])
 
 class pipeline:
     def __init__(self):

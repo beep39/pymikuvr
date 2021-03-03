@@ -1,27 +1,30 @@
 @uniform shadow_tr "shadow tr"
-@uniform shadow_dist_bias "shadow dist bias"
+@uniform shadow_cascades "shadow cascades"
 @sampler shadow_map "shadow"
 //@sampler shadow_poisson "shadow poisson"
-//@predefined model_scale "nya model scale"
+@predefined model_scale "nya model scale"
 
 @all
-//varying vec3 vpos;
-varying vec4 shadow_tc;
+varying vec4 vpos;
+varying vec4 shadow_tc[4];
 
 @vertex
-uniform mat4 shadow_tr;
-//uniform vec4 model_scale;
+uniform mat4 shadow_tr[4];
+uniform vec4 model_scale;
 
 void shadow(vec4 wpos)
 {
-    shadow_tc = shadow_tr * wpos;
-    shadow_tc.xyz = 0.5 * (shadow_tc.xyz + shadow_tc.w);
-    //vpos = (gl_Vertex * model_scale).xyz;
+    for (int i = 0; i < 4; ++i)
+    {
+        shadow_tc[i] = shadow_tr[i] * wpos;
+        shadow_tc[i].xyz = 0.5 * (shadow_tc[i].xyz + shadow_tc[i].w);
+    }
+    vpos = vec4((gl_Vertex * model_scale).xyz, wpos.z);
 }
 
 @fragment
 uniform sampler2D shadow_map;
-uniform vec4 shadow_dist_bias;
+uniform vec4 shadow_cascades;
 
 //uniform sampler2D shadow_poisson;
 //
@@ -34,18 +37,24 @@ uniform vec4 shadow_dist_bias;
 
 float shadow(float ndl01)
 {
-    vec2 shad_xy = shadow_tc.xy / shadow_tc.w;
-    float shad_z = shadow_tc.z / shadow_tc.w - shadow_dist_bias.a;
+    if (ndl01 < 0.001)
+        return 0.0;
+
+    vec3 d3 = step(shadow_cascades.xyz, vpos.www);
+    float d = d3.x + d3.y + d3.z;
+    vec2 offset = vec2(0.5 * step(0.5, float(mod(d, 2.0))), 0.5 * step(1.5, d));
+    int i = int(d);
+
+    vec2 shad_xy = shadow_tc[i].xy / shadow_tc[i].w * 0.5 + offset;
+    float shad_z = shadow_tc[i].z / shadow_tc[i].w;
     float shadow = 1.0;
 //    for (int i = 0; i < 6; ++i)
 //    {
-//        float index = random(floor(vpos*1000.0), i);
+//        float index = random(floor(vpos.xyz*1000.0), i);
 //        vec2 dtc = texture2D(shadow_poisson, vec2(index, 0.5)).xy;
 //        shadow -= 0.1667 * step(texture2D(shadow_map, shad_xy + dtc).r - shad_z, 0.0);
 //    }
 
     shadow -= step(texture2D(shadow_map, shad_xy).r - shad_z, 0.0);
-
-    vec2 b = step(vec2(0.0), shad_xy) * step(shad_xy, vec2(1.0));
-    return max(shadow, 1.0 - b.x * b.y);
+    return shadow;
 }

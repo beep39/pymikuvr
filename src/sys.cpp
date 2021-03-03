@@ -104,7 +104,7 @@ bool sys::start_window(int width, int height, const char *title)
         return false;
 
     //glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
-    //glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
 #ifndef _WIN32
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
