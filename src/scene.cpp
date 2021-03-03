@@ -26,7 +26,6 @@ void scene::init()
     ui::init();
 
     m_mmd_phys.init();
-    m_mmd_phys.set_gravity(1.0f);
 
     phys::init();
 
