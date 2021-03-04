@@ -86,8 +86,8 @@ bool scene::set_shadow_proj(const nya_math::mat4 &view, float near, float far)
 
     for (const auto &proj: m_proj)
     {
-        const float pnear = std::max((proj[3][2] - proj[2][2] * near) / (proj[3][3] - proj[2][3] * near), -1.0f);
-        const float pfar  = std::min((proj[3][2] - proj[2][2] * far)  / (proj[3][3] - proj[2][3] * far),  1.0f);
+        const float pnear = nya_math::max((proj[3][2] - proj[2][2] * near) / (proj[3][3] - proj[2][3] * near), -1.0f);
+        const float pfar  = nya_math::min((proj[3][2] - proj[2][2] * far)  / (proj[3][3] - proj[2][3] * far),   1.0f);
 
         const auto frustum_corners =
         {
