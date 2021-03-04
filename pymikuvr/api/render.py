@@ -66,7 +66,7 @@ class shadows:
         self.__resolution = 0
         self._resolution = 4096
         self.__cascades = None
-        self._cascades = (1.5, 10, 30, 300)
+        self._cascades = (2, 7, 30, 300)
 
     @property
     def enabled(self):
