@@ -79,17 +79,17 @@ void scene::update(int dt)
 
 bool scene::set_shadow_proj(const nya_math::mat4 &view, float near, float far)
 {
-    const auto shadow_view = m_shadow_camera->get_view_matrix();
+    const nya_math::mat4 &shadow_view = m_shadow_camera->get_view_matrix();
 
     nya_math::vec3 vmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     nya_math::vec3 vmax = -vmin;
 
-    for (const auto &proj: m_proj)
+    for (const nya_math::mat4 &proj: m_proj)
     {
-        const float pnear = nya_math::max((proj[3][2] - proj[2][2] * near) / (proj[3][3] - proj[2][3] * near), -1.0f);
-        const float pfar  = nya_math::min((proj[3][2] - proj[2][2] * far)  / (proj[3][3] - proj[2][3] * far),   1.0f);
+        const float pnear = std::max((proj[3][2] - proj[2][2] * near) / (proj[3][3] - proj[2][3] * near), -1.0f);
+        const float pfar  = std::min((proj[3][2] - proj[2][2] * far)  / (proj[3][3] - proj[2][3] * far),   1.0f);
 
-        const auto frustum_corners =
+        const nya_math::vec4 frustum_corners[] =
         {
             nya_math::vec4( 1.0f,  1.0f, pnear, 1.0f),
             nya_math::vec4(-1.0f,  1.0f, pnear, 1.0f),
@@ -102,8 +102,8 @@ bool scene::set_shadow_proj(const nya_math::mat4 &view, float near, float far)
             nya_math::vec4(-1.0f, -1.0f, pfar, 1.0f),
         };
 
-        const auto m = (view * proj).invert() * shadow_view;
-        for (auto &c: frustum_corners)
+        const nya_math::mat4 m = (view * proj).invert() * shadow_view;
+        for (const nya_math::vec4 &c: frustum_corners)
         {
             auto v = m * c;
             v.xyz() /= v.w;
