@@ -77,7 +77,7 @@ void scene::update(int dt)
     m_update_cameras = true;
 }
 
-bool scene::set_shadow_proj(const nya_math::mat4 &view, float near, float far)
+bool scene::set_shadow_proj(const nya_math::mat4 &view, float dist_near, float dist_far)
 {
     const nya_math::mat4 &shadow_view = m_shadow_camera->get_view_matrix();
 
@@ -87,8 +87,8 @@ bool scene::set_shadow_proj(const nya_math::mat4 &view, float near, float far)
     for (const nya_math::mat4 &proj: m_proj)
     {
         const float proj32 = proj[3][2], proj22 = proj[2][2], proj33 = proj[3][3], proj23 = proj[2][3];
-        const float pnear = std::max((proj32 - proj22 * near) / (proj33 - proj23 * near), -1.0f);
-        const float pfar  = std::min((proj32 - proj22 * far)  / (proj33 - proj23 * far),   1.0f);
+        const float pnear = std::max((proj32 - proj22 * dist_near) / (proj33 - proj23 * dist_near), -1.0f);
+        const float pfar  = std::min((proj32 - proj22 * dist_far)  / (proj33 - proj23 * dist_far),   1.0f);
 
         const nya_math::vec4 frustum_corners[] =
         {
