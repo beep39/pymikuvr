@@ -90,6 +90,10 @@ class animation:
     def weight(self, value):
         self.__weight = value
         c_lib.animation_set_weight(self.__id, value)
+        
+    def mirror(self):
+        c_lib.animation_mirror(self.__id)
+        return self
 
     def __del__(self):
         c_lib.animation_remove(self.__id)

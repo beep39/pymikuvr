@@ -16,6 +16,7 @@ public:
     void set_time(int time);
     int set_range(int from, int to);
     bool is_finished();
+    void mirror();
     static void copy(int from, int to);
 
 private:

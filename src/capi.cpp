@@ -35,6 +35,7 @@ EX  void animation_set_loop(int id, bool loop) { return animation::get(id)->anim
 EX  void animation_set_speed(int id, float speed) { return animation::get(id)->anim->set_speed(speed); }
 EX  void animation_set_weight(int id, float weight) { return animation::get(id)->anim->set_weight(weight); }
 EX  int animation_set_range(int id, int from, int to) { return animation::get(id)->set_range(from, to); }
+EX  void animation_mirror(int id) { return animation::get(id)->mirror(); }
 EX  void animation_remove(int id) { animation::remove(id); }
 
 EX  int camera_create() { return camera::add(); }

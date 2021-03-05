@@ -59,6 +59,73 @@ bool animation::is_finished()
     return true;
 }
 
+inline bool replace(std::string& str, const std::string& from, const std::string& to)
+{
+    const size_t s = str.find(from);
+    if (s == std::string::npos)
+        return false;
+    str.replace(s, from.length(), to);
+    return true;
+}
+
+void animation::mirror()
+{
+    if (!anim.is_valid())
+        return;
+    
+    const auto &sh = anim->get_shared_data();
+    if (!sh.is_valid())
+        return;
+
+    nya_scene::shared_animation sha;
+    const auto &from = sh->anim;
+    auto &to = sha.anim;
+
+    const std::string left = "\xe5\xb7\xa6", right = "\xe5\x8f\xb3";
+
+    for (int i = 0, count = from.get_bones_count(); i < count; ++i)
+    {
+        std::string name = from.get_bone_name(i);
+        if (!replace(name, left, right))
+            replace(name, right, left);
+        to.add_bone(name.c_str());
+    }
+
+    for (int i = 0, count = from.get_bones_count(); i < count; ++i)
+    {
+        for (auto &f: from.get_pos_frames(i))
+        {
+            nya_math::vec3 pos = f.second.value;
+            pos.x = -pos.x;
+            to.add_bone_pos_frame(i, f.first, pos, f.second.inter);
+        }
+
+        for (auto &f: from.get_rot_frames(i))
+        {
+            nya_math::quat rot = f.second.value;
+            rot.v.y = -rot.v.y;
+            rot.v.z = -rot.v.z;
+            to.add_bone_rot_frame(i, f.first, rot, f.second.inter);
+        }
+    }
+
+    for (int i = 0, count = from.get_cuves_count(); i < count; ++i)
+    {
+        std::string name = from.get_curve_name(i);
+        if(!replace(name, left, right))
+            replace(name, right, left);
+        to.add_curve(name.c_str());
+    }
+
+    for (int i = 0, count = from.get_cuves_count(); i < count; ++i)
+    {
+        for (auto &f: from.get_curve_frames(i))
+            to.add_curve_frame(i, f.first, f.second.value);
+    }
+
+    anim->create(sha);
+}
+
 void animation::copy(int from, int to)
 {
     get(to)->anim.set(get(from)->anim.get());
