@@ -19,6 +19,9 @@ public:
     void set_cylinder(float r, float h, float s, float t, bool ntc);
     void set_box(float x, float y, float z, float s, float t, bool ntc);
     void set_plane(float w, float h, float s, float t, bool ntc);
+    void set_heightmap(int count_w, int count_h, float step, const float *heights, float scale, float s, float t, bool ntc);
+    void set_heightmap(int count_w, int count_h, float step, const nya_scene::texture_proxy &tex, float scale, float s, float t, bool ntc);
+
     void add_shape(shape *other);
 
     void set_material(int mat_id);
@@ -67,6 +70,7 @@ private:
         type_cylinder,
         type_box,
         type_plane,
+        type_heightmap,
         type_triangles,
     };
 

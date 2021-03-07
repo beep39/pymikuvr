@@ -4,11 +4,14 @@ from api.base import base
 from api.color import color
 from api.material import material
 from api.texture import texture
+from collections.abc import Sequence
 
 c_lib.shape_set_sphere.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_bool)
 c_lib.shape_set_cylinder.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_bool)
 c_lib.shape_set_box.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_bool)
 c_lib.shape_set_plane.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_bool)
+c_lib.shape_set_heightmap.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_bool)
+c_lib.shape_set_heightmap_tex.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_bool)
 c_lib.shape_set_color.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.shape_trace.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_void_p)
 
@@ -59,6 +62,45 @@ class shape(base):
         sh = shape()
         c_lib.shape_set_plane(sh.__id, w, h, s, t, normalize_tc)
         return sh
+
+    @staticmethod
+    def heightmap(count_w, count_h, step, height, scale = 1, s = 1, t = 1, normalize_tc = True):
+        if isinstance(height, Sequence):
+            if isinstance(height[0], Sequence):
+                if count_w is None:
+                    count_w = len(height[0])
+                if count_h is None:
+                    count_h = len(height)
+                if count_w > len(height[0]) or count_h > len(height):
+                    raise ValueError("insufficent array size")
+                return shape.heightmap(count_w, count_h, step, sum(height, []), scale, s, t , normalize_tc)
+            else:
+                l = len(height)
+                if l < count_w * count_h:
+                    raise ValueError("insufficent array size")
+                sh = shape()
+                arr = (ctypes.c_float * l)(*height)
+                c_lib.shape_set_heightmap(sh.__id, count_w, count_h, step, arr, scale, s, t, normalize_tc)
+                return sh
+        elif callable(height):
+            heights = []
+            for i in range(count_h):
+                for j in range(count_w):
+                    heights.append(height(i, j))
+            return shape.heightmap(count_w, count_h, step, heights, scale, s, t , normalize_tc)
+        elif isinstance(height, texture):
+            if height.w == 0:
+                raise ValueError("invalid texture")
+            if count_w is None:
+                count_w = height.w
+            if count_h is None:
+                count_h = height.h
+            print("texture!")
+            sh = shape()
+            c_lib.shape_set_heightmap_tex(sh.__id, count_w, count_h, step, height._texture__id, scale, s, t, normalize_tc)
+            return sh
+        else:
+            raise ValueError("height must be 1d/2d array, texture, or a function(i,j)")
 
     @staticmethod
     def pyramide(x, h, z, s = 1, t = 1, normalize_tc = True):

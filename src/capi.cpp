@@ -171,6 +171,15 @@ EX  void shape_set_sphere(int id, float r, float s, float t, bool ntc) { shape::
 EX  void shape_set_cylinder(int id, float r, float h, float s, float t, bool ntc) { shape::get(id)->set_cylinder(r, h, s, t, ntc); }
 EX  void shape_set_box(int id, float x, float y, float z, float s, float t, bool ntc) { shape::get(id)->set_box(x, y, z, s, t, ntc); }
 EX  void shape_set_plane(int id, float w, float h, float s, float t, bool ntc) { shape::get(id)->set_plane(w, h, s, t, ntc); }
+EX  void shape_set_heightmap(int id, int count_w, int count_h, float step, const float *height, float scale, float s, float t, bool ntc)
+{
+    shape::get(id)->set_heightmap(count_w, count_h, step, height, scale, s, t, ntc);
+}
+EX  void shape_set_heightmap_tex(int id, int count_w, int count_h, float step, const int height_tex_id, float scale, float s, float t, bool ntc)
+{
+    shape::get(id)->set_heightmap(count_w, count_h, step, texture::get(height_tex_id)->tex, scale, s, t, ntc);
+}
+
 EX  void shape_add_shape(int id, int other) { shape::get(id)->add_shape(shape::get(other)); }
 EX  void shape_set_color(int id, float r, float g, float b, float a) { shape::get(id)->set_color(r,g,b,a); }
 EX  bool shape_trace(int id, float x, float y, float z, float dx, float dy, float dz, float *result)

@@ -384,6 +384,169 @@ void shape::set_plane(float w, float h, float s, float t, bool ntc)
     m_update = true;
 }
 
+void shape::set_heightmap(int count_w, int count_h, float step, const float *heights, float scale, float s, float t, bool ntc)
+{
+    clear();
+
+    m_vertices.resize(count_w * count_h);
+    auto *v = m_vertices.data();
+    const float *h = heights;
+    const float pos_x = -0.5f * step * (count_w - 1);
+    nya_math::vec2 pos(pos_x, -0.5f * step * (count_h - 1));
+    const nya_math::vec2 tc_step(1.0f / (count_w - 1), 1.0f / (count_h - 1));
+    nya_math::vec2 tc;
+    float hmin = *h, hmax = *h;
+
+    for (int y = 0; y < count_h; ++y)
+    {
+        for (int x = 0; x < count_w; ++x)
+        {
+            v->pos.x = pos.x;
+            v->pos.y = *h * scale;
+            v->pos.z = pos.y;
+            v->tc = tc;
+
+            hmin = std::min(v->pos.y, hmin);
+            hmax = std::max(v->pos.y, hmax);
+
+            ++v;
+            ++h;
+            pos.x += step;
+            tc.x += tc_step.x;
+        }
+
+        pos.x = pos_x;
+        pos.y += step;
+        tc.x = 0;
+        tc.y += tc_step.y;
+    }
+
+    const float ny = step + step;
+    for (int y = 1; y < count_h-1; ++y)
+    {
+        vertex *v = &m_vertices[y * count_w];
+        for (int x = 1; x < count_w-1; ++x)
+        {
+            ++v;
+            const float hl = (v-1)->pos.y;
+            const float hr = (v+1)->pos.y;
+            const float hu = (v-count_w)->pos.y;
+            const float hd = (v+count_w)->pos.y;
+            v->normal.set(hl - hr, ny, hu - hd).normalize();
+        }
+    }
+
+    if (m_vertices.size() < 0xffff)
+    {
+        m_indices2b.resize(count_w * count_h * 6);
+        uint16_t *ind = m_indices2b.data();
+        for (int i = 0, idx = 0, to = (count_h - 1); i < to; ++i, ++idx)
+        {
+            for (int j = 0, to = (count_w - 1); j < to; ++j, ++idx)
+            {
+                *ind++ = idx;
+                *ind++ = idx + count_w;
+                *ind++ = idx + 1;
+                *ind++ = idx + 1;
+                *ind++ = idx + count_w;
+                *ind++ = idx + count_w + 1;
+            }
+        }
+    }
+    else
+    {
+        m_indices4b.resize((count_w-1) * (count_h-1) * 6);
+        uint32_t *ind = m_indices4b.data();
+        for (int i = 0, idx = 0, to = (count_h - 1); i < to; ++i, ++idx)
+        {
+            for (int j = 0, to = (count_w - 1); j < to; ++j, ++idx)
+            {
+                *ind++ = idx;
+                *ind++ = idx + count_w;
+                *ind++ = idx + 1;
+                *ind++ = idx + 1;
+                *ind++ = idx + count_w;
+                *ind++ = idx + count_w + 1;
+            }
+        }
+    }
+
+    m_type = type_heightmap;
+    m_aabb_src.origin = nya_math::vec3(0.0f, -hmin, 0.0f);
+    m_aabb_src.delta = nya_math::vec3(pos.x, (hmax - hmin) * 0.5f, pos.y);
+    m_update = true;
+}
+
+void shape::set_heightmap(int count_w, int count_h, float step, const nya_scene::texture_proxy &tex, float scale, float s, float t, bool ntc)
+{
+    if (!tex.is_valid() || tex->get_width() < count_w || tex->get_height() < count_h)
+    {
+        set_plane((count_w - 1) * step, (count_h - 1) * step, s, t, ntc);
+        return;
+    }
+
+    auto data = tex->get_data();
+    nya_memory::tmp_buffer_scoped heights_buf(count_w * count_h * sizeof(float));
+    float *heights = (float *)heights_buf.get_data();
+    const float f2b = (1.0f / 255);
+
+    switch (tex->get_format())
+    {
+        case nya_render::texture::color_rgb:
+        {
+            auto src = (const uint8_t *)data.get_data();
+            for (int i = 0, j = 0, to = count_w * count_h * 3; i < to; i += 3, ++j)
+                heights[j] = src[i] * f2b;
+        }
+        break;
+
+        case nya_render::texture::color_rgba:
+        case nya_render::texture::color_bgra:
+        {
+            auto src = (const uint8_t *)data.get_data();
+            for (int i = 0, j = 0, to = count_w * count_h * 4; i < to; i += 4, ++j)
+                heights[j] = src[i] * f2b;
+        }
+        break;
+
+        case nya_render::texture::greyscale:
+        {
+            auto src = (const uint8_t *)data.get_data();
+            for (int i = 0, to = count_w * count_h; i < to; ++i)
+                heights[i] = src[i] * f2b;
+        }
+        break;
+
+        case nya_render::texture::color_r32f:
+            heights = (float *)data.get_data();
+            break;
+
+        case nya_render::texture::color_rgb32f:
+        {
+            auto src = (const float *)data.get_data();
+            for (int i = 0, j = 0, to = count_w * count_h * 3; i < to; i += 3, ++j)
+                heights[j] = src[i];
+        }
+        break;
+
+        case nya_render::texture::color_rgba32f:
+        {
+            auto src = (const float *)data.get_data();
+            for (int i = 0, j = 0, to = count_w * count_h * 4; i < to; i += 4, ++j)
+                heights[j] = src[i];
+        }
+        break;
+
+        default:
+            set_plane((count_w - 1) * step, (count_h - 1) * step, s, t, ntc);
+            data.free();
+            return;
+    }
+
+    set_heightmap(count_w, count_h, step, heights, scale, s, t, ntc);
+    data.free();
+}
+
 void shape::add_shape(shape *other)
 {
     auto voff = (uint32_t)m_vertices.size();
