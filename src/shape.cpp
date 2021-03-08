@@ -58,6 +58,12 @@ void shape::set_sphere(float radius, float s, float t, bool ntc)
         }
     }
 
+    if (radius < 0)
+    {
+        for (auto &v: m_vertices)
+            v.normal = -v.normal;
+    }
+
     m_indices2b.resize((stack_count * 2 - 2) * sector_count * 3);
     auto* ind = m_indices2b.data();
     int k1, k2;
@@ -143,6 +149,12 @@ void shape::set_cylinder(float radius, float height, float s, float t, bool ntc)
             v.tc.set(x * 0.5f + 0.5f, z * -0.5 + 0.5);
             m_vertices.push_back(v);
         }
+    }
+
+    if (radius * height < 0)
+    {
+        for (auto &v: m_vertices)
+            v.normal = -v.normal;
     }
 
     int k1 = 0, k2 = sector_count + 1;
@@ -316,6 +328,12 @@ void shape::set_box(float x, float y, float z, float s, float t, bool ntc)
         }
     }
 
+    if (x * y * z < 0)
+    {
+        for (auto &v: m_vertices)
+            v.normal = -v.normal;
+    }
+
     for (int i = 0, voff = 0; voff < vcount; ++i, voff += 4)
     {
         if (i % 2)
@@ -421,7 +439,11 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
         tc.y += tc_step.y;
     }
 
-    const float ny = step + step;
+    const float istep = 0.5f / step;
+    const float istep2 = istep * 0.5f;
+
+    //center
+
     for (int y = 1; y < count_h-1; ++y)
     {
         vertex *v = &m_vertices[y * count_w];
@@ -432,9 +454,94 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
             const float hr = (v+1)->pos.y;
             const float hu = (v-count_w)->pos.y;
             const float hd = (v+count_w)->pos.y;
-            v->normal.set(hl - hr, ny, hu - hd).normalize();
+            v->normal.set((hl - hr) * istep, 1.0f, (hu - hd) * istep).normalize();
         }
     }
+
+    //top
+
+    v = &m_vertices[0];
+    for (int x = 1; x < count_w-1; ++x)
+    {
+        ++v;
+        const float hl = (v-1)->pos.y;
+        const float hr = (v+1)->pos.y;
+        const float hu = v->pos.y;
+        const float hd = (v+count_w)->pos.y;
+        v->normal.set((hl - hr) * istep, 1.0f, (hu - hd) * istep2).normalize();
+    }
+
+    //down
+
+    v = &m_vertices[count_w * (count_h - 1)];
+    for (int x = 1; x < count_w-1; ++x)
+    {
+        ++v;
+        const float hl = (v-1)->pos.y;
+        const float hr = (v+1)->pos.y;
+        const float hu = (v-count_w)->pos.y;
+        const float hd = v->pos.y;
+        v->normal.set((hl - hr) * istep, 1.0f, (hu - hd) * istep2).normalize();
+    }
+
+    //left
+
+    v = &m_vertices[0];
+    for (int y = 1; y < count_h-1; ++y)
+    {
+        v += count_w;
+        const float hl = v->pos.y;
+        const float hr = (v+1)->pos.y;
+        const float hu = (v-count_w)->pos.y;
+        const float hd = (v+count_w)->pos.y;
+        v->normal.set((hl - hr) * istep2, 1.0f, (hu - hd) * istep).normalize();
+    }
+
+    //right
+
+    v = &m_vertices[count_w - 1];
+    for (int y = 1; y < count_h-1; ++y)
+    {
+        v += count_w;
+        const float hl = (v-1)->pos.y;
+        const float hr = v->pos.y;
+        const float hu = (v-count_w)->pos.y;
+        const float hd = (v+count_w)->pos.y;
+        v->normal.set((hl - hr) * istep2, 1.0f, (hu - hd) * istep).normalize();
+    }
+    
+    //corners
+
+    v = &m_vertices[0];
+    {
+        const float h = v->pos.y;
+        const float hr = (v+1)->pos.y;
+        const float hd = (v+count_w)->pos.y;
+        v->normal.set((h - hr) * istep2, 1.0f, (h - hd) * istep2).normalize();
+    }
+    v = &m_vertices[count_w - 1];
+    {
+        const float h = v->pos.y;
+        const float hl = (v-1)->pos.y;
+        const float hd = (v+count_w)->pos.y;
+        v->normal.set((hl - h) * istep2, 1.0f, (h - hd) * istep2).normalize();
+    }
+    v = &m_vertices[count_w * (count_h - 1)];
+    {
+        const float h = v->pos.y;
+        const float hr = (v+1)->pos.y;
+        const float hu = (v-count_w)->pos.y;
+        v->normal.set((h - hr) * istep2, 1.0f, (hu - h) * istep2).normalize();
+    }
+    v = &m_vertices[count_w * count_h - 1];
+    {
+        const float h = v->pos.y;
+        const float hl = (v-1)->pos.y;
+        const float hu = (v-count_w)->pos.y;
+        v->normal.set((hl - h) * istep2, 1.0f, (hu - h) * istep2).normalize();
+    }
+
+    //indices
 
     if (m_vertices.size() < 0xffff)
     {
@@ -783,6 +890,7 @@ bool shape::trace(const vec3 &origin, const vec3 &dir, float &result) const
         case type_cylinder:
         case type_box:
         case type_plane:
+        case type_heightmap:
 
         case type_triangles:
         {
