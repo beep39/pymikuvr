@@ -90,9 +90,14 @@ class animation:
     def weight(self, value):
         self.__weight = value
         c_lib.animation_set_weight(self.__id, value)
-        
+
     def mirror(self):
+        time = self.time
         c_lib.animation_mirror(self.__id)
+        c_lib.animation_set_weight(self.__id, self.__weight)
+        c_lib.animation_set_speed(self.__id, self.__speed)
+        c_lib.animation_set_loop(self.__id, self.__loop)
+        self.time = time
         return self
 
     def __del__(self):
