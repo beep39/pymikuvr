@@ -21,6 +21,7 @@ public:
     int get_anim_time(int layer);
     void set_anim_time(int layer, int time);
     void set_animation(nya_scene::animation_proxy anim, int layer);
+    void remove_animation(int layer);
     bool is_anim_finished(int layer);
 
     int get_bones_count();

@@ -173,6 +173,13 @@ void mesh::set_animation(nya_scene::animation_proxy anim, int layer)
     update_bones();
 }
 
+void mesh::remove_animation(int layer)
+{
+    m_mesh.remove_anim(layer);
+    m_mesh.update(0);
+    update_bones();
+}
+
 int mesh::get_anim_time(int layer)
 {
     return m_mesh.get_anim_time(layer);

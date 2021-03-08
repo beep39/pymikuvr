@@ -58,7 +58,13 @@ EX  int mesh_create() { return mesh::add(); }
 EX  int mesh_get_origin(int id) { return mesh::get(id)->get_origin(); }
 EX  void mesh_set_enabled(int id, bool enabled) { mesh::get(id)->set_enabled(enabled); }
 EX  bool mesh_load(int id, const char *name) { return mesh::get(id)->load(name); }
-EX  void mesh_set_animation(int id, int anim_id, int layer) { animation::get(anim_id)->set_mesh(id, layer); }
+EX  void mesh_set_animation(int id, int anim_id, int layer)
+{
+    if (anim_id < 0)
+        mesh::get(id)->remove_animation(layer);
+    else
+        animation::get(anim_id)->set_mesh(id, layer);
+}
 EX  int mesh_get_bones_count(int id) { return mesh::get(id)->get_bones_count(); }
 EX  const char *mesh_get_bone_name(int id, int idx) { return mesh::get(id)->get_bone_name(idx); }
 EX  int mesh_get_bone(int id, const char *name) { return mesh::get(id)->get_bone(name); }
