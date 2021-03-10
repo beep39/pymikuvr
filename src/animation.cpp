@@ -23,6 +23,14 @@ int animation::load(const char *name)
     return result;
 }
 
+void animation::blend(animation &new_anim, float duration)
+{
+    anim = nya_scene::animation_proxy(new_anim.anim.get());
+    auto m = m_mesh.lock();
+    if (m)
+        m->blend_animation(anim, m_layer, duration);
+}
+
 int animation::get_time()
 {
     auto m = m_mesh.lock();

@@ -173,6 +173,79 @@ void mesh::set_animation(nya_scene::animation_proxy anim, int layer)
     update_bones();
 }
 
+void mesh::blend_animation(nya_scene::animation_proxy anim, int layer, float duration)
+{
+    if (duration < 0.01f)
+    {
+        set_animation(anim, layer);
+        return;
+    }
+
+    remove_blend(layer); //ToDo: multiple blends
+
+    blend b;
+
+    auto &prev = m_mesh.get_anim(layer);
+    if (prev.is_valid())
+    {
+        b.prev_layer = new_blend_id(1024);
+        b.prev_weight = prev->get_weight();
+        m_mesh.set_anim(prev.get(), b.prev_layer, true);
+    }
+    else //fade in
+        b.prev_layer = -1;
+
+    if (anim.is_valid())
+    {
+        b.layer = layer;
+        b.weight = anim->get_weight();
+        anim->set_weight(0.0f);
+        m_mesh.set_anim(anim, layer, true);
+    }
+    else //fade out
+        m_mesh.remove_anim(layer);
+
+    if (!anim.is_valid() && b.prev_layer < 0)
+        return;
+
+    b.layer = layer;
+    b.total_time = duration;
+    b.time = 0;
+    m_blends.push_back(b);
+
+    m_mesh.update(0);
+    update_bones();
+}
+
+int mesh::new_blend_id(int src)
+{
+    for (auto &b: m_blends)
+    {
+        if (b.prev_layer == src)
+            return new_blend_id(src + 1);
+    }
+    return src;
+}
+
+void mesh::remove_blend(int layer)
+{
+    bool found = false;
+    for (auto &b: m_blends)
+    {
+        if (b.layer != layer)
+            continue;
+
+        if (b.prev_layer >= 0)
+            m_mesh.remove_anim(b.prev_layer);
+        found = true;
+    }
+
+    if (!found)
+        return;
+
+    m_blends.erase(std::remove_if(m_blends.begin(), m_blends.end(), [layer](const blend &b) { return layer == b.layer; }), m_blends.end());
+}
+
 void mesh::remove_animation(int layer)
 {
     m_mesh.remove_anim(layer);
@@ -216,7 +289,7 @@ const char *mesh::get_bone_name(int idx) { return m_mesh.get_bone_name(idx); }
 
 int mesh::get_bone(const char *name)
 {
-    m_bones.erase(std::remove_if(m_bones.begin(), m_bones.end(), bone::expired),m_bones.end());
+    m_bones.erase(std::remove_if(m_bones.begin(), m_bones.end(), bone::expired), m_bones.end());
 
     for (auto &b: m_bones)
     {
@@ -421,13 +494,43 @@ void mesh::update_bones()
             bone_deleted = true;
     }
     if (bone_deleted)
-        m_bones.erase(std::remove_if(m_bones.begin(), m_bones.end(), bone::expired),m_bones.end());
+        m_bones.erase(std::remove_if(m_bones.begin(), m_bones.end(), bone::expired), m_bones.end());
 }
 
 void mesh::update_pre(int dt)
 {
     if(!m_enabled)
         return;
+
+    for (int i = (int)m_blends.size() - 1; i >= 0; --i)
+    {
+        auto &b = m_blends[i];
+        b.time += dt * 0.001f;
+        float k = b.time / b.total_time;
+        if (k > 1.0f)
+        {
+            k = 1.0f;
+            m_blends.erase(m_blends.begin() + i);
+            
+            if (b.prev_layer >= 0)
+                m_mesh.remove_anim(b.prev_layer);
+            
+            auto anim = m_mesh.get_anim(b.layer);
+            if (anim.is_valid())
+                anim->set_weight(b.weight);
+            continue;
+        }
+
+        if (b.prev_layer >= 0)
+        {
+            auto prev = m_mesh.get_anim(b.prev_layer);
+            prev->set_weight(b.prev_weight * (1.0 - k));
+        }
+
+        auto anim = m_mesh.get_anim(b.layer);
+        if (anim.is_valid())
+            anim->set_weight(b.weight * k);
+    }
 
     m_mesh.set_pos(m_torigin->get_pos());
     m_mesh.set_rot(m_torigin->get_rot());
