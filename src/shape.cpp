@@ -411,7 +411,8 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
     const float *h = heights;
     const float pos_x = -0.5f * step * (count_w - 1);
     nya_math::vec2 pos(pos_x, -0.5f * step * (count_h - 1));
-    const nya_math::vec2 tc_step(1.0f / (count_w - 1), 1.0f / (count_h - 1));
+    const auto tc_step = ntc ? nya_math::vec2(1.0f / ((count_w - 1) * s), 1.0f / ((count_h - 1) * t)) : nya_math::vec2(1.0f / s, 1.0f / t);
+
     nya_math::vec2 tc;
     float hmin = *h, hmax = *h;
 
@@ -421,7 +422,7 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
         {
             v->pos.x = pos.x;
             v->pos.y = *h * scale;
-            v->pos.z = pos.y;
+            v->pos.z = -pos.y;
             v->tc = tc;
 
             hmin = std::min(v->pos.y, hmin);
@@ -454,7 +455,7 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
             const float hr = (v+1)->pos.y;
             const float hu = (v-count_w)->pos.y;
             const float hd = (v+count_w)->pos.y;
-            v->normal.set((hl - hr) * istep, 1.0f, (hu - hd) * istep).normalize();
+            v->normal.set((hl - hr) * istep, 1.0f, (hd - hu) * istep).normalize();
         }
     }
 
@@ -468,7 +469,7 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
         const float hr = (v+1)->pos.y;
         const float hu = v->pos.y;
         const float hd = (v+count_w)->pos.y;
-        v->normal.set((hl - hr) * istep, 1.0f, (hu - hd) * istep2).normalize();
+        v->normal.set((hl - hr) * istep, 1.0f, (hd - hu) * istep2).normalize();
     }
 
     //down
@@ -481,7 +482,7 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
         const float hr = (v+1)->pos.y;
         const float hu = (v-count_w)->pos.y;
         const float hd = v->pos.y;
-        v->normal.set((hl - hr) * istep, 1.0f, (hu - hd) * istep2).normalize();
+        v->normal.set((hl - hr) * istep, 1.0f, (hd - hu) * istep2).normalize();
     }
 
     //left
@@ -494,7 +495,7 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
         const float hr = (v+1)->pos.y;
         const float hu = (v-count_w)->pos.y;
         const float hd = (v+count_w)->pos.y;
-        v->normal.set((hl - hr) * istep2, 1.0f, (hu - hd) * istep).normalize();
+        v->normal.set((hl - hr) * istep2, 1.0f, (hd - hu) * istep).normalize();
     }
 
     //right
@@ -507,7 +508,7 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
         const float hr = v->pos.y;
         const float hu = (v-count_w)->pos.y;
         const float hd = (v+count_w)->pos.y;
-        v->normal.set((hl - hr) * istep2, 1.0f, (hu - hd) * istep).normalize();
+        v->normal.set((hl - hr) * istep2, 1.0f, (hd - hu) * istep).normalize();
     }
     
     //corners
@@ -517,28 +518,28 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
         const float h = v->pos.y;
         const float hr = (v+1)->pos.y;
         const float hd = (v+count_w)->pos.y;
-        v->normal.set((h - hr) * istep2, 1.0f, (h - hd) * istep2).normalize();
+        v->normal.set((h - hr) * istep2, 1.0f, (hd - h) * istep2).normalize();
     }
     v = &m_vertices[count_w - 1];
     {
         const float h = v->pos.y;
         const float hl = (v-1)->pos.y;
         const float hd = (v+count_w)->pos.y;
-        v->normal.set((hl - h) * istep2, 1.0f, (h - hd) * istep2).normalize();
+        v->normal.set((hl - h) * istep2, 1.0f, (hd - h) * istep2).normalize();
     }
     v = &m_vertices[count_w * (count_h - 1)];
     {
         const float h = v->pos.y;
         const float hr = (v+1)->pos.y;
         const float hu = (v-count_w)->pos.y;
-        v->normal.set((h - hr) * istep2, 1.0f, (hu - h) * istep2).normalize();
+        v->normal.set((h - hr) * istep2, 1.0f, (h - hu) * istep2).normalize();
     }
     v = &m_vertices[count_w * count_h - 1];
     {
         const float h = v->pos.y;
         const float hl = (v-1)->pos.y;
         const float hu = (v-count_w)->pos.y;
-        v->normal.set((hl - h) * istep2, 1.0f, (hu - h) * istep2).normalize();
+        v->normal.set((hl - h) * istep2, 1.0f, (h - hu) * istep2).normalize();
     }
 
     //indices
@@ -552,10 +553,10 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
             for (int j = 0, to = (count_w - 1); j < to; ++j, ++idx)
             {
                 *ind++ = idx;
-                *ind++ = idx + count_w;
-                *ind++ = idx + 1;
                 *ind++ = idx + 1;
                 *ind++ = idx + count_w;
+                *ind++ = idx + count_w;
+                *ind++ = idx + 1;
                 *ind++ = idx + count_w + 1;
             }
         }
@@ -569,10 +570,10 @@ void shape::set_heightmap(int count_w, int count_h, float step, const float *hei
             for (int j = 0, to = (count_w - 1); j < to; ++j, ++idx)
             {
                 *ind++ = idx;
-                *ind++ = idx + count_w;
-                *ind++ = idx + 1;
                 *ind++ = idx + 1;
                 *ind++ = idx + count_w;
+                *ind++ = idx + count_w;
+                *ind++ = idx + 1;
                 *ind++ = idx + count_w + 1;
             }
         }
