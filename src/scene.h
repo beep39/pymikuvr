@@ -27,6 +27,7 @@ public:
     void set_shadows_enabled(bool enabled);
     void set_shadows_resolution(int resolution);
     void set_shadows_cascades(float c0, float c1, float c2, float c3);
+    void set_shadows_bias(int idx, float bias, float slope);
 
     const nya_scene::material::param_proxy &get_light_ambient() const;
     const nya_scene::material::param_proxy &get_light_color() const;
@@ -76,6 +77,8 @@ private:
     nya_render::fbo m_shadow_fbo;
     std::vector<nya_math::mat4> m_proj;
     float m_shadow_cascades_dist[4] = {10.0f, -1.0f, -1.0f, -1.0f};
+    float m_shadow_cascades_bias[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float m_shadow_cascades_slope_bias[4] = {7.0f, 7.0f, 7.0f, 7.0f};
     nya_math::mat4 m_shadow_matrices[4];
 
     bool m_has_context = false;

@@ -169,7 +169,7 @@ EX  void render_pipeline_set_condition(const char *name, bool enable) { scene::i
 EX  void render_shadows_enabled(bool enabled) { scene::instance().set_shadows_enabled(enabled); }
 EX  void render_shadows_resolution(int resolution) { scene::instance().set_shadows_resolution(resolution); }
 EX  void render_shadows_cascades(float c0, float c1, float c2, float c3) { scene::instance().set_shadows_cascades(c0, c1, c2, c3); }
-
+EX  void render_set_shadows_bias(int idx, float c, float s) { scene::instance().set_shadows_bias(idx, c, s); }
 EX  int shape_create() { return shape::add(); }
 EX  int shape_get_origin(int id) { return shape::get(id)->get_origin(); }
 EX  void shape_set_enabled(int id, bool enabled) { shape::get(id)->set_enabled(enabled); }

@@ -6,7 +6,8 @@ from api.vec3 import vec3_o
 c_lib.render_light_ambient.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_light_color.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_light_dir.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
-c_lib.render_shadows_cascades.argtypes = [ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+c_lib.render_shadows_cascades.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
+c_lib.render_set_shadows_bias.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float)
 
 class directional_light:
     slots = ('__ambient', '__color', '__intensity', '__dir')
@@ -67,6 +68,8 @@ class shadows:
         self._resolution = 4096
         self.__cascades = None
         self._cascades = (2, 7, 30, 300)
+        self.__bias = None
+        self._bias = ((1,7), (1,7), (1,7), (4,1))
 
     @property
     def enabled(self):
@@ -106,6 +109,16 @@ class shadows:
         for i in range(len(v)):
             c[i] = v[i]
         c_lib.render_shadows_cascades(c[0], c[1], c[2], c[3])
+        
+    @property
+    def _bias(self):
+        return self.__bias
+
+    @_cascades.setter
+    def _bias(self, bias):
+        for i in range(len(bias)):
+            c_lib.render_set_shadows_bias(i, bias[i][0], bias[i][1])
+        self.__bias = bias
 
 class pipeline:
     def __init__(self):

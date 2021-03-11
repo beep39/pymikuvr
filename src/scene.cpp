@@ -146,7 +146,6 @@ void scene::draw()
     if (m_update_shadows)
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(1.0f, 7.0f);
 
         auto prev_camera = nya_scene::get_camera_proxy();
         auto prev_viewport = nya_render::get_viewport();
@@ -193,6 +192,8 @@ void scene::draw()
 
             if (!draw)
                 continue;
+            
+            glPolygonOffset(m_shadow_cascades_bias[i], m_shadow_cascades_slope_bias[i]);
 
             m_shadow_camera->set_proj(m_shadow_matrices[i]);
             nya_render::set_viewport(r);
@@ -321,6 +322,15 @@ void scene::set_shadows_cascades(float c0, float c1, float c2, float c3)
 
     const float max_dist = 1000000.0f;
     m_shadow_cascades->set(c0 <= 0 ? max_dist : c0, c1 <= 0 ? max_dist : c1, c2 <= 0 ? max_dist : c2, c3 <= 0 ? max_dist : c3);
+}
+
+void scene::set_shadows_bias(int idx, float bias, float slope)
+{
+    if (idx < 0 || idx >= 4)
+        return;
+
+    m_shadow_cascades_bias[idx] = bias;
+    m_shadow_cascades_slope_bias[idx] = slope;
 }
 
 const nya_scene::material::param_proxy &scene::get_light_ambient() const { return m_light_ambient; }
