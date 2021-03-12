@@ -58,12 +58,6 @@ void shape::set_sphere(float radius, float s, float t, bool ntc)
         }
     }
 
-    if (radius < 0)
-    {
-        for (auto &v: m_vertices)
-            v.normal = -v.normal;
-    }
-
     m_indices2b.resize((stack_count * 2 - 2) * sector_count * 3);
     auto* ind = m_indices2b.data();
     int k1, k2;
@@ -149,12 +143,6 @@ void shape::set_cylinder(float radius, float height, float s, float t, bool ntc)
             v.tc.set(x * 0.5f + 0.5f, z * -0.5 + 0.5);
             m_vertices.push_back(v);
         }
-    }
-
-    if (radius * height < 0)
-    {
-        for (auto &v: m_vertices)
-            v.normal = -v.normal;
     }
 
     int k1 = 0, k2 = sector_count + 1;
@@ -326,12 +314,6 @@ void shape::set_box(float x, float y, float z, float s, float t, bool ntc)
             v->tc.set(s1, 0);
             ++v;
         }
-    }
-
-    if (x * y * z < 0)
-    {
-        for (auto &v: m_vertices)
-            v.normal = -v.normal;
     }
 
     for (int i = 0, voff = 0; voff < vcount; ++i, voff += 4)
