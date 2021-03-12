@@ -2,7 +2,7 @@ from api.base import updater
 from api.transform import transform
 from api.vec2 import vec2
 from api.vec3 import vec3
-from api.sys import sys
+from api.system import system
 
 import math
 
@@ -33,7 +33,7 @@ class locomotion:
             if l > 1:
                 s /= l
             s.y = -s.y
-            s = s.rotated(head.rot.yaw) * (sys.dt * speed)
+            s = s.rotated(head.rot.yaw) * (system.dt * speed)
             pos.x += s.x
             pos.z += s.y
         self._walk_update = update
@@ -49,7 +49,7 @@ class locomotion:
             l = s.length()
             if l > 1:
                 s /= l
-            t.pos += head.rot * s * (sys.dt * speed)
+            t.pos += head.rot * s * (system.dt * speed)
         self._walk_update = update
 
     def turn(self, source, speed=1, fixed_angle=None):
@@ -57,7 +57,7 @@ class locomotion:
         t = self._target
         if fixed_angle is None:
             def update():
-                t.rot.yaw -= source.x * sys.dt * speed
+                t.rot.yaw -= source.x * system.dt * speed
             self._turn_update = update
             return
 
@@ -76,7 +76,7 @@ class locomotion:
             else:
                  rotating = True
             if rotating_delta != 0:
-                drot = sys.dt * speed
+                drot = system.dt * speed
                 if abs(rotating_delta) > drot:
                     drot = math.copysign(drot, rotating_delta)
                     t.rot.yaw += drot

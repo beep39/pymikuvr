@@ -12,7 +12,7 @@ from api.quat import quat
 from api.render import render
 from api.shape import shape
 from api.sound import sound
-from api.sys import sys
+from api.system import system
 from api.texture import texture
 from api.transform import transform
 from api.ui import ui
@@ -49,7 +49,7 @@ def clamp(value, f, to):
 def load_text(name, local_fs):
     text = None
     if local_fs:
-        text = sys.load_text(name)
+        text = system.load_text(name)
     else:
         try:
             with open(name, encoding='utf-8') as file:
@@ -95,7 +95,7 @@ class importer_class(object):
         try:
             code = compile(text, name, 'exec')
         except Exception as e:
-            sys.error(str(e) + "\n" + traceback.format_exc())
+            system.error(str(e) + "\n" + traceback.format_exc())
 
         if code is None:
             raise ImportError(name)
@@ -105,7 +105,7 @@ class importer_class(object):
         try:
             exec(code, self.global_vars, new_module.__dict__)
         except Exception as e:
-            sys.error(str(e) + " in module " + name + "\n" + traceback.format_exc())
+            system.error(str(e) + " in module " + name + "\n" + traceback.format_exc())
             new_module = None
 
         if new_module is None:
@@ -154,9 +154,9 @@ class script:
             print("Script not found:", name)
             return
 
-        sys.reset_resources()
+        system.reset_resources()
         if not local_fs:
-            sys.add_resources_folder(os.path.dirname(name))
+            system.add_resources_folder(os.path.dirname(name))
 
         self.__script_path = name
         self.__script_modified_time = self.get_modified_time()
@@ -176,7 +176,7 @@ class script:
             "script": script,
             "shape": shape,
             "sound": sound,
-            "sys": sys,
+            "system": system,
             "texture": texture,
             "transform": transform,
             "ui": ui,
@@ -194,7 +194,7 @@ class script:
         try:
             code = compile(text, name, 'exec')
         except Exception as e:
-            sys.error(str(e) + "\n" + traceback.format_exc())
+            system.error(str(e) + "\n" + traceback.format_exc())
             return
 
         importer = importer_class(local_fs, os.path.dirname(name), self.__global_vars, self.__local_vars)
@@ -203,7 +203,7 @@ class script:
         try:
             exec(code, self.__global_vars, self.__local_vars)
         except Exception as e:
-            sys.error(str(e) + "\n" + traceback.format_exc())
+            system.error(str(e) + "\n" + traceback.format_exc())
 
         meta_path.remove(importer)
         importer.cleanup()

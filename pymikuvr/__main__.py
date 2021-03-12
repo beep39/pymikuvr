@@ -5,24 +5,24 @@ import os, gc
 from api.render import render
 from api.player import player
 from api.script import scene_script
-from api.sys import sys, sys_internal
+from api.system import system, system_internal
 from api.base import updater
 from api.ui import ui
 
 if len(argv) < 2:
     exit("please specify game script to load, e.g.: python3 pymikuvr test.py")
 
-sys.argv = argv[2:]
-sys.default_res_folder = os.path.dirname(os.path.abspath(__file__)) + "/../resources/"
-sys.reset_resources()
+system.argv = argv[2:]
+system.default_res_folder = os.path.dirname(os.path.abspath(__file__)) + "/../resources/"
+system.reset_resources()
 
 title = "pymikuvr"
 
 path = os.getcwd()
-if sys_internal.start_vr():
+if system_internal.start_vr():
     print("starting in vr")
 else:
-    sys_internal.start_window(640, 480, title)
+    system_internal.start_window(640, 480, title)
     print("starting windowed")
 os.chdir(path)
 
@@ -33,14 +33,14 @@ scene_script.load(argv[1], False)
 
 scripts_update = updater.update
 player_update = player._update
-native_update = sys_internal.get_update_func()
+native_update = system_internal.get_update_func()
 frames = 0
 start_time = time()
 prev_time = start_time
 while native_update():
     t = time()
-    sys.dt = t - prev_time
-    sys.time += sys.dt
+    system.dt = t - prev_time
+    system.time += system.dt
     prev_time = t
     player_update()
     scripts_update()
@@ -55,4 +55,4 @@ while native_update():
 
 print("exiting...")
 gc.collect()
-sys_internal.exit()
+system_internal.exit()

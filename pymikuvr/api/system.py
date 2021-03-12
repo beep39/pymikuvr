@@ -5,7 +5,7 @@ from api.texture import texture
 
 c_lib.sys_load_text.restype = ctypes.c_char_p
 
-class sys_class:
+class system_class:
     __slots__ = ('__screen_texture', 'default_res_folder', 'time', 'dt', 'argv', 'log', 'warnings', 'errors')
     def __init__(self):
         self.__screen_texture = None
@@ -61,9 +61,9 @@ class sys_class:
         self.errors.append(msg)
         self.verbose("Error: " + msg)
 
-sys = sys_class()
+system = system_class()
 
-class sys_internal_class:
+class system_internal_class:
     def start_vr(self):
         return c_lib.sys_start_vr()
     def start_window(self, width, height, title):
@@ -73,4 +73,4 @@ class sys_internal_class:
     def get_update_func(self,):
         return c_lib.sys_update
 
-sys_internal = sys_internal_class()
+system_internal = system_internal_class()

@@ -1,4 +1,4 @@
-from api.sys import sys
+from api.system import system
 from api.transform import transform
 import traceback
 
@@ -31,7 +31,7 @@ class updater_class:
                     o.update(o)
                 except Exception as e:
                     o.update = None
-                    sys.error(str(e) + "\n" + traceback.format_exc())
+                    system.error(str(e) + "\n" + traceback.format_exc())
 
     def reset(self):
         self.remove_list.clear()
@@ -82,7 +82,7 @@ class base(transform):
             def update_interval(obj):
                 nonlocal time
                 nonlocal function
-                time += sys.dt
+                time += system.dt
                 while time > interval:
                     time -= interval
                     function(obj)
@@ -105,7 +105,7 @@ class base(transform):
             nonlocal count
             nonlocal time
             nonlocal function
-            time += sys.dt
+            time += system.dt
             while time > interval:
                 time -= interval
                 count -= 1
