@@ -48,6 +48,8 @@ public:
     const char *load_text(const char *filename);
     void free_tmp();
 
+    void set_znearfar(float znear, float zfar); //ToDo: should be in the scene
+
 private:
     void update_resources();
     void emulate_vr_input();

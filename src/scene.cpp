@@ -6,6 +6,7 @@
 #include "scene.h"
 #include "sound.h"
 #include "video.h"
+#include "sys.h"
 #include "ui.h"
 
 #include "tests/shared/load_pmx.h"
@@ -231,7 +232,7 @@ void scene::resize(int w, int h)
 {
     nya_render::set_viewport(0, 0, w, h);
 
-    m_camera->set_proj(60.0, w / float(h), 0.01f, 300.0f);
+    m_camera->set_proj(60.0, w / float(h), m_znear, m_zfar);
     m_proj = { m_camera->get_proj_matrix() };
 }
 
@@ -251,6 +252,13 @@ void scene::release()
 }
 
 void scene::set_proj(const nya_math::mat4 &left, const nya_math::mat4 &right) { m_proj = {left, right}; }
+
+void scene::set_znearfar(float znear, float zfar)
+{
+    m_znear = znear;
+    m_zfar = zfar;
+    sys::instance().set_znearfar(znear, zfar);
+}
 
 void scene::set_light_ambient(float r, float g, float b) { m_light_ambient->set(r, g, b, 1.0f); }
 void scene::set_light_color(float r, float g, float b) { m_light_color->set(r, g, b, 1.0f); }

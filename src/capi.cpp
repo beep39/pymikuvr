@@ -160,6 +160,7 @@ EX  void phys_remove(int id) { phys::remove(id); }
 
 EX  int player_get_transform(const char *name) { return player::instance().get_transform(name); }
 
+EX  void render_set_znearfar(float znear, float zfar) { return scene::instance().set_znearfar(znear, zfar); }
 EX  void render_light_ambient(float r, float g, float b) { return scene::instance().set_light_ambient(r, g, b); }
 EX  void render_light_color(float r, float g, float b) { return scene::instance().set_light_color(r, g, b); }
 EX  void render_light_dir(float x, float y, float z) { return scene::instance().set_light_dir(x, y, z); }

@@ -19,6 +19,8 @@ public:
     void release();
 
     void set_proj(const nya_math::mat4 &left, const nya_math::mat4 &right);
+    
+    void set_znearfar(float znear, float zfar);
 
     void set_light_ambient(float r, float g, float b);
     void set_light_color(float r, float g, float b);
@@ -76,6 +78,7 @@ private:
     nya_scene::texture_proxy m_shadow_tex, m_shadow_poisson;
     nya_render::fbo m_shadow_fbo;
     std::vector<nya_math::mat4> m_proj;
+    float m_znear = 0.1, m_zfar = 300;
     float m_shadow_cascades_dist[4] = {10.0f, -1.0f, -1.0f, -1.0f};
     float m_shadow_cascades_bias[4] = {1.0f, 1.0f, 1.0f, 1.0f};
     float m_shadow_cascades_slope_bias[4] = {7.0f, 7.0f, 7.0f, 7.0f};

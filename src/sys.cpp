@@ -55,8 +55,8 @@ bool sys::start_vr()
     m_width = (int)w;
     m_height = (int)h;
 
-    m_lproj_mat = nya_system::get_proj_matrix(m_vr, nya_system::vr_eye_left, 0.01f, 300.0f);
-    m_rproj_mat = nya_system::get_proj_matrix(m_vr, nya_system::vr_eye_right, 0.01f, 300.0f);
+    m_lproj_mat = nya_system::get_proj_matrix(m_vr, nya_system::vr_eye_left, 0.1f, 300.0f);
+    m_rproj_mat = nya_system::get_proj_matrix(m_vr, nya_system::vr_eye_right, 0.1f, 300.0f);
 #endif
 
     if (!glfwInit())
@@ -435,6 +435,20 @@ void sys::free_tmp()
     for (auto t: m_tmp)
         delete[] t;
     m_tmp.clear();
+}
+
+void sys::set_znearfar(float znear, float zfar)
+{
+    if (m_vr)
+    {
+#ifdef USE_VR
+        m_lproj_mat = nya_system::get_proj_matrix(m_vr, nya_system::vr_eye_left, znear, zfar);
+        m_rproj_mat = nya_system::get_proj_matrix(m_vr, nya_system::vr_eye_right, znear, zfar);
+#endif
+        scene::instance().set_proj(m_lproj_mat, m_rproj_mat);
+    }
+    else
+        scene::instance().resize(m_width, m_height); //this updates non-vr proj matrix
 }
 
 void sys::emulate_vr_input()

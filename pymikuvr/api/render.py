@@ -8,6 +8,7 @@ c_lib.render_light_color.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_fl
 c_lib.render_light_dir.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_shadows_cascades.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_set_shadows_bias.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float)
+c_lib.render_set_znearfar.argtypes = (ctypes.c_float, ctypes.c_float)
 
 class directional_light:
     slots = ('__ambient', '__color', '__intensity', '__dir')
@@ -69,7 +70,7 @@ class shadows:
         self.__cascades = None
         self._cascades = (2, 7, 30, 300)
         self.__bias = None
-        self._bias = ((1,7), (1,7), (1,7), (4,1))
+        self._bias = ((1,7), (1,7), (1,7), (1,21))
 
     @property
     def enabled(self):
@@ -109,7 +110,7 @@ class shadows:
         for i in range(len(v)):
             c[i] = v[i]
         c_lib.render_shadows_cascades(c[0], c[1], c[2], c[3])
-        
+
     @property
     def _bias(self):
         return self.__bias
@@ -154,5 +155,9 @@ class render_class:
         self.__light = directional_light()
         self.__shadows = shadows()
         self.__pipeline = pipeline()
+        self._set_znearfar(0.05, 300)
+
+    def _set_znearfar(self, znear, zfar):
+        c_lib.render_set_znearfar(znear, zfar)
 
 render = render_class()
