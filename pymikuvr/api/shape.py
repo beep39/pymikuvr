@@ -95,7 +95,6 @@ class shape(base):
                 count_w = height.w
             if count_h is None:
                 count_h = height.h
-            print("texture!")
             sh = shape()
             c_lib.shape_set_heightmap_tex(sh.__id, count_w, count_h, step, height._texture__id, scale, s, t, normalize_tc)
             return sh
