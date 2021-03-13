@@ -121,12 +121,13 @@ class importer_class(object):
 
 class script:
     __slots__ = ('autoreload', '__local_vars', '__global_vars',
-                 '__script_path', '__script_path_is_local', '__script_modified_time',)
+                 '__script_path', '__script_path_is_local', '__watch_paths',)
     def __init__(self):
         self.__local_vars = None
         self.__global_vars = None
         self.__script_path = None
         self.__script_path_is_local = True
+        self.__watch_paths = []
         self.autoreload = True
 
     def load(self, name, local_fs = True):
@@ -139,6 +140,7 @@ class script:
 
         self.__script_path = None
         self.__script_path_is_local = local_fs
+        self.__watch_paths = []
 
         self.__local_vars = {}
         self.__global_vars = None
@@ -159,7 +161,6 @@ class script:
             system.add_resources_folder(os.path.dirname(name))
 
         self.__script_path = name
-        self.__script_modified_time = self.get_modified_time()
 
         self.__global_vars = {
             "animation": animation,
@@ -205,6 +206,17 @@ class script:
         except Exception as e:
             system.error(str(e) + "\n" + traceback.format_exc())
 
+        if not self.__script_path_is_local:
+            self.__watch_paths.append([self.__script_path, None]);
+            for m in importer.modules:
+                f = importer.full_folder_path(m)
+                if os.path.exists(f):
+                    self.__watch_paths.append([f, None])
+                else:
+                    self.__watch_paths.append([importer.full_path(m), None]);
+            for p in self.__watch_paths:
+                p[1] = self.get_modified_time(p[0])
+
         meta_path.remove(importer)
         importer.cleanup()
 
@@ -215,21 +227,24 @@ class script:
         self.load(self.__script_path, self.__script_path_is_local)
 
     def check_for_changes(self):
-        if not self.autoreload or self.__script_path is None:
+        if not self.autoreload:
             return
 
-        mtime = self.get_modified_time()
-        if mtime != self.__script_modified_time:
-            self.__script_modified_time = mtime
+        reload = False
+        for p in self.__watch_paths:
+            mtime = self.get_modified_time(p[0])
+            if mtime != p[1]:
+                p[1] = mtime
+                reload = True
+        if reload:
             self.reload()
 
-    def get_modified_time(self):
-        #ToDo
+    def get_modified_time(self, path):
         if self.__script_path_is_local:
-            return
+            raise NotImplementedError
 
         try:
-            return os.path.getmtime(self.__script_path)
+            return os.path.getmtime(path)
         except Exception as e:
             print(e)
         return None
