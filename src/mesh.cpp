@@ -168,6 +168,7 @@ void mesh::enable_phys()
 
 void mesh::set_animation(nya_scene::animation_proxy anim, int layer)
 {
+    remove_blend(layer);
     m_mesh.set_anim(anim, layer, true);
     m_mesh.update(0);
     update_bones();
@@ -248,6 +249,7 @@ void mesh::remove_blend(int layer)
 
 void mesh::remove_animation(int layer)
 {
+    remove_blend(layer);
     m_mesh.remove_anim(layer);
     m_mesh.update(0);
     update_bones();

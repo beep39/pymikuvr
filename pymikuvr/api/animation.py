@@ -33,6 +33,7 @@ class animation:
             self.__duration = _copy_from.__duration
             self.__speed = _copy_from.__speed
             self.__weight = _copy_from.__weight
+            c_lib.animation_set_weight(self.__id, self.__weight)
 
     def load(self, resource, loop = False):
         result = c_lib.animation_load(self.__id, resource.encode())
