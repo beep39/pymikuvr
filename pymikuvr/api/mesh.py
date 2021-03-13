@@ -91,7 +91,7 @@ class mesh_animations(MutableSequence):
     def __setitem__(self, ii, anim):
         anim = animation(anim)
         self.__list[ii] = anim
-        c_lib.mesh_set_animation(self.__id, anim._animation__id, 0)
+        c_lib.mesh_set_animation(self.__id, anim._animation__id, ii)
 
     def __delitem__(self, ii):
         del self.__list[ii]
