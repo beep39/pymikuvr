@@ -95,15 +95,15 @@ class mesh_animations(MutableSequence):
 
     def __delitem__(self, ii):
         del self.__list[ii]
-        for i, a in enumerate(self.__list):
-            c_lib.mesh_set_animation(self.__id, a._animation__id, i)
+        for i in range(ii, len(self.__list)):
+            c_lib.mesh_set_animation(self.__id, self.__list[i]._animation__id, i)
         c_lib.mesh_set_animation(self.__id, -1, len(self.__list))
 
     def insert(self, ii, anim):
         anim = animation(anim)
         self.__list.insert(ii, anim)
-        for i, a in enumerate(self.__list):
-            c_lib.mesh_set_animation(self.__id, a._animation__id, i)
+        for i in range(ii, len(self.__list)):
+            c_lib.mesh_set_animation(self.__id, self.__list[i]._animation__id, i)
 
 class mesh_material:
     __slots__ = ('__id', '__idx', '__visible', '__texture', '__name')
