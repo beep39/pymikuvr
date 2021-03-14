@@ -144,6 +144,8 @@ void scene::draw()
     m_camera->set_pos(head->get_pos());
     m_camera->set_rot(head->get_rot());
 
+    const static nya_math::vec2 shadow_offsets[] = { nya_math::vec2(), nya_math::vec2(1.0f, 0.0f),
+                                                     nya_math::vec2(0.0f, 1.0f), nya_math::vec2(1.0f, 1.0f) };
     if (m_update_shadows)
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -161,8 +163,6 @@ void scene::draw()
         float prevz = 0.0f;
         const float width = m_shadow_tex->get_width() * 0.5f;
         const float height = m_shadow_tex->get_height() * 0.5f;
-        const static nya_math::vec2 offsets[] = { nya_math::vec2(), nya_math::vec2(1.0f, 0.0f),
-                                                  nya_math::vec2(0.0f, 1.0f), nya_math::vec2(1.0f, 1.0f) };
         for (int i = 0; i < 4; ++i)
         {
             const float dist = m_shadow_cascades_dist[i];
@@ -176,7 +176,7 @@ void scene::draw()
 
             if (m_shadow_cascades_dist[1] > 0)
             {
-                const auto &off = offsets[i];
+                const auto &off = shadow_offsets[i];
                 const nya_math::vec3 moff(-1.0f + off.x * 2.0f, -1.0f + off.y * 2.0f, 0.0f);
                 m_shadow_matrices[i] = m_shadow_camera->get_proj_matrix() * nya_math::mat4().scale(0.5f, 0.5f, 1.0f).translate(moff);
                 r.x = off.x * width;
@@ -218,11 +218,24 @@ void scene::draw()
 
     auto cam = nya_scene::get_camera_proxy();
 
-    nya_math::mat4 matrices[4];
     const auto imvpshv = (cam->get_view_matrix() * cam->get_proj_matrix()).invert() * m_shadow_camera->get_view_matrix();
-    for (int i = 0; i < 4; ++i)
-        matrices[i] = imvpshv * m_shadow_matrices[i];
-    memcpy(m_shadow_tr->get_buf(), matrices, sizeof(matrices));
+    if (m_shadow_cascades_dist[1] > 0)
+    {
+        nya_math::mat4 matrices[4];
+        for (int i = 0; i < 4; ++i)
+        {
+            auto bias = nya_math::mat4().scale(0.5).scale(0.5,0.5,1.0).translate(1.0,1.0,1.0);
+            bias.translate(shadow_offsets[i].x * 2, shadow_offsets[i].y * 2, 0);
+            matrices[i] = imvpshv * m_shadow_matrices[i] * bias;
+        }
+        memcpy(m_shadow_tr->get_buf(), matrices, sizeof(matrices));
+    }
+    else
+    {
+        static const auto bias = nya_math::mat4().scale(0.5).translate(1.0,1.0,1.0);
+        nya_math::mat4 mat = imvpshv * m_shadow_matrices[0] * bias;
+        memcpy(m_shadow_tr->get_buf(), mat[0], sizeof(mat));
+    }
 
     postprocess::draw(0);
     phys::debug_draw();

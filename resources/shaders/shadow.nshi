@@ -15,10 +15,7 @@ uniform vec4 model_scale;
 void shadow(vec4 wpos)
 {
     for (int i = 0; i < 4; ++i)
-    {
         shadow_tc[i] = shadow_tr[i] * wpos;
-        shadow_tc[i].xyz = 0.5 * (shadow_tc[i].xyz + shadow_tc[i].w);
-    }
     shadow_z = wpos.z;
 }
 
@@ -35,15 +32,12 @@ float shadow(float ndl01)
 
     vec3 d3 = step(shadow_cascades.xyz, vec3(shadow_z));
     float d = d3.x + d3.y + d3.z;
-    vec2 offset = vec2(0.5 * step(0.5, float(mod(d, 2.0))), 0.5 * step(1.5, d));
     int i = int(d);
-
-    float scale = step(abs(shadow_cascades.y-shadow_cascades.z), 0.01) * 0.5 + 0.5;
-    vec2 shad_xy = shadow_tc[i].xy / shadow_tc[i].w * scale + offset;
+    vec2 shad_xy = shadow_tc[i].xy / shadow_tc[i].w;
     float shad_z = shadow_tc[i].z / shadow_tc[i].w;
+    const float dsh = (1.0/16);
     float shadow = 1.0;
 
-    const float dsh = (1.0/16);
     for (int i = 0; i < 4; ++i)
     {
         vec2 dtc = texture2D(shadow_poisson, vec2(float(i + 0.5) / 16.0, 0.5)).xy;
