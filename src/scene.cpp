@@ -144,8 +144,6 @@ void scene::draw()
     m_camera->set_pos(head->get_pos());
     m_camera->set_rot(head->get_rot());
 
-    const static nya_math::vec2 shadow_offsets[] = { nya_math::vec2(), nya_math::vec2(1.0f, 0.0f),
-                                                     nya_math::vec2(0.0f, 1.0f), nya_math::vec2(1.0f, 1.0f) };
     if (m_update_shadows)
     {
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -157,12 +155,15 @@ void scene::draw()
         const auto view_matrix = prev_camera->get_view_matrix();
 
         m_shadow_fbo.bind();
+        nya_render::set_viewport(0, 0, m_shadow_tex->get_width(), m_shadow_tex->get_height());
         nya_render::clear(false, true);
         nya_scene::set_camera(m_shadow_camera);
 
         float prevz = 0.0f;
         const float width = m_shadow_tex->get_width() * 0.5f;
         const float height = m_shadow_tex->get_height() * 0.5f;
+        const static nya_math::vec2 shadow_offsets[] = { nya_math::vec2(), nya_math::vec2(1.0f, 0.0f),
+                                                         nya_math::vec2(0.0f, 1.0f), nya_math::vec2(1.0f, 1.0f) };
         for (int i = 0; i < 4; ++i)
         {
             const float dist = m_shadow_cascades_dist[i];
@@ -171,7 +172,7 @@ void scene::draw()
 
             const bool draw = set_shadow_proj(view_matrix, prevz, dist);
             prevz = dist;
-            
+
             nya_render::rect r;
 
             if (m_shadow_cascades_dist[1] > 0)
@@ -193,11 +194,10 @@ void scene::draw()
 
             if (!draw)
                 continue;
-            
+
             glPolygonOffset(m_shadow_cascades_bias[i], m_shadow_cascades_slope_bias[i]);
 
             m_shadow_camera->set_proj(m_shadow_matrices[i]);
-            nya_render::set_viewport(r);
             nya_render::scissor::enable(r);
             draw_scene("shadows", nya_scene::tags());
         }
@@ -206,7 +206,7 @@ void scene::draw()
         nya_render::set_viewport(prev_viewport);
         nya_scene::set_camera(prev_camera);
         m_update_shadows = false;
-        
+
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
@@ -218,24 +218,12 @@ void scene::draw()
 
     auto cam = nya_scene::get_camera_proxy();
 
+    static const auto bias = nya_math::mat4().scale(0.5).translate(1.0,1.0,1.0);
     const auto imvpshv = (cam->get_view_matrix() * cam->get_proj_matrix()).invert() * m_shadow_camera->get_view_matrix();
-    if (m_shadow_cascades_dist[1] > 0)
-    {
-        nya_math::mat4 matrices[4];
-        for (int i = 0; i < 4; ++i)
-        {
-            auto bias = nya_math::mat4().scale(0.5).scale(0.5,0.5,1.0).translate(1.0,1.0,1.0);
-            bias.translate(shadow_offsets[i].x * 2, shadow_offsets[i].y * 2, 0);
-            matrices[i] = imvpshv * m_shadow_matrices[i] * bias;
-        }
-        memcpy(m_shadow_tr->get_buf(), matrices, sizeof(matrices));
-    }
-    else
-    {
-        static const auto bias = nya_math::mat4().scale(0.5).translate(1.0,1.0,1.0);
-        nya_math::mat4 mat = imvpshv * m_shadow_matrices[0] * bias;
-        memcpy(m_shadow_tr->get_buf(), mat[0], sizeof(mat));
-    }
+    nya_math::mat4 matrices[4];
+    for (int i = 0; i < 4; ++i)
+        matrices[i] = imvpshv * m_shadow_matrices[i] * bias;
+    memcpy(m_shadow_tr->get_buf(), matrices, sizeof(matrices));
 
     postprocess::draw(0);
     phys::debug_draw();
