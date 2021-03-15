@@ -191,6 +191,7 @@ void mesh::blend_animation(nya_scene::animation_proxy anim, int layer, float dur
         b.prev_layer = new_blend_id(1024);
         b.prev_weight = prev->get_weight();
         m_mesh.set_anim(prev.get(), b.prev_layer, true);
+        m_mesh.set_anim_time(m_mesh.get_anim_time(layer), b.prev_layer);
     }
     else //fade in
         b.prev_layer = -1;
