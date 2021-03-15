@@ -79,11 +79,13 @@ void main()
     float ndh = dot(n, normalize(ldir + eye));
     vec3 spec = spec_k.rgb * max(pow(ndh, spec_k.a), 0.0);
 
-    if (shadow_param.a > 0.0)
-        ndl = min(ndl, shadow(ndl));
-
     c.rgb *= clamp(amb_k.rgb + (diff_k.rgb) * light_color.rgb, vec3(0.0), vec3(1.0));
     c.rgb += spec * light_color.rgb;
-    c.rgb *= texture2D(toon,vec2(0.0, ndl)).rgb;
+
+    vec3 t = texture2D(toon,vec2(0.0, ndl)).rgb;
+    if (shadow_param.a > 0.0)
+        t = min(t, mix(texture2D(toon, vec2(0.0, 0.0)).rgb, vec3(1.0), shadow(ndl))); //ToDo: pass shadow color as uniform
+    c.rgb *= t;
+
     gl_FragColor = c;
 }

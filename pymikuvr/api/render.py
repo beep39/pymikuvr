@@ -70,7 +70,7 @@ class shadows:
         self.__cascades = None
         self._cascades = (4, 20, 70, 300)
         self.__bias = None
-        self._bias = ((1,7), (1,7), (1,7), (1,128))
+        self._bias = ((3,8), (2,8), (2,8), (2,8))
 
     @property
     def enabled(self):

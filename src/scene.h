@@ -37,7 +37,6 @@ public:
     const nya_scene::material::param_array_proxy &get_shadow_tr() const;
     const nya_scene::material::param_proxy &get_shadow_cascades() const;
     const nya_scene::texture_proxy &get_shadow_tex() const;
-    const nya_scene::texture_proxy &get_shadow_poisson() const;
 
     bool load_postprocess(const char *name);
     bool get_condition(const char *name);
@@ -75,7 +74,7 @@ private:
     nya_scene::camera_proxy m_shadow_camera;
     nya_scene::material::param_array_proxy m_shadow_tr;
     nya_scene::material::param_proxy m_shadow_cascades;
-    nya_scene::texture_proxy m_shadow_tex, m_shadow_poisson;
+    nya_scene::texture_proxy m_shadow_tex;
     nya_render::fbo m_shadow_fbo;
     std::vector<nya_math::mat4> m_proj;
     float m_znear = 0.1, m_zfar = 300;

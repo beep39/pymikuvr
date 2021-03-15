@@ -1,59 +1,46 @@
 @uniform shadow_tr "shadow tr"
 @uniform shadow_cascades "shadow cascades"
 @sampler shadow_map "shadow"
-@sampler shadow_poisson "shadow poisson"
-@predefined model_scale "nya model scale"
 
 @all
-varying float shadow_z;
+varying float shadow_view_z;
 varying vec4 shadow_tc[4];
 
 @vertex
 uniform mat4 shadow_tr[4];
-uniform vec4 model_scale;
 
 void shadow(vec4 wpos)
 {
     for (int i = 0; i < 4; ++i)
         shadow_tc[i] = shadow_tr[i] * wpos;
-    shadow_z = wpos.z;
+    shadow_view_z = wpos.z;
 }
 
 @fragment
 uniform sampler2D shadow_map;
 uniform vec4 shadow_cascades;
 
-uniform sampler2D shadow_poisson;
-
 float shadow(float ndl01)
 {
     if (ndl01 < 0.001)
         return 0.0;
 
-    vec3 d3 = step(shadow_cascades.xyz, vec3(shadow_z));
+    vec3 d3 = step(shadow_cascades.xyz, vec3(shadow_view_z));
     float d = d3.x + d3.y + d3.z;
     int i = int(d);
-    vec2 shad_xy = shadow_tc[i].xy / shadow_tc[i].w;
-    float shad_z = shadow_tc[i].z / shadow_tc[i].w;
-    const float dsh = (1.0/16);
-    float shadow = 1.0;
 
-    for (int i = 0; i < 4; ++i)
-    {
-        vec2 dtc = texture2D(shadow_poisson, vec2(float(i + 0.5) / 16.0, 0.5)).xy;
-        shadow -= dsh * step(texture2D(shadow_map, shad_xy + dtc).r - shad_z, 0.0);
-    }
+    // note there is no need to divide by w for othogonal light sources
+    vec2 shad_xy = shadow_tc[i].xy;
+    float shad_z = shadow_tc[i].z;
 
-    //early bailing
-    float unshaded = step(0.999, shadow);
-    if (unshaded + step(shadow, 1.001 - dsh * 4) > 0)
-        return unshaded;
-
-    //penumbra
-    for (int i = 4; i < 16; ++i)
-    {
-        vec2 dtc = texture2D(shadow_poisson, vec2(float(i + 0.5) / 16.0, 0.5)).xy;
-        shadow -= dsh * step(texture2D(shadow_map, shad_xy + dtc).r - shad_z, 0.0);
-    }
+    float shadow = 1.0 - step(texture(shadow_map, shad_xy).x, shad_z) * 0.25;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( -1, -1)).x, shad_z) * 0.0625;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( -1, 0)).x, shad_z) * 0.125;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( -1, 1)).x, shad_z) * 0.0625;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( 0, -1)).x, shad_z) * 0.125;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( 0, 1)).x, shad_z) * 0.125;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( 1, -1)).x, shad_z) * 0.0625;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( 1, 0)).x, shad_z) * 0.125;
+    shadow -= step(textureOffset(shadow_map, shad_xy, ivec2( 1, 1)).x, shad_z) * 0.0625;
     return shadow;
 }

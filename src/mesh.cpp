@@ -113,7 +113,6 @@ bool mesh::load(const char *name)
                 m.set_param_array("shadow tr", scene::instance().get_shadow_tr());
                 m.set_param("shadow cascades", scene::instance().get_shadow_cascades());
                 m.set_texture("shadow", scene::instance().get_shadow_tex());
-                m.set_texture("shadow poisson", scene::instance().get_shadow_poisson());
 
                 if (pmx)
                 {

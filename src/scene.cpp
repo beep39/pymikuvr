@@ -244,7 +244,6 @@ void scene::release()
     m_black.unload();
     m_shadow_fbo.release();
     m_shadow_tex.free();
-    m_shadow_poisson.free();
     m_has_context = false;
     sound::release();
     ui::release();
@@ -295,31 +294,6 @@ void scene::set_shadows_resolution(int resolution)
     //m_shadow_fbo.release();
     m_shadow_fbo.set_depth_target(stex);
     set_texture("shadows", m_shadow_tex);
-
-    nya_math::vec3 shadow_poisson[] =
-    {
-        nya_math::vec3(-0.94201624,  -0.39906216, 0),
-        nya_math::vec3( 0.94558609,  -0.76890725, 0),
-        nya_math::vec3(-0.094184101, -0.92938870, 0),
-        nya_math::vec3(0.34495938,    0.29387760, 0),
-        nya_math::vec3(-0.91588581,   0.45771432, 0),
-        nya_math::vec3(-0.81544232,  -0.87912464, 0),
-        nya_math::vec3(-0.38277543,   0.27676845, 0),
-        nya_math::vec3( 0.97484398,   0.75648379, 0),
-        nya_math::vec3( 0.44323325,  -0.97511554, 0),
-        nya_math::vec3( 0.53742981,  -0.47373420, 0),
-        nya_math::vec3(-0.26496911,  -0.41893023, 0),
-        nya_math::vec3( 0.79197514,   0.19090188, 0),
-        nya_math::vec3(-0.24188840,   0.99706507, 0),
-        nya_math::vec3(-0.81409955,   0.91437590, 0),
-        nya_math::vec3( 0.19984126,   0.78641367, 0),
-        nya_math::vec3( 0.14383161,  -0.14100790, 0)
-    };
-    for (auto &s: shadow_poisson)
-        s *= 1.0f / resolution;
-    m_shadow_poisson->build(shadow_poisson, 16, 1, nya_render::texture::color_rgb32f);
-    stex = m_shadow_poisson->internal().get_shared_data()->tex;
-    stex.set_filter(nya_render::texture::filter_nearest, nya_render::texture::filter_nearest, nya_render::texture::filter_nearest);
 }
 
 void scene::set_shadows_cascades(float c0, float c1, float c2, float c3)
@@ -348,7 +322,6 @@ const nya_scene::material::param_proxy &scene::get_light_dir() const { return m_
 const nya_scene::material::param_array_proxy &scene::get_shadow_tr() const { return m_shadow_tr; }
 const nya_scene::material::param_proxy &scene::get_shadow_cascades() const { return m_shadow_cascades; }
 const nya_scene::texture_proxy &scene::get_shadow_tex() const { return m_shadow_tex; }
-const nya_scene::texture_proxy &scene::get_shadow_poisson() const { return m_shadow_poisson; }
 
 bool scene::load_postprocess(const char *name)
 {
@@ -390,7 +363,6 @@ scene::scene()
     m_shadow_cascades.create();
     m_shadow_camera.create();
     m_shadow_tex.create();
-    m_shadow_poisson.create();
     
     m_camera = nya_scene::get_camera_proxy();
 }
