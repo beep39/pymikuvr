@@ -230,21 +230,21 @@ int mesh::new_blend_id(int src)
 
 void mesh::remove_blend(int layer)
 {
-    bool found = false;
-    for (auto &b: m_blends)
+    for (int i = (int)m_blends.size() - 1; i >= 0; --i)
     {
+        const auto &b = m_blends[i];
         if (b.layer != layer)
             continue;
 
         if (b.prev_layer >= 0)
             m_mesh.remove_anim(b.prev_layer);
-        found = true;
+
+        auto a = m_mesh.get_anim(layer);
+        if (a.is_valid())
+            a->set_weight(b.weight);
+
+        m_blends.erase(m_blends.begin() + i);
     }
-
-    if (!found)
-        return;
-
-    m_blends.erase(std::remove_if(m_blends.begin(), m_blends.end(), [layer](const blend &b) { return layer == b.layer; }), m_blends.end());
 }
 
 void mesh::remove_animation(int layer)
