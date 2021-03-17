@@ -69,7 +69,7 @@ class shadows:
         self._resolution = 4096
         self.__cascades = None
         self.__bias = None
-        self._bias = [(3,8), (2,8), (2,8), (2,8)]
+        self._bias = [(3,8), (2,8), (2,8), (4,64)]
 
     @property
     def enabled(self):

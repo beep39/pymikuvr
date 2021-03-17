@@ -75,6 +75,7 @@ void scene::update(int dt)
     std::sort(m_objects.begin(), m_objects.end(), iobject_compare);
 
     m_update_shadows = m_shadows_enabled;
+    m_shadow_update_skip = (m_shadow_update_skip + 1) % 4;
     m_update_cameras = true;
 }
 
@@ -151,12 +152,11 @@ void scene::draw()
         auto prev_camera = nya_scene::get_camera_proxy();
         auto prev_viewport = nya_render::get_viewport();
         auto prev_fbo = nya_render::fbo::get_current();
-        
+
         const auto view_matrix = prev_camera->get_view_matrix();
 
         m_shadow_fbo.bind();
         nya_render::set_viewport(0, 0, m_shadow_tex->get_width(), m_shadow_tex->get_height());
-        nya_render::clear(false, true);
         nya_scene::set_camera(m_shadow_camera);
 
         float prevz = 0.0f;
@@ -169,6 +169,22 @@ void scene::draw()
             const float dist = m_shadow_cascades_dist[i];
             if (dist <= 0)
                 break;
+
+            //since vr runs at 90-144 fps, not all cascades are updated every frame
+            if (m_shadow_cascades_dist[3] > 0)
+            {
+                if (m_shadow_update_skip != 1 && i == 2)
+                    continue;
+                if (m_shadow_update_skip != 3 && i == 3)
+                    continue;
+            }
+            if (m_shadow_update_skip % 2)
+            {
+                if (i == 1)
+                    continue;
+            }
+            else if (i == 2)
+                continue;
 
             const bool draw = set_shadow_proj(view_matrix, prevz, dist);
             prevz = dist;
@@ -191,6 +207,9 @@ void scene::draw()
                 r.width = width * 2.0f;
                 r.height = height * 2.0f;
             }
+            
+            nya_render::scissor::enable(r);
+            nya_render::clear(false, true);
 
             if (!draw)
                 continue;
@@ -198,7 +217,6 @@ void scene::draw()
             glPolygonOffset(m_shadow_cascades_bias[i], m_shadow_cascades_slope_bias[i]);
 
             m_shadow_camera->set_proj(m_shadow_matrices[i]);
-            nya_render::scissor::enable(r);
             draw_scene("shadows", nya_scene::tags());
         }
         nya_render::scissor::disable();

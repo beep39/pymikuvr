@@ -81,6 +81,7 @@ private:
     float m_shadow_cascades_dist[4] = {10.0f, -1.0f, -1.0f, -1.0f};
     float m_shadow_cascades_bias[4] = {1.0f, 1.0f, 1.0f, 1.0f};
     float m_shadow_cascades_slope_bias[4] = {7.0f, 7.0f, 7.0f, 7.0f};
+    int m_shadow_update_skip = 0;
     nya_math::mat4 m_shadow_matrices[4];
 
     bool m_has_context = false;
