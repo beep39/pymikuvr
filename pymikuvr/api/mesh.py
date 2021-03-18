@@ -62,10 +62,9 @@ class mesh_morphs(Mapping):
         self.__data = data
 
     def __getitem__(self, key):
-        m = c_lib.mesh_get_morph(self.__id, key.encode())
-        if m < -1000:
-            return None
-        return m
+        if not key in self.__data:
+            raise KeyError(key)
+        return c_lib.mesh_get_morph(self.__id, key.encode())
 
     def __len__(self):
         return len(self.__data)

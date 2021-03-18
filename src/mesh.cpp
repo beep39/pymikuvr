@@ -326,15 +326,7 @@ void mesh::set_bone_rot(const char *name, const nya_math::quat &rot, bool additi
 
 int mesh::get_morphs_count() { return m_mesh.get_morphs_count(); }
 const char *mesh::get_morph_name(int idx) { return m_mesh.get_morph_name(idx); }
-
-float mesh::get_morph(const char *name)
-{
-    const int idx = find_morph(name);
-    if (idx < 0)
-        return -9999;
-    
-    return m_mesh.get_morph(idx);
-}
+float mesh::get_morph(const char *name) { return m_mesh.get_morph(find_morph(name)); }
 
 bool mesh::set_morph(const char *name, float v, bool override_animation)
 {
