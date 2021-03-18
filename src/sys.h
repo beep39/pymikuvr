@@ -46,6 +46,8 @@ public:
     std::string get_path(const char *path) const;
 
     const char *load_text(const char *filename);
+    int list_folder(const char *path, bool include_path);
+    const char *get_folder_item(int idx);
     void free_tmp();
 
     void set_znearfar(float znear, float zfar); //ToDo: should be in the scene
@@ -67,7 +69,9 @@ private:
     nya_resources::composite_resources_provider *m_cprov = 0;
     std::vector<nya_resources::resources_provider *> m_providers;
     std::vector<std::string> m_folders;
-    std::vector<char *> m_tmp;
+
+    std::vector<const char *> m_tmp;
+    std::vector<const char *> m_list_folder;
 
 private:
     nya_render::fbo m_lfbo, m_rfbo;

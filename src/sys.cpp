@@ -380,6 +380,29 @@ void sys::update_resources()
     nya_resources::set_resources_provider(m_cprov);
 }
 
+const std::vector<std::string> sys::get_folders() const { return m_folders; }
+
+std::string sys::get_path(const char *path) const
+{
+    if (!path || !path[0])
+        return std::string();
+
+    auto url = std::string(path);
+    for (auto &f: sys::instance().get_folders())
+    {
+        auto path = f + "/" + url;
+#ifdef _WIN32
+        for(size_t i = 0; i < path.length();++i) if(url[i] == '/') url[i] = '\\';
+#endif
+        FILE *exists = fopen(path.c_str(), "r");
+        if (!exists)
+            continue;
+        fclose(exists);
+        return path;
+    }
+    return std::string();
+}
+
 const char *sys::load_text(const char *filename)
 {
     auto res = nya_resources::get_resources_provider().access(filename);
@@ -407,34 +430,41 @@ const char *sys::load_text(const char *filename)
     return buf;
 }
 
-const std::vector<std::string> sys::get_folders() const { return m_folders; }
-
-std::string sys::get_path(const char *path) const
+int sys::list_folder(const char *path, bool include_path)
 {
+    auto &prov = nya_resources::get_resources_provider();
     if (!path || !path[0])
-        return std::string();
-
-    auto url = std::string(path);
-    for (auto &f: sys::instance().get_folders())
     {
-        auto path = f + "/" + url;
-#ifdef _WIN32
-        for(size_t i = 0; i < path.length();++i) if(url[i] == '/') url[i] = '\\';
-#endif
-        FILE *exists = fopen(path.c_str(), "r");
-        if (!exists)
-            continue;
-        fclose(exists);
-        return path;
+        for (int i = 0, count = prov.get_resources_count(); i < count; ++i)
+        {
+            auto name = prov.get_resource_name(i);
+            if (name)
+                m_list_folder.push_back(name);
+        }
     }
-    return std::string();
+    else
+    {
+        const auto len = strlen(path);
+        for (int i = 0, count = prov.get_resources_count(); i < count; ++i)
+        {
+            auto name = prov.get_resource_name(i);
+            if (name && strncmp(path, name, len) == 0)
+                m_list_folder.push_back(include_path ? name : (name + len));
+        }
+    }
+
+    std::sort(m_list_folder.begin(), m_list_folder.end());
+    return (int)m_list_folder.size();
 }
+
+const char *sys::get_folder_item(int idx) { return m_list_folder[idx]; }
 
 void sys::free_tmp()
 {
     for (auto t: m_tmp)
         delete[] t;
     m_tmp.clear();
+    m_list_folder.clear();
 }
 
 void sys::set_znearfar(float znear, float zfar)

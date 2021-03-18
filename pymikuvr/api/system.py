@@ -1,9 +1,11 @@
 import ctypes
+import os.path
 import platform
 from api.capi import c_lib
 from api.texture import texture
 
 c_lib.sys_load_text.restype = ctypes.c_char_p
+c_lib.sys_get_folder_item.restype = ctypes.c_char_p
 
 class system_class:
     __slots__ = ('__screen_texture', 'default_res_folder', 'time', 'dt', 'argv', 'log', 'warnings', 'errors')
@@ -43,6 +45,18 @@ class system_class:
         text = ptr.decode()
         c_lib.sys_free_tmp()
         return text
+
+    def list_folder(self, path, include_path = True):
+        if path is None:
+            path = "";
+        elif len(path) > 0:
+            path = os.path.normpath(path) + "/"
+        count = c_lib.sys_list_folder(path.encode(), include_path)
+        result = []
+        for i in range(count):
+            result.append(c_lib.sys_get_folder_item(i).decode())
+        c_lib.sys_free_tmp()
+        return result
 
     def verbose(self, *args):
         msg = ("{} " * (len(args)-1) + "{}").format(*args)

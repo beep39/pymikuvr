@@ -236,6 +236,8 @@ EX  void sys_reg_desktop_texture(int id) { sys::instance().reg_desktop_texture(i
 EX  void sys_reset_resources() { sys::instance().reset_resources(); }
 EX  void sys_add_resources_folder(const char *folder) { sys::instance().add_resources_folder(folder); }
 EX  const char *sys_load_text(const char *filename) { return sys::instance().load_text(filename); }
+EX  int sys_list_folder(const char *path, bool include_path) { return sys::instance().list_folder(path, include_path); }
+EX  const char *sys_get_folder_item(int idx) { return sys::instance().get_folder_item(idx); }
 EX  void sys_free_tmp() { sys::instance().free_tmp(); }
 
 EX  int texture_create() { return texture::add(); }
