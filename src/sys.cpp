@@ -430,27 +430,32 @@ const char *sys::load_text(const char *filename)
     return buf;
 }
 
+int ends_with(const char *str, const char *suffix)
+{
+    if (!str || !suffix)
+        return false;
+    const size_t lenstr = strlen(str);
+    const size_t lensuffix = strlen(suffix);
+    if (lensuffix >  lenstr)
+        return false;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
+
 int sys::list_folder(const char *path, bool include_path)
 {
+    const size_t path_len = path ? strlen(path) : 0;
+
     auto &prov = nya_resources::get_resources_provider();
-    if (!path || !path[0])
+    for (int i = 0, count = prov.get_resources_count(); i < count; ++i)
     {
-        for (int i = 0, count = prov.get_resources_count(); i < count; ++i)
-        {
-            auto name = prov.get_resource_name(i);
-            if (name)
-                m_list_folder.push_back(name);
-        }
-    }
-    else
-    {
-        const auto len = strlen(path);
-        for (int i = 0, count = prov.get_resources_count(); i < count; ++i)
-        {
-            auto name = prov.get_resource_name(i);
-            if (name && strncmp(path, name, len) == 0)
-                m_list_folder.push_back(include_path ? name : (name + len));
-        }
+        auto name = prov.get_resource_name(i);
+        if (!name || ends_with(name, ".DS_Store") || ends_with(name, "Thumbs.db"))
+            continue;
+
+        if (!path_len)
+            m_list_folder.push_back(name);
+        else if (strncmp(path, name, path_len) == 0)
+            m_list_folder.push_back(include_path ? name : (name + path_len));
     }
 
     std::sort(m_list_folder.begin(), m_list_folder.end());
