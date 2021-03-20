@@ -59,11 +59,10 @@ def load_text(name, local_fs):
     return text
 
 class importer_class(object):
-    def __init__(self, local_fs, path, global_vars, local_vars):
+    def __init__(self, local_fs, path, vars):
         self.local_fs = local_fs
         self.path = path
-        self.global_vars = global_vars
-        self.local_vars = local_vars
+        self.vars = vars
         self.modules = []
 
     def full_path(self, name):
@@ -103,7 +102,7 @@ class importer_class(object):
         new_module = imp.new_module(name)
 
         try:
-            exec(code, self.global_vars, new_module.__dict__)
+            exec(code, self.vars, new_module.__dict__)
         except Exception as e:
             system.error(str(e) + " in module " + name + "\n" + traceback.format_exc())
             new_module = None
@@ -120,11 +119,10 @@ class importer_class(object):
             modules.pop(m)
 
 class script:
-    __slots__ = ('autoreload', '__local_vars', '__global_vars',
+    __slots__ = ('autoreload', '__vars',
                  '__script_path', '__script_path_is_local', '__watch_paths',)
     def __init__(self):
-        self.__local_vars = None
-        self.__global_vars = None
+        self.__vars = None
         self.__script_path = None
         self.__script_path_is_local = True
         self.__watch_paths = []
@@ -133,7 +131,7 @@ class script:
     def load(self, name, local_fs = True):
         cache = None
         if name == self.__script_path and local_fs == self.__script_path_is_local:
-            cache = (self.__local_vars, self.__global_vars)
+            cache = self.__vars
             print("reloading script", name)
         else:
             print("loading script", name)
@@ -142,8 +140,7 @@ class script:
         self.__script_path_is_local = local_fs
         self.__watch_paths = []
 
-        self.__local_vars = {}
-        self.__global_vars = None
+        self.__vars = None
         updater.reset()
         render.reset()
         player.reset()
@@ -162,7 +159,7 @@ class script:
 
         self.__script_path = name
 
-        self.__global_vars = {
+        self.__vars = {
             "animation": animation,
             "camera": camera,
             "color": color,
@@ -198,11 +195,11 @@ class script:
             system.error(str(e) + "\n" + traceback.format_exc())
             return
 
-        importer = importer_class(local_fs, os.path.dirname(name), self.__global_vars, self.__local_vars)
+        importer = importer_class(local_fs, os.path.dirname(name), self.__vars)
         meta_path.append(importer)
 
         try:
-            exec(code, self.__global_vars, self.__local_vars)
+            exec(code, self.__vars, self.__vars)
         except Exception as e:
             system.error(str(e) + "\n" + traceback.format_exc())
 
