@@ -156,7 +156,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <GenerateManifest>false</GenerateManifest>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
-    <OutDir>$(SolutionDir)\..\$(MSBuildProjectName)d\</OutDir>
+    <OutDir>$(SolutionDir)\..\lib\</OutDir>
     <IntDir>$(SolutionDir)\..\tmp\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -173,7 +173,7 @@
       <CompileAsWinRT>false</CompileAsWinRT>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_GLFW_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)/../deps/openal-soft/include/;$(SolutionDir)/../deps/DevIL/include/;$(SolutionDir)/../deps/bullet/include/;$(SolutionDir)/../deps/openvr/include/;$(SolutionDir)/../deps/nya-engine/;$(SolutionDir)/../deps/glfw/include/;$(SolutionDir)/../deps/imgui/;$(SolutionDir)/../deps/libvlc/include;$(SolutionDir)/../deps/recastnavigation/Detour/Include/;$(SolutionDir)/../deps/recastnavigation/Recast/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)%(DefiningProjectName)/</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
