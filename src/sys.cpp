@@ -444,6 +444,17 @@ int ends_with(const char *str, const char *suffix)
 int sys::list_folder(const char *path, bool include_path)
 {
     const size_t path_len = path ? strlen(path) : 0;
+    std::string path_buf;
+    if (path_len > 0)
+    {
+        path_buf = path;
+        for(size_t i = 0; i < path_len; ++i)
+        {
+            if(path_buf[i]=='\\')
+                path_buf[i]='/';
+        }
+        path = path_buf.c_str();
+    }
 
     auto &prov = nya_resources::get_resources_provider();
     for (int i = 0, count = prov.get_resources_count(); i < count; ++i)
