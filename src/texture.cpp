@@ -32,19 +32,19 @@ static bool load_gdi_plus(nya_scene::shared_texture &res,nya_scene::resource_dat
     const int w = (int)image.GetWidth();
     const int h = (int)image.GetHeight();
     Gdiplus::Rect rc(0, 0, w, h);
-
     Gdiplus::BitmapData bitmap_data;
-    image.LockBits(&rc, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmap_data);
+    if (image.LockBits(&rc, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmap_data) != Gdiplus::Ok)
+        return false;
 
     nya_memory::tmp_buffer_scoped buf(w*h*4);
-    auto col=(uint32_t *)buf.get_data();
-    for (int y = 0; y < h; ++y)
-        memcpy(col, (char*)bitmap_data.Scan0 + bitmap_data.Stride * (h-y-1), w * 4);
+    auto col = (uint32_t *)buf.get_data();
+    for (int y = 0, stride = w * 4; y < h; ++y, col += w)
+        memcpy(col, (char *)bitmap_data.Scan0 + bitmap_data.Stride * (h - 1 - y), stride);
     image.UnlockBits(&bitmap_data);
 
     nya_render::bitmap_argb_to_rgba((uint8_t *)buf.get_data(), w, h);
 
-    if(nya_render::bitmap_is_full_alpha((uint8_t *)buf.get_data(), w, h))
+    if (nya_render::bitmap_is_full_alpha((uint8_t *)buf.get_data(), w, h))
     {
         nya_render::bitmap_rgba_to_rgb((uint8_t *)buf.get_data(), w, h);
         return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_rgb);
