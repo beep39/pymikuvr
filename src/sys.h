@@ -34,6 +34,7 @@ public:
     void exit();
 
     int get_dt() const;
+    void reset_dt();
 
     void block_input(bool right, bool block);
     uint32_t get_ctrl(bool right, float *ax, float *ay, float *triger);

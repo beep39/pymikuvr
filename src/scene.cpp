@@ -59,7 +59,7 @@ void scene::update(int dt)
     //m_dd.clear();
 
     video::update();
-    sound::update();
+    sound::update(dt);
     phys::update(dt);
 
     for (auto &o: m_objects)

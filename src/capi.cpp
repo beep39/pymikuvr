@@ -199,8 +199,8 @@ EX  void shape_remove(int id) { shape::remove(id); }
 EX  int sound_create() { return sound::add(); }
 EX  int sound_get_origin(int id) { return sound::get(id)->get_origin(); }
 EX  void sound_set_enabled(int id, bool enabled) { sound::get(id)->set_enabled(enabled); }
-EX  int sound_play(int id, const char *name, bool loop) { return sound::get(id)->play(name, loop); }
-EX  void sound_stop(int id) { sound::get(id)->stop(); }
+EX  int sound_play(int id, const char *name, bool loop, float fade) { return sound::get(id)->play(name, loop, fade); }
+EX  void sound_stop(int id, float fade) { sound::get(id)->stop(fade); }
 EX  void sound_set_volume(int id, float volume) { sound::get(id)->set_volume(volume); }
 EX  void sound_set_pitch(int id, float pitch) { sound::get(id)->set_pitch(pitch); }
 EX  void sound_set_radius(int id, float radius) { sound::get(id)->set_radius(radius); }
@@ -221,6 +221,7 @@ EX  bool sys_start_window(int width, int height, const char *title)
         return sys::instance().start_window(width, height, title);
     }
 EX  bool sys_update() { return sys::instance().update(); }
+EX  void sys_reset_dt() { sys::instance().reset_dt(); }
 EX  void sys_exit() { sys::instance().exit(); }
 EX  unsigned int sys_get_ctrl(bool right, float *jx, float *jy, float *trigger)
     {

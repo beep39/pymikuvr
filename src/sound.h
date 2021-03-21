@@ -11,7 +11,7 @@ class sound: public container<sound>
 {
 public:
     static void init();
-    static void update();
+    static void update(int dt);
     static void release();
 
 public:
@@ -20,8 +20,8 @@ public:
     static bool preload(const char *name);
 
 public:
-    int play(const char *name, bool loop);
-    void stop();
+    int play(const char *name, bool loop, float fade_time);
+    void stop(float fade_time);
     void set_radius(float radius);
     void set_volume(float volume);
     void set_pitch(float pitch);
@@ -52,8 +52,12 @@ private:
     {
         unsigned int sourceid = 0;
         std::shared_ptr<buffer> buffer;
-
+        float volume = 1.0f;
+        unsigned int fade_time = 0;
+        unsigned int fade_goal = 0;
+        
         bool is_finished();
+        float fade_value();
         ~source();
     };
     static std::vector<std::shared_ptr<source>> m_tmp_sources;
@@ -68,6 +72,7 @@ private:
     unsigned int m_tversion;
     bool m_enabled = true;
     std::shared_ptr<source> m_source;
+    std::shared_ptr<source> m_fadeout_source;
     float m_volume = 1.0f;
     float m_pitch = 1.0f;
     float m_radius = -1.0f;

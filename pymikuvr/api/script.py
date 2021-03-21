@@ -20,6 +20,8 @@ from api.vec2 import vec2
 from api.vec3 import vec3
 from api.video import video
 
+from api.capi import c_lib
+
 import gc
 import random
 import math
@@ -219,6 +221,7 @@ class script:
 
         cache = None
         gc.collect()
+        c_lib.sys_reset_dt()
 
     def reload(self):
         self.load(self.__script_path, self.__script_path_is_local)

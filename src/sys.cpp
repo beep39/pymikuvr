@@ -363,6 +363,12 @@ void sys::reset_resources()
 
 int sys::get_dt() const { return m_dt; }
 
+void sys::reset_dt()
+{
+    m_dt = 0;
+    m_time = nya_system::get_time();
+}
+
 void sys::add_resources_folder(const char *folder)
 {
     m_providers.push_back(new nya_resources::file_resources_provider(folder));

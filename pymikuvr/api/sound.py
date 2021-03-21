@@ -8,6 +8,8 @@ c_lib.sound_play3d.argtypes = (ctypes.c_char_p, ctypes.c_float, ctypes.c_float, 
 c_lib.sound_set_volume.argtypes = (ctypes.c_int, ctypes.c_float)
 c_lib.sound_set_pitch.argtypes = (ctypes.c_int, ctypes.c_float)
 c_lib.sound_set_radius.argtypes = (ctypes.c_int, ctypes.c_float)
+c_lib.sound_play.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_bool, ctypes.c_float)
+c_lib.sound_stop.argtypes = (ctypes.c_int, ctypes.c_float)
 
 class sound(base):
     __slots__ = ('__id', '__volume', '__pitch', '__radius', '__duration')
@@ -41,12 +43,12 @@ class sound(base):
     def preload(resource):
         return c_lib.sound_preload(resource.encode())
 
-    def play(self, resource, loop):
-        self.__duration = c_lib.sound_play(self.__id, resource.encode(), loop)* 0.001
+    def play(self, resource, loop = False, fade = 0):
+        self.__duration = c_lib.sound_play(self.__id, resource.encode(), loop, fade) * 0.001
 
-    def stop(self):
+    def stop(self, fade = 0):
         self.__duration = 0
-        c_lib.sound_stop(self.__id)
+        c_lib.sound_stop(self.__id, fade)
 
     @property
     def level(self):

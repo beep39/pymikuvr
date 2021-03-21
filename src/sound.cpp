@@ -36,7 +36,7 @@ void sound::init()
     alListenerf(AL_GAIN, 1.0f);
 }
 
-void sound::update()
+void sound::update(int dt)
 {
     auto h = player::instance().head();
     auto p = h->get_pos();
@@ -51,14 +51,32 @@ void sound::update()
 
     for (auto &s: m_update_list)
     {
-        if (!s->m_source)
-            continue;
+        if (s->m_source && s->m_source->fade_time < s->m_source->fade_goal)
+        {
+            s->m_source->fade_time += dt;
+            alSourcef(s->m_source->sourceid, AL_GAIN, s->m_source->volume * s->m_source->fade_value());
+        }
+        if (s->m_fadeout_source && s->m_fadeout_source->fade_time < s->m_fadeout_source->fade_goal)
+        {
+            s->m_fadeout_source->fade_time += dt;
+            alSourcef(s->m_fadeout_source->sourceid, AL_GAIN, s->m_fadeout_source->volume * (1.0f - s->m_fadeout_source->fade_value()));
+
+            if (s->m_fadeout_source->fade_time >= s->m_fadeout_source->fade_goal)
+            {
+                s->m_fadeout_source.reset();
+                if (!s->m_source)
+                    m_update_list.erase(std::remove(m_update_list.begin(), m_update_list.end(), s), m_update_list.end());
+            }
+        }
 
         if (s->m_torigin->version() == s->m_tversion)
             continue;
 
         const auto &p = s->m_torigin->get_pos();
-        alSource3f(s->m_source->sourceid, AL_POSITION, p.x, p.y, p.z);
+        if (s->m_source)
+            alSource3f(s->m_source->sourceid, AL_POSITION, p.x, p.y, p.z);
+        if (s->m_fadeout_source)
+            alSource3f(s->m_fadeout_source->sourceid, AL_POSITION, p.x, p.y, p.z);
         s->m_tversion = s->m_torigin->version();
     }
 }
@@ -82,10 +100,9 @@ void sound::release()
     }
 }
 
-int sound::play(const char *name, bool loop)
+int sound::play(const char *name, bool loop, float fade)
 {
-    stop();
-
+    stop(fade);
     m_source = create_src(name, m_volume);
     if (!m_source)
         return 0;
@@ -96,26 +113,51 @@ int sound::play(const char *name, bool loop)
     alSource3f(m_source->sourceid, AL_POSITION, p.x, p.y, p.z);
     set_pitch(m_pitch);
     set_radius(m_radius);
-    m_update_list.push_back(this);
+    if (std::find(m_update_list.begin(), m_update_list.end(), this) == m_update_list.end())
+        m_update_list.push_back(this);
     if (!m_enabled)
         alSourcePause(m_source->sourceid);
+
+    if (fade > 0.01f)
+    {
+        alSourcef(m_source->sourceid, AL_GAIN, 0.0f);
+        m_source->fade_goal = fade * 1000;
+        m_source->fade_time = 0;
+    }
     return m_source->buffer->length;
 }
 
-void sound::stop()
+void sound::stop(float fade)
 {
     if (!m_source)
         return;
 
+    if (m_fadeout_source)
+        m_fadeout_source.reset();
+
+    if (fade < 0.01f)
+    {
+        m_source.reset();
+        m_update_list.erase(std::remove(m_update_list.begin(), m_update_list.end(), this), m_update_list.end());
+        return;
+    }
+
+    m_fadeout_source = m_source;
+    if (m_fadeout_source->fade_time < m_fadeout_source->fade_goal)
+        m_fadeout_source->volume *= m_fadeout_source->fade_value();
+    m_fadeout_source->fade_goal = fade * 1000;
+    m_fadeout_source->fade_time = 0;
     m_source.reset();
-    m_update_list.erase(std::remove(m_update_list.begin(), m_update_list.end(), this), m_update_list.end());
 }
 
 void sound::set_volume(float volume)
 {
     m_volume = volume;
     if (m_source)
-        alSourcef(m_source->sourceid, AL_GAIN, volume);
+        return;
+
+    m_source->volume = volume;
+    alSourcef(m_source->sourceid, AL_GAIN, volume * m_source->fade_value());
 }
 
 void sound::set_pitch(float pitch)
@@ -230,7 +272,7 @@ void sound::set_enabled(bool enabled)
 }
 
 sound::sound() { m_torigin = transform::get((m_origin = transform::add())); m_tversion = m_torigin->version(); }
-sound::~sound() { stop(); }
+sound::~sound() { stop(0.0f); }
 
 const void* load_wav(const void* data, size_t data_size, uint32_t& chan, uint32_t& samplerate, uint32_t& bps, uint32_t& size)
 {
@@ -370,6 +412,14 @@ bool sound::source::is_finished()
     ALint state;
     alGetSourcei(sourceid, AL_SOURCE_STATE, &state);
     return state != AL_PLAYING;
+}
+
+float sound::source::fade_value()
+{
+    if (fade_time >= fade_goal)
+        return 1.0f;
+
+    return float(fade_time) / fade_goal;
 }
 
 sound::source::~source()
