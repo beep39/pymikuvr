@@ -153,7 +153,7 @@ void sound::stop(float fade)
 void sound::set_volume(float volume)
 {
     m_volume = volume;
-    if (m_source)
+    if (!m_source)
         return;
 
     m_source->volume = volume;
