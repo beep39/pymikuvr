@@ -184,6 +184,7 @@ void mesh::blend_animation(nya_scene::animation_proxy anim, int layer, float dur
     remove_blend(layer); //ToDo: multiple blends
 
     blend b;
+    b.layer = layer;
 
     auto &prev = m_mesh.get_anim(layer);
     if (prev.is_valid())
@@ -198,7 +199,6 @@ void mesh::blend_animation(nya_scene::animation_proxy anim, int layer, float dur
 
     if (anim.is_valid())
     {
-        b.layer = layer;
         b.weight = anim->get_weight();
         anim->set_weight(0.0f);
         m_mesh.set_anim(anim, layer, true);
@@ -209,9 +209,49 @@ void mesh::blend_animation(nya_scene::animation_proxy anim, int layer, float dur
     if (!anim.is_valid() && b.prev_layer < 0)
         return;
 
-    b.layer = layer;
     b.total_time = duration;
-    b.time = 0;
+    m_blends.push_back(b);
+
+    m_mesh.update(0);
+    update_bones();
+}
+
+void mesh::blend_animation(nya_scene::animation_proxy anim, int layer, float duration, nya_scene::animation_proxy transition, int time)
+{
+    if (duration < 0.01f || !transition.is_valid() || !transition->get_duration())
+    {
+        set_animation(anim, layer);
+        return;
+    }
+    
+    remove_blend(layer);
+
+    blend b;
+    b.anim = true;
+    b.layer = layer;
+    b.set_time = time;
+
+    if (anim.is_valid())
+    {
+        b.weight = anim->get_weight();
+        anim->set_weight(0.0f);
+        m_mesh.set_anim(anim, layer, true);
+    }
+    else
+        m_mesh.remove_anim(layer);
+
+    b.prev_layer = new_blend_id(1024);
+    b.prev_weight = transition->get_weight();
+    b.total_time = duration;
+    m_mesh.set_anim(transition.get(), b.prev_layer, true);
+    auto tr = m_mesh.get_anim(b.prev_layer);
+    float speed = duration * 1000 / transition->get_duration();
+    if (tr->get_speed() < 0)
+    {
+        speed = -speed;
+        m_mesh.set_anim_time(tr->get_duration(), b.prev_layer);
+    }
+    tr->set_speed(speed);
     m_blends.push_back(b);
 
     m_mesh.update(0);
@@ -263,6 +303,13 @@ int mesh::get_anim_time(int layer)
 void mesh::set_anim_time(int layer, int time)
 {
     m_mesh.set_anim_time(time, layer);
+
+    for (auto &b: m_blends)
+    {
+        if (b.layer == layer && b.anim)
+            b.set_time = time;
+    }
+
     m_mesh.update(0);
     update_bones();
 }
@@ -500,20 +547,24 @@ void mesh::update_pre(int dt)
     {
         auto &b = m_blends[i];
         b.time += dt * 0.001f;
-        float k = b.time / b.total_time;
-        if (k > 1.0f)
+        if (b.time >= b.total_time)
         {
-            k = 1.0f;
             m_blends.erase(m_blends.begin() + i);
-            
             if (b.prev_layer >= 0)
                 m_mesh.remove_anim(b.prev_layer);
-            
+
             auto anim = m_mesh.get_anim(b.layer);
             if (anim.is_valid())
                 anim->set_weight(b.weight);
+            if (b.anim)
+                m_mesh.set_anim_time(b.layer, b.set_time);
             continue;
         }
+
+        if (b.anim)
+            continue;
+
+        const float k = b.time / b.total_time;
 
         if (b.prev_layer >= 0)
         {

@@ -4,7 +4,7 @@ from api.sound import sound
 
 c_lib.animation_set_speed.argtypes = (ctypes.c_int, ctypes.c_float)
 c_lib.animation_set_weight.argtypes = (ctypes.c_int, ctypes.c_float)
-c_lib.animation_blend.argtypes =  (ctypes.c_int, ctypes.c_int, ctypes.c_float)
+c_lib.animation_blend.argtypes =  (ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int)
 
 def unpack_animation(init_f):
     def _wrapper(self, *args, **kws):
@@ -45,12 +45,19 @@ class animation:
             self.loop = loop
             return True
 
-    def blend(self, animation, duration):    
+    def blend(self, animation, duration, transition = None):
         self.__loop = animation.__loop
         self.__duration = animation.__duration
         self.__speed = animation.__speed
         self.__weight = animation.__weight
-        c_lib.animation_blend(self.__id, animation.__id, duration)
+        transition_id = -1
+        if transition is not None:
+            transition_id = transition.__id
+            if duration is None:
+                duration = transition.duration
+        elif duration is None:
+            duration = 0
+        c_lib.animation_blend(self.__id, animation.__id, duration, transition_id)
 
     def set_range(self, range_from, range_to):
         self.__duration = c_lib.animation_set_range(self.__id, int(range_from * 1000), int(range_to * 1000)) * 0.001

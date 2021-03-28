@@ -22,6 +22,7 @@ public:
     void set_anim_time(int layer, int time);
     void set_animation(nya_scene::animation_proxy anim, int layer);
     void blend_animation(nya_scene::animation_proxy anim, int layer, float duration);
+    void blend_animation(nya_scene::animation_proxy anim, int layer, float duration, nya_scene::animation_proxy transition, int time);
     void remove_animation(int layer);
     bool is_anim_finished(int layer);
 
@@ -115,15 +116,17 @@ private:
         static bool expired(const bone &b) { return b.transform.expired(); }
     };
     std::vector<bone> m_bones;
-    
+
     struct blend
     {
-        int layer;
-        int prev_layer;
-        float time;
-        float total_time;
-        float prev_weight;
-        float weight;
+        int layer = -1;
+        int prev_layer = -1;
+        float time = 0;
+        float total_time = 0;
+        float prev_weight = 1.0f;
+        float weight = 1.0f;
+        bool anim = false;
+        int set_time = 0;
     };
     std::vector<blend> m_blends;
 };

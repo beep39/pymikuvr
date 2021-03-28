@@ -13,6 +13,7 @@ public:
     void set_mesh(int mesh_idx, int layer);
     int load(const char *name);
     void blend(animation &new_anim, float duration);
+    void blend(animation &new_anim, float duration, animation &transition);
     int get_time();
     void set_time(int time);
     int set_range(int from, int to);

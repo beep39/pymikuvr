@@ -31,6 +31,14 @@ void animation::blend(animation &new_anim, float duration)
         m->blend_animation(anim, m_layer, duration);
 }
 
+void animation::blend(animation &new_anim, float duration, animation &transition)
+{
+    anim = nya_scene::animation_proxy(new_anim.anim.get());
+    auto m = m_mesh.lock();
+    if (m)
+        m->blend_animation(anim, m_layer, duration, transition.anim, new_anim.m_time);
+}
+
 int animation::get_time()
 {
     auto m = m_mesh.lock();
