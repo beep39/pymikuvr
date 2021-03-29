@@ -140,7 +140,7 @@ bool mesh::load(const char *name)
     if (m_mesh.is_mmd())
     {
         m_mesh.set_scale(-mmd_scale(),mmd_scale(),-mmd_scale());
-        enable_phys();
+        enable_phys(true);
     }
     else
         m_mesh.set_scale(-1.0f,1.0f,-1.0f);
@@ -153,17 +153,6 @@ bool mesh::load(const char *name)
 int mesh::get_origin() const { return m_origin; }
 
 void mesh::set_enabled(bool enabled) { m_enabled = enabled; }
-
-void mesh::enable_phys()
-{
-    auto pos = m_mesh.get_pos();
-    auto scale = m_mesh.get_scale();
-    m_mesh.set_pos(pos / scale);
-    m_mesh.set_scale(nya_math::vec3::one());
-    m_phys.init(&m_mesh, scene::instance().mmd_phys());
-    m_mesh.set_pos(pos);
-    m_mesh.set_scale(scale);
-}
 
 void mesh::set_animation(nya_scene::animation_proxy anim, int layer)
 {
@@ -630,6 +619,22 @@ void mesh::draw(const char *pass)
             m_mesh.draw_group(i, pass);
     }
 }
+
+void mesh::enable_phys(bool enable)
+{
+    if (!m_mesh.is_mmd())
+        return;
+
+    if (enable)
+    {
+        m_phys.init(&m_mesh, scene::instance().mmd_phys());
+        m_phys.reset();
+    }
+    else
+        m_phys.release();
+}
+
+void mesh::enable_reset() { m_phys.reset(); }
 
 mesh::mesh()
 {

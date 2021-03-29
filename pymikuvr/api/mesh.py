@@ -141,14 +141,34 @@ class mesh_material:
         self.__texture = t
         c_lib.mesh_set_texture(self.__id, self.__idx, t._texture__id)
 
+class mesh_physics():
+    def __init__(self, mesh_id):
+        self.__mesh_id = mesh_id
+        self.__enabled = True
+
+    @property
+    def enabled(self):
+        return self.__enabled
+
+    @enabled.setter
+    def enabled(self, enable):
+        if enable != self.__enabled:
+            c_lib.mesh_phys_enable(self.__mesh_id, enable)
+            self.__enabled = enable
+ 
+    def reset(self):
+        if self.__enabled:
+            c_lib.mesh_phys_reset(self.__mesh_id)
+
 class mesh(base):
-    __slots__ = ('__id', '__animations', '__morphs', '__materials', '__bones')
+    __slots__ = ('__id', '__animations', '__morphs', '__materials', '__bones', '__physics')
     def __init__(self, resource = None):
         self.__id = c_lib.mesh_create()
         self.__animations = mesh_animations(self.__id)
         self.__morphs = None
         self.__materials = None
         self.__bones = None
+        self.__physics = mesh_physics(self.__id)
         def enable_callback(enable):
             c_lib.mesh_set_enabled(self.__id, enable)
         super().__init__(c_lib.mesh_get_origin(self.__id), enable_callback)
@@ -231,6 +251,10 @@ class mesh(base):
         for i in range(count):
             self.__materials.append(mesh_material(self.__id, i))
         return self.__materials
+
+    @property
+    def physics(self):
+        return self.__physics
 
     def __del__(self):
         c_lib.mesh_remove(self.__id)

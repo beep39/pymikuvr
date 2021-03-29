@@ -16,8 +16,6 @@ public:
     int get_origin() const;
     void set_enabled(bool enabled);
 
-    void enable_phys();
-
     int get_anim_time(int layer);
     void set_anim_time(int layer, int time);
     void set_animation(nya_scene::animation_proxy anim, int layer);
@@ -42,6 +40,9 @@ public:
     void set_group_visible(int idx, bool visible);
     void mesh_init_texture(int idx, int tex_id);
     void mesh_set_texture(int idx, int tex_id);
+
+    void enable_phys(bool enable);
+    void enable_reset();
 
     void copy_to_shape(shape *s) const;
 
