@@ -6,9 +6,10 @@ from api.texture import texture
 
 c_lib.sys_load_text.restype = ctypes.c_char_p
 c_lib.sys_get_folder_item.restype = ctypes.c_char_p
+c_lib.sound_set_master_volume.argtypes = [ctypes.c_float]
 
 class system_class:
-    __slots__ = ('__screen_texture', 'default_res_folder', 'time', 'dt', 'argv', 'log', 'warnings', 'errors')
+    __slots__ = ('__screen_texture', 'default_res_folder', 'time', 'dt', 'argv', 'log', 'warnings', 'errors', '__volume')
     def __init__(self):
         self.__screen_texture = None
         self.default_res_folder = None
@@ -18,10 +19,20 @@ class system_class:
         self.log = []
         self.warnings = []
         self.errors = []
+        self.__volume = 1.0
 
     @property
     def platform(self):
         return platform.system()
+
+    @property
+    def volume(self):
+        return self.__volume
+
+    @volume.setter
+    def volume(self, volume):
+        self.__volume = volume
+        c_lib.sound_set_master_volume(volume)
 
     @property
     def screen_texture(self):

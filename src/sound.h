@@ -19,6 +19,8 @@ public:
     static bool play3d(const char *name, float x, float y, float z, float volume, float pitch, float radius);
     static bool preload(const char *name);
 
+    static void set_master_volume(float volume);
+
 public:
     int play(const char *name, bool loop, float fade_time);
     void stop(float fade_time);

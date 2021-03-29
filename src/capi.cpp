@@ -204,6 +204,7 @@ EX  bool shape_trace(int id, float x, float y, float z, float dx, float dy, floa
     }
 EX  void shape_remove(int id) { shape::remove(id); }
 
+EX  void sound_set_master_volume(float volume) { sound::set_master_volume(volume); }
 EX  int sound_create() { return sound::add(); }
 EX  int sound_get_origin(int id) { return sound::get(id)->get_origin(); }
 EX  void sound_set_enabled(int id, bool enabled) { sound::get(id)->set_enabled(enabled); }

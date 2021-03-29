@@ -475,3 +475,5 @@ bool sound::play3d(const char *name, float x, float y, float z, float volume, fl
 }
 
 bool sound::preload(const char *name) { return get_snd(name) != 0; }
+
+void sound::set_master_volume(float volume) { alListenerf(AL_GAIN, volume); }
