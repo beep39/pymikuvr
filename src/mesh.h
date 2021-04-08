@@ -29,6 +29,9 @@ public:
     int get_bone(const char *name);
     void set_bone_pos(const char *name, const nya_math::vec3 &pos, bool additive);
     void set_bone_rot(const char *name, const nya_math::quat &rot, bool additive);
+    void bone_pos_transformed(int transform_id);
+    void bone_rot_transformed(int transform_id);
+    void reset_bone(int transform_id);
 
     int get_morphs_count();
     const char *get_morph_name(int idx);
@@ -108,11 +111,15 @@ private:
     struct bone
     {
         std::string name;
+        int parent_idx;
         int bone_idx;
-        int transform_idx;
+        int transform_id;
         std::weak_ptr<transform> transform;
-        
-        bool update(mmd_mesh &mesh);
+        nya_math::vec3 offset;
+
+        bool to_transform(mmd_mesh &mesh);
+        void pos_from_transform(mmd_mesh &mesh);
+        void rot_from_transform(mmd_mesh &mesh);
 
         static bool expired(const bone &b) { return b.transform.expired(); }
     };

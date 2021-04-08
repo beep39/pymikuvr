@@ -29,23 +29,19 @@ class transform:
         self.__children = []
 
         def update_pos():
-            pos = self.__pos
-            c_lib.transform_set_pos(self.__id, pos.x, pos.y, pos.z)
+            c_lib.transform_set_pos(self.__id, self.__pos.x, self.__pos.y, self.__pos.z)
         self.__pos = vec3_o(update_pos)
 
         def update_rot():
-            rot = self.__rot
-            c_lib.transform_set_rot(self.__id, rot.x, rot.y, rot.z, rot.w)
+            c_lib.transform_set_rot(self.__id, self.__rot.x, self.__rot.y, self.__rot.z, self.__rot.w)
         self.__rot = quat_o(update_rot)
 
         def update_local_pos():
-            pos = self.__local_pos
-            c_lib.transform_set_local_pos(self.__id, pos.x, pos.y, pos.z)
+            c_lib.transform_set_local_pos(self.__id, self.__local_pos.x, self.__local_pos.y, self.__local_pos.z)
         self.__local_pos = vec3_o(update_local_pos)
 
         def update_local_rot():
-            rot = self.__local_rot
-            c_lib.transform_set_local_rot(self.__id, rot.x, rot.y, rot.z, rot.w)
+            c_lib.transform_set_local_rot(self.__id, self.__local_rot.x, self.__local_rot.y, self.__local_rot.z, self.__local_rot.w)
         self.__local_rot = quat_o(update_local_rot)
 
     def __del__(self):

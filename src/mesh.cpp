@@ -308,18 +308,29 @@ bool mesh::is_anim_finished(int layer)
     return m_mesh.is_anim_finished(layer);
 }
 
-bool mesh::bone::update(mmd_mesh &mesh)
+inline nya_math::quat rotate_180(const nya_math::quat &q) { auto r = q; r.v.x = -r.v.x; r.v.z = -r.v.z; return r; }
+
+bool mesh::bone::to_transform(mmd_mesh &mesh)
 {
     auto t = transform.lock();
     if (!t)
         return false;
 
     t->set_local_pos(mesh.get_bone_pos(bone_idx, true) * mesh.get_scale());
-    auto r = mesh.get_bone_rot(bone_idx, true);
-    r.v.x = -r.v.x;
-    r.v.z = -r.v.z;
-    t->set_local_rot(r);
+    t->set_local_rot(rotate_180(mesh.get_bone_rot(bone_idx, true)));
     return true;
+}
+
+void mesh::bone::pos_from_transform(mmd_mesh &mesh)
+{
+    const auto p = transform.lock()->get_local_pos() / mesh.get_scale();
+    mesh.set_bone_pos(bone_idx, mesh.get_bone_rot(parent_idx, true).rotate_inv(p - mesh.get_bone_pos(parent_idx, true)) - offset, false);
+}
+
+void mesh::bone::rot_from_transform(mmd_mesh &mesh)
+{
+    const auto pr = nya_math::quat::invert(mesh.get_bone_rot(parent_idx, true));
+    mesh.set_bone_rot(bone_idx, pr * rotate_180(transform.lock()->get_local_rot()), false);
 }
 
 int mesh::get_bones_count() { return m_mesh.get_bones_count(); }
@@ -332,32 +343,64 @@ int mesh::get_bone(const char *name)
     for (auto &b: m_bones)
     {
         if (b.name == name)
-            return b.transform_idx;
+            return b.transform_id;
     }
+    
+    const auto &sk = m_mesh.get_skeleton();
 
     bone b;
     b.name = name;
-    b.bone_idx = m_mesh.get_bone_idx(name);
-    b.transform_idx = transform::add();
-    b.transform = transform::get_weak(b.transform_idx);
+    b.bone_idx = sk.get_bone_idx(name);
+    b.parent_idx = sk.get_bone_parent_idx(b.bone_idx);
+    b.transform_id = transform::add();
+    b.transform = transform::get_weak(b.transform_id);
     b.transform.lock()->set_parent(m_torigin);
-    b.update(m_mesh);
+    b.offset = sk.get_bone_original_pos(b.bone_idx) - sk.get_bone_original_pos(b.parent_idx);
+    b.to_transform(m_mesh);
 
     m_bones.push_back(b);
-    return b.transform_idx;
+    return b.transform_id;
 }
 
 void mesh::set_bone_pos(const char *name, const nya_math::vec3 &pos, bool additive)
 {
-    m_mesh.set_bone_pos(m_mesh.get_bone_idx(name), pos, additive);
+    m_mesh.set_bone_pos(m_mesh.get_bone_idx(name), pos / m_mesh.get_scale(), additive);
 }
 
 void mesh::set_bone_rot(const char *name, const nya_math::quat &rot, bool additive)
 {
-    auto r = rot;
-    r.v.x = -r.v.x;
-    r.v.z = -r.v.z;
-    m_mesh.set_bone_rot(m_mesh.get_bone_idx(name), r, additive);
+    m_mesh.set_bone_rot(m_mesh.get_bone_idx(name), rotate_180(rot), additive);
+}
+
+void mesh::bone_pos_transformed(int transform_id)
+{
+    for (auto &b: m_bones) //ToDo
+    {
+        if (b.transform_id == transform_id)
+            b.pos_from_transform(m_mesh);
+    }
+}
+
+void mesh::bone_rot_transformed(int transform_id)
+{
+    for (auto &b: m_bones) //ToDo
+    {
+        if (b.transform_id == transform_id)
+            b.rot_from_transform(m_mesh);
+    }
+}
+
+void mesh::reset_bone(int transform_id)
+{
+    for (auto &b: m_bones) //ToDo
+    {
+        if (b.transform_id == transform_id)
+        {
+            m_mesh.set_bone_pos(b.bone_idx, nya_math::vec3::zero(), true);
+            m_mesh.set_bone_rot(b.bone_idx, nya_math::quat(), true);
+            b.to_transform(m_mesh);
+        }
+    }
 }
 
 int mesh::get_morphs_count() { return m_mesh.get_morphs_count(); }
@@ -520,7 +563,7 @@ void mesh::update_bones()
     bool bone_deleted = false;
     for (auto &b: m_bones)
     {
-        if (!b.update(m_mesh))
+        if (!b.to_transform(m_mesh))
             bone_deleted = true;
     }
     if (bone_deleted)

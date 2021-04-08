@@ -83,6 +83,9 @@ EX  void mesh_set_bone_rot(int id, const char *name, float x, float y, float z, 
     {
         mesh::get(id)->set_bone_rot(name, nya_math::quat(x, y, z, w), additive);
     }
+EX  void mesh_bone_pos_transformed(int id, int transform_id) { mesh::get(id)->bone_pos_transformed(transform_id); }
+EX  void mesh_bone_rot_transformed(int id, int transform_id) { mesh::get(id)->bone_rot_transformed(transform_id); }
+EX  void mesh_reset_bone(int id, int transform_id) { mesh::get(id)->reset_bone(transform_id); }
 EX  int mesh_get_morphs_count(int id) { return mesh::get(id)->get_morphs_count(); }
 EX  const char *mesh_get_morph_name(int id, int idx) { return mesh::get(id)->get_morph_name(idx); }
 EX  float mesh_get_morph(int id, const char *name) { return mesh::get(id)->get_morph(name); }

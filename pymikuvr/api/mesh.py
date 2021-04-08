@@ -1,6 +1,8 @@
 import ctypes
 from api.capi import c_lib
 from api.base import base
+from api.vec3 import vec3_o
+from api.quat import quat_o
 from api.transform import transform
 from api.animation import animation
 from collections.abc import Mapping
@@ -15,11 +17,32 @@ c_lib.mesh_set_bone_pos.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_floa
 c_lib.mesh_set_bone_rot.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_bool)
 
 class bone_transform(transform):
-    __slots__ = ('__release_id')
-    def __init__(self, id, parent):
+    __slots__ = ('__mesh_id')
+    def __init__(self, mesh_id, id, parent):
         super().__init__(id)
         self._transform__parent = parent
         parent._transform__children.append(self)
+        self.__mesh_id = mesh_id
+
+        def update_pos():
+            c_lib.transform_set_pos(self._transform__id, self._transform__pos.x, self._transform__pos.y, self._transform__pos.z)
+            c_lib.mesh_bone_pos_transformed(self.__mesh_id, self._transform__id)
+        self._transform__pos = vec3_o(update_pos)
+
+        def update_rot():
+            c_lib.transform_set_rot(self._transform__id, self._transform__rot.x, self._transform__rot.y, self._transform__rot.z, self._transform__rot.w)
+            c_lib.mesh_bone_rot_transformed(self.__mesh_id, self._transform__id)
+        self._transform__rot = quat_o(update_rot)
+
+        def update_local_pos():
+            c_lib.transform_set_local_pos(self._transform__id, self._transform__local_pos.x, self._transform__local_pos.y, self._transform__local_pos.z)
+            c_lib.mesh_bone_pos_transformed(self.__mesh_id, self._transform__id)
+        self._transform__local_pos = vec3_o(update_local_pos)
+
+        def update_local_rot():
+            c_lib.transform_set_local_rot(self._transform__id, self._transform__local_rot.x, self._transform__local_rot.y, self._transform__local_rot.z, self._transform__local_rot.w)
+            c_lib.mesh_bone_rot_transformed(self.__mesh_id, self._transform__id)
+        self._transform__local_rot = quat_o(update_local_rot)
 
     @property
     def parent(self):
@@ -29,12 +52,15 @@ class bone_transform(transform):
     def parent(self, parent):
         raise ValueError('unable to set parent for bone')
 
+    def reset(self):
+        c_lib.mesh_reset_bone(self.__mesh_id, self._transform__id)
+
     def __del__(self):
         super().__del__()
 
 class mesh_bones(Mapping):
-    def __init__(self, id, data, parent):
-        self.__id = id
+    def __init__(self, mesh_id, data, parent):
+        self.__mesh_id = mesh_id
         self.__parent = parent
         self.__data = data
 
@@ -43,7 +69,7 @@ class mesh_bones(Mapping):
         if item is not None:
             return item
 
-        item = bone_transform(c_lib.mesh_get_bone(self.__id, key.encode()), self.__parent)
+        item = bone_transform(self.__mesh_id, c_lib.mesh_get_bone(self.__mesh_id, key.encode()), self.__parent)
         self.__data[key] = item
         return item
 
