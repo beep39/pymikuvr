@@ -51,6 +51,7 @@ EX  void camera_set_enabled(int id, bool enabled) { camera::get(id)->set_enabled
 EX  void camera_set_texture(int id, int idx) { camera::get(id)->set_texture(idx); }
 EX  void camera_set_fps(int id, int fps) { camera::get(id)->set_fps(fps); }
 EX  void camera_set_fov(int id, float fov) { camera::get(id)->set_fov(fov); }
+EX  void camera_set_znearfar(int id, float znear, float zfar) { return camera::get(id)->set_znearfar(znear, zfar); }
 EX  void camera_render_to(int id, int idx) { camera::get(id)->render_to(idx); }
 EX  void camera_remove(int id) { camera::remove(id); }
 

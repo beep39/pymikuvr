@@ -4,6 +4,7 @@ from api.base import base
 from api.texture import texture
 
 c_lib.camera_set_fov.argtypes = (ctypes.c_int, ctypes.c_float)
+c_lib.camera_set_znearfar.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c_float)
 
 class camera(base):
     __slots__ = ('__id', '__texture', '__fps', '__fov')
@@ -51,6 +52,9 @@ class camera(base):
 
     def render_to(self, target):
         c_lib.camera_render_to(self.__id, target._texture__id)
+
+    def _set_znearfar(self, znear, zfar):
+        c_lib.camera_set_znearfar(self.__id, znear, zfar)
 
     def __del__(self):
         c_lib.camera_remove(self.__id)

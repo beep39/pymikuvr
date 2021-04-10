@@ -17,6 +17,7 @@ public:
     void set_enabled(bool enabled);
     void set_fps(int fps);
     void set_fov(float fov);
+    void set_znearfar(float znear, float zfar);
     void set_texture(int tex_id);
     void render_to(int tex_id);
 
@@ -33,6 +34,7 @@ private:
     unsigned int m_update_interval = 0;
     unsigned int m_time = 0;
     float m_fov = 60.0f;
+    float m_znear = 0.1, m_zfar = 300;
 
     nya_scene::camera_proxy m_camera;
     texture *m_texture = 0;

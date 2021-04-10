@@ -43,8 +43,15 @@ void camera::set_fov(float fov)
     if (!w || !h)
         return;
 
-    m_camera->set_proj(fov, w / float(h), 0.1f, 300.0f);
+    m_camera->set_proj(fov, w / float(h), m_znear, m_zfar);
     m_fov = fov;
+}
+
+void camera::set_znearfar(float znear, float zfar)
+{
+    m_znear = znear;
+    m_zfar = zfar;
+    set_fov(m_fov);
 }
 
 void camera::set_texture(int tex_id)
