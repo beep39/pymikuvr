@@ -42,8 +42,9 @@ public:
     bool get_condition(const char *name);
     void set_condition(const char *name, bool enable);
 
-    const nya_scene::texture &white_texture();
-    const nya_scene::texture &black_texture();
+    const nya_scene::texture &white_texture() const;
+    const nya_scene::texture &black_texture() const;
+    const nya_scene::texture &normal_texture() const;
 
     btDiscreteDynamicsWorld *mmd_phys();
 
@@ -94,6 +95,7 @@ private:
 
     nya_scene::texture m_white;
     nya_scene::texture m_black;
+    nya_scene::texture m_normal;
 
     mmd_phys_world m_mmd_phys;
     nya_scene::camera_proxy m_camera;

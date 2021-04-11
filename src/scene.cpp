@@ -43,7 +43,8 @@ void scene::init()
     nya_scene::animation::register_load_function(xps_loader::load_pose, false);
 
     m_white.build("\xff\xff\xff\xff", 1, 1, nya_render::texture::color_rgba);
-    m_black.build("\xff\x00\x00\x00", 1, 1, nya_render::texture::color_rgba);
+    m_black.build("\x00\x00\x00\xff", 1, 1, nya_render::texture::color_rgba);
+    m_normal.build("\x80\x80\xff\xff", 1, 1, nya_render::texture::color_rgba);
 
     if (!m_pipeline.empty())
         load(m_pipeline.c_str());
@@ -260,6 +261,7 @@ void scene::release()
     unload();
     m_white.unload();
     m_black.unload();
+    m_normal.unload();
     m_shadow_fbo.release();
     m_shadow_tex.free();
     m_has_context = false;
@@ -362,8 +364,9 @@ void scene::set_condition(const char *name, bool enable)
     postprocess::set_condition(name, enable);
 }
 
-const nya_scene::texture &scene::white_texture() { return m_white; }
-const nya_scene::texture &scene::black_texture() { return m_black; }
+const nya_scene::texture &scene::white_texture() const { return m_white; }
+const nya_scene::texture &scene::black_texture() const { return m_black; }
+const nya_scene::texture &scene::normal_texture() const { return m_normal; }
 
 btDiscreteDynamicsWorld *scene::mmd_phys()
 {

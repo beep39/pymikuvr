@@ -1,6 +1,7 @@
 //
 
 #include "texture.h"
+#include "scene.h"
 #include "render/bitmap.h"
 #include "tests/shared/texture_bgra_bmp.h"
 
@@ -64,6 +65,10 @@ void texture::init()
     nya_scene::texture::register_load_function(nya_scene::load_texture_il, false);
 #endif
 }
+
+void texture::make_white(int id) { get(id)->tex = nya_scene::texture_proxy(scene::instance().white_texture()); }
+void texture::make_black(int id) { get(id)->tex = nya_scene::texture_proxy(scene::instance().black_texture()); }
+void texture::make_normal(int id) { get(id)->tex = nya_scene::texture_proxy(scene::instance().normal_texture()); }
 
 bool texture::save(const char *name)
 {

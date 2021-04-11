@@ -261,6 +261,9 @@ EX  void texture_build(int id, int w, int h, float r, float g, float b, float a)
 EX  int texture_get_width(int id) { return texture::get(id)->tex->get_width(); }
 EX  int texture_get_height(int id) { return texture::get(id)->tex->get_height(); }
 EX  void texture_copy(int from, int to) { texture::copy(from, to); }
+EX  void texture_white(int id) { texture::make_white(id); }
+EX  void texture_black(int id) { texture::make_black(id); }
+EX  void texture_normal(int id) { texture::make_normal(id); }
 EX  void texture_remove(int id) { texture::remove(id); }
 
 EX  int transform_create() { return transform::add(); }

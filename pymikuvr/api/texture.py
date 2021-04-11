@@ -4,6 +4,10 @@ from api.color import color
 
 c_lib.texture_build.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
 
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return classmethod(self.fget).__get__(None, owner)()
+
 class texture:
     __slots__ = ('__id')
     def __init__(self, resource = None):
@@ -44,5 +48,26 @@ class texture:
     def h(self):
         return c_lib.texture_get_height(self.__id)
 
+    def __eq__(a, b):
+        return a.__id == b.__id
+
     def __del__(self):
         c_lib.texture_remove(self.__id)
+
+    @classproperty
+    def white(self):
+        t = texture()
+        c_lib.texture_white(t.__id)
+        return t
+
+    @classproperty
+    def black(self):
+        t = texture()
+        c_lib.texture_black(t.__id)
+        return t
+
+    @classproperty
+    def normal(self):
+        t = texture()
+        c_lib.texture_normal(t.__id)
+        return t
