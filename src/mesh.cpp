@@ -234,7 +234,7 @@ void mesh::blend_animation(nya_scene::animation_proxy anim, int layer, float dur
     b.total_time = duration;
     m_mesh.set_anim(transition.get(), b.prev_layer, true);
     auto tr = m_mesh.get_anim(b.prev_layer);
-    float speed = duration * 1000 / transition->get_duration();
+    float speed = transition->get_duration() / 1000.0f / duration;
     if (tr->get_speed() < 0)
     {
         speed = -speed;
