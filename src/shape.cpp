@@ -675,10 +675,22 @@ void shape::add_tris(const vertex *verts, uint32_t vcount, const uint16_t *inds,
 
     if (!icount)
     {
-        std::vector<uint16_t> inds;
-        for (uint16_t i = 0; i < (uint16_t)vcount; ++i)
-            inds[i] = i;
-        add_tris(verts, vcount, inds.data(), vcount);
+        if (vcount < 0xffff)
+        {
+            std::vector<uint16_t> inds;
+            inds.resize(vcount);
+            for (uint16_t i = 0; i < (uint16_t)vcount; ++i)
+                inds[i] = i;
+            add_tris(verts, vcount, inds.data(), vcount);
+        }
+        else
+        {
+            std::vector<uint32_t> inds;
+            inds.resize(vcount);
+            for (uint32_t i = 0; i < (uint32_t)vcount; ++i)
+                inds[i] = i;
+            add_tris(verts, vcount, inds.data(), vcount);
+        }
         calculate_aabb();
         return;
     }
