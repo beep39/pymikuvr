@@ -43,15 +43,13 @@ static bool load_gdi_plus(nya_scene::shared_texture &res,nya_scene::resource_dat
         memcpy(col, (char *)bitmap_data.Scan0 + bitmap_data.Stride * (h - 1 - y), stride);
     image.UnlockBits(&bitmap_data);
 
-    nya_render::bitmap_argb_to_rgba((uint8_t *)buf.get_data(), w, h);
-
     if (nya_render::bitmap_is_full_alpha((uint8_t *)buf.get_data(), w, h))
     {
-        nya_render::bitmap_rgba_to_rgb((uint8_t *)buf.get_data(), w, h);
+        nya_render::bitmap_bgra_to_rgb((uint8_t *)buf.get_data(), w, h);
         return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_rgb);
     }
 
-    return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_rgba);
+    return res.tex.build_texture(buf.get_data(), w, h, nya_render::texture::color_bgra);
 }
 #endif
 
