@@ -22,7 +22,6 @@ public:
     
     void set_znearfar(float znear, float zfar);
 
-    void set_light_ambient(float r, float g, float b);
     void set_light_color(float r, float g, float b);
     void set_light_dir(float x, float y, float z);
 
@@ -31,7 +30,6 @@ public:
     void set_shadows_cascades(float c0, float c1, float c2, float c3);
     void set_shadows_bias(int idx, float bias, float slope);
 
-    const nya_scene::material::param_proxy &get_light_ambient() const;
     const nya_scene::material::param_proxy &get_light_color() const;
     const nya_scene::material::param_proxy &get_light_dir() const;
     const nya_scene::material::param_array_proxy &get_shadow_tr() const;
@@ -71,7 +69,7 @@ private:
     void draw_scene(const char *pass, const nya_scene::tags &t) override;
 
 private:
-    nya_scene::material::param_proxy m_light_ambient, m_light_color, m_light_dir;
+    nya_scene::material::param_proxy m_light_color, m_light_dir;
     nya_scene::camera_proxy m_shadow_camera;
     nya_scene::material::param_array_proxy m_shadow_tr;
     nya_scene::material::param_proxy m_shadow_cascades;

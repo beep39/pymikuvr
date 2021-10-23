@@ -60,6 +60,7 @@ EX  void material_load(int id, const char *name) { material::get(id)->load(name)
 EX  void material_copy(int id, int copy) { material::copy(id, copy); }
 EX  void material_set_texture(int id, const char *type, int tex_id) { material::get(id)->set_texture(type, tex_id); }
 EX  void material_set_param(int id, const char *type, float x, float y, float z, float w) { material::get(id)->set_param(type, x, y, z, w); }
+EX  void material_set_opaque(int id, float alpha) { material::get(id)->set_opaque(alpha); }
 EX  void material_remove(int id) { material::remove(id); }
 
 EX  int mesh_create() { return mesh::add(); }
@@ -173,7 +174,6 @@ EX  void phys_remove(int id) { phys::remove(id); }
 EX  int player_get_transform(const char *name) { return player::instance().get_transform(name); }
 
 EX  void render_set_znearfar(float znear, float zfar) { return scene::instance().set_znearfar(znear, zfar); }
-EX  void render_light_ambient(float r, float g, float b) { return scene::instance().set_light_ambient(r, g, b); }
 EX  void render_light_color(float r, float g, float b) { return scene::instance().set_light_color(r, g, b); }
 EX  void render_light_dir(float x, float y, float z) { return scene::instance().set_light_dir(x, y, z); }
 EX  bool render_pipeline_load(const char *name) { return scene::instance().load_postprocess(name); }

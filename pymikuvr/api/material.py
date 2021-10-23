@@ -5,6 +5,7 @@ from api.texture import texture
 from api.vec3 import vec3, vec3_o
 
 c_lib.material_set_param.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
+c_lib.material_set_opaque.argtypes = (ctypes.c_int, ctypes.c_float)
 
 def unpack_material(init_f):
     def _wrapper(self, *args, **kws):
@@ -23,7 +24,7 @@ class material_base:
         self.__textures = {}
         if _copy_from is None:
             self.load(resname)
-            self.set_param("color", color.white)
+            self.color = color.white
             if tex is not None:
                 if isinstance(tex, texture):
                     self.texture = tex
@@ -60,19 +61,26 @@ class material_base:
     def texture(self, t):
         self.set_texture("diffuse", t)
 
-    def set_param(self, name, value):
-        if value is None:
-            raise ValueError("param value must not be null")
+    def set_param(self, name, value = None):
+        return self._set_param(name, value, name == "color")
+
+    def _set_param(self, name, value = None, affects_opaque = False):
         if isinstance(value, vec3):
+            w = 0.0
+            if name == "color":
+                w = 1.0
+                c_lib.material_set_opaque(self.__id, w)
             def update_param():
                 v = self.__params[name]
-                c_lib.material_set_param(self.__id, name.encode(), v.x, v.y, v.z, 0.0)
+                c_lib.material_set_param(self.__id, name.encode(), v.x, v.y, v.z, w)
             self.__params[name] = vec3_o(update_param)
             update_param()
         elif isinstance(value, color):
             def update_param():
                 v = self.__params[name]
                 c_lib.material_set_param(self.__id, name.encode(), v.r, v.g, v.b, v.a)
+                if affects_opaque:
+                    c_lib.material_set_opaque(self.__id, v.a)
             self.__params[name] = color_o(update_param, value.r, value.g, value.b, value.a)
             update_param()
         else:
@@ -90,7 +98,24 @@ class material_base:
 class material(material_base):
     @unpack_material
     def __init__(self, texture = None, _copy_from = None):
+        def update_color():
+            c = self._color
+            self.set_param("amb k", c * 0.4)
+            self.set_param("diff k", color(c.r * 0.6, c.g * 0.6, c.b * 0.6, c.a))
+            self.set_param("color", c)
+        self._color = color_o(update_color, 1, 1, 1, 1)
         super().__init__("materials/lambert.txt", texture, _copy_from)
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, c):
+        self._color.set(c.r, c.g, c.b, c.a)
+
+    def set_param(self, name, value = None):
+        return self._set_param(name, value, name == "color" or name == "diff k")
 
     @staticmethod
     def additive(texture = None):

@@ -280,7 +280,6 @@ void scene::set_znearfar(float znear, float zfar)
     sys::instance().set_znearfar(znear, zfar);
 }
 
-void scene::set_light_ambient(float r, float g, float b) { m_light_ambient->set(r, g, b, 1.0f); }
 void scene::set_light_color(float r, float g, float b) { m_light_color->set(r, g, b, 1.0f); }
 void scene::set_light_dir(float x, float y, float z)
 {
@@ -336,7 +335,6 @@ void scene::set_shadows_bias(int idx, float bias, float slope)
     m_shadow_cascades_slope_bias[idx] = slope;
 }
 
-const nya_scene::material::param_proxy &scene::get_light_ambient() const { return m_light_ambient; }
 const nya_scene::material::param_proxy &scene::get_light_color() const { return m_light_color; }
 const nya_scene::material::param_proxy &scene::get_light_dir() const { return m_light_dir; }
 const nya_scene::material::param_array_proxy &scene::get_shadow_tr() const { return m_shadow_tr; }
@@ -375,7 +373,6 @@ btDiscreteDynamicsWorld *scene::mmd_phys()
 
 scene::scene()
 {
-    m_light_ambient.create();
     m_light_color.create();
     m_light_dir.create();
 

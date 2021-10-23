@@ -7,7 +7,7 @@
 @uniform alpha_test "alpha test"
 
 @uniform light_dir "light dir":local_rot_scale=-0.4,0.82,0.4
-@uniform light_color "light color"=0.6,0.6,0.6
+@uniform light_color "light color"=1.0,1.0,1.0
 @predefined cam_pos "nya camera position":local
 @predefined cam_rot "nya camera rotation":local
 
@@ -75,7 +75,7 @@ void main()
     float ndh = dot(n, normalize(ldir + eye));
     vec3 spec = spec_k.rgb * max(pow(ndh, spec_k.a), 0.0);
 
-    c.rgb *= clamp((diff_k.rgb + spec) * light_color.rgb + amb_k.rgb, vec3(0.0), vec3(1.0));
+    c.rgb *= clamp((diff_k.rgb + spec) * 0.6 * light_color.rgb + amb_k.rgb, vec3(0.0), vec3(1.0));
 
     vec4 e = texture2D(env, env_tc);
     c = mix(c, c * e, env_p.x);

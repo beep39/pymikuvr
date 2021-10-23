@@ -15,6 +15,7 @@ public:
     bool load(const char *name);
     void set_texture(const char *type, int tex);
     void set_param(const char *type, float x, float y, float z, float w);
+    void set_opaque(float alpha);
 
     //inline bool opaque() const { return m_opaque; }
     //inline bool alpha_clip() const { return m_alpha_clip; }

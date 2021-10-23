@@ -107,7 +107,6 @@ bool mesh::load(const char *name)
 
                 auto shadow_param = nya_math::vec4(1.0f, 0.0f, 0.0f, 0.3f);
 
-                m.set_param("light ambient", scene::instance().get_light_ambient());
                 m.set_param("light color", scene::instance().get_light_color());
                 m.set_param("light dir", scene::instance().get_light_dir());
                 m.set_param_array("shadow tr", scene::instance().get_shadow_tr());

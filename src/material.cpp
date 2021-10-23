@@ -15,7 +15,6 @@ bool material::load(const char *name)
     if (result)
     {
         mat.set_texture("diffuse", scene::instance().white_texture());
-        mat.set_param("light ambient", scene::instance().get_light_ambient());
         mat.set_param("light color", scene::instance().get_light_color());
         mat.set_param("light dir", scene::instance().get_light_dir());
         mat.set_param_array("shadow tr", scene::instance().get_shadow_tr());
@@ -47,11 +46,12 @@ void material::set_texture(const char *type, int idx)
 void material::set_param(const char *type, float r, float g, float b, float a)
 {
     mat.set_param(type, r, g, b, a);
-    if (strcmp(type, "color") == 0)
-    {
-        m_alpha = a;
-        update_opaque();
-    }
+}
+
+void material::set_opaque(float alpha)
+{
+    m_alpha = alpha;
+    update_opaque();
 }
 
 void material::update_opaque()

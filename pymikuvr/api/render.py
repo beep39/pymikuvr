@@ -3,7 +3,6 @@ from api.capi import c_lib
 from api.color import color_o
 from api.vec3 import vec3_o
 
-c_lib.render_light_ambient.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_light_color.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_light_dir.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float)
 c_lib.render_shadows_cascades.argtypes = (ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
@@ -11,29 +10,16 @@ c_lib.render_set_shadows_bias.argtypes = (ctypes.c_int, ctypes.c_float, ctypes.c
 c_lib.render_set_znearfar.argtypes = (ctypes.c_float, ctypes.c_float)
 
 class directional_light:
-    slots = ('__ambient', '__color', '__intensity', '__dir')
+    slots = ('__ambient', '__color', '__dir')
     def __init__(self):
-        def update_ambient():
-            c_lib.render_light_ambient(self.__ambient.r, self.__ambient.g, self.__ambient.b)
-        self.__ambient = color_o(update_ambient, 0.5, 0.5, 0.5)
-        update_ambient()
         def update_color():
-            c_lib.render_light_color(self.__color.r * self.__intensity, self.__color.g * self.__intensity, self.__color.b * self.__intensity)
+            c_lib.render_light_color(self.__color.r, self.__color.g, self.__color.b)
         self.__color = color_o(update_color)
-        self.__intensity = 0.6
         update_color()
         def update_dir():
             c_lib.render_light_dir(self.__dir.x, self.__dir.y, self.__dir.z)
         self.__dir = vec3_o(update_dir, 0.4, -0.82, -0.4)
         update_dir()
-
-    @property
-    def ambient(self):
-        return self.__ambient
-
-    @ambient.setter
-    def ambient(self, v):
-        self.__ambient.set(v.r, v.g, v.b)
 
     @property
     def color(self):
@@ -42,15 +28,6 @@ class directional_light:
     @color.setter
     def color(self, v):
         self.__color.set(v.r, v.g, v.b)
-
-    @property
-    def intensity(self):
-        return self.__intensity
-
-    @intensity.setter
-    def intensity(self, v):
-        self.__intensity = v
-        self.__color.set(self.__color.r, self.__color.g, self.__color.b)
 
     @property
     def dir(self):
