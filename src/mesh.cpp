@@ -294,8 +294,13 @@ void mesh::set_anim_time(int layer, int time)
 
     for (auto &b: m_blends)
     {
-        if (b.layer == layer && b.anim)
+        if (b.layer != layer)
+            continue;
+
+        if (b.anim)
             b.set_time = time;
+        else if (b.prev_layer >= 0)
+            m_mesh.set_anim_time(time, b.prev_layer);
     }
 
     m_mesh.update(0);
