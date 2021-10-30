@@ -179,6 +179,7 @@ class vec3_c(vec3):
 
 class vec3_o(vec3):
     __slots__ = ('__observer_callback', '__x', '__y', '__z')
+    @unpack_vec3
     def __init__(self, observer_callback, x = 0.0, y = 0.0, z = 0.0):
         self.__x = x
         self.__y = y

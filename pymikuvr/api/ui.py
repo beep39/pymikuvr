@@ -111,7 +111,7 @@ class ui_checkbox(ui_label):
     def value(self, v):
         c_lib.ui_set_bool(self._ui_label__p._ui__id, self._ui_label__id, v)
 
-class ui_list(ui_label):
+class ui_list:
     __slots__ = ('__items', '__p', '__id')
     def __init__(self, p, id, items):
         self.__p = p

@@ -269,6 +269,7 @@ class quat_c(quat):
 
 class quat_o(quat):
     __slots__ = ('__observer_callback', '__x', '__y', '__z', '__w')
+    @unpack_quat
     def __init__(self, observer_callback, x = 0.0, y = 0.0, z = 0.0, w = 1.0):
         self.__x = x
         self.__y = y
