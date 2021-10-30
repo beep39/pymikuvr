@@ -34,7 +34,7 @@ class video:
                 info = None
                 try:
                     info = ydl.extract_info(resname, download=False)
-                except:
+                except Exception:
                     pass
                 if info is not None and 'requested_formats' in info:
                     info = info['requested_formats']

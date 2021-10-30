@@ -54,7 +54,7 @@ class material_base:
     def texture(self):
         try:
             return self._textures["diffuse"]
-        except:
+        except Exception:
             return None
 
     @texture.setter

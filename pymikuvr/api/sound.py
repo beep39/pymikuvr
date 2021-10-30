@@ -88,8 +88,8 @@ class sound(base):
     @radius.setter
     def radius(self, v):
         self.__radius = v
-        if radius is None:
-            radius = -1
+        if v is None:
+            v = -1
         c_lib.sound_set_radius(self.__id, v)
 
     @property

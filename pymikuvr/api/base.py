@@ -21,7 +21,7 @@ class updater_class:
             for r in self.remove_list:
                 try:
                     self.list.remove(r)
-                except:
+                except Exception:
                     pass
             self.remove_list.clear()
 

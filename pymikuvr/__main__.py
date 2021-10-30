@@ -1,4 +1,4 @@
-from time import sleep, time
+from time import time
 from sys import argv, exit, path
 import os, gc
 

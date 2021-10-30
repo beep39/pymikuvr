@@ -1,6 +1,5 @@
 import ctypes
 from api.capi import c_lib
-from api.color import color
 
 c_lib.texture_build.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
 
@@ -48,8 +47,8 @@ class texture:
     def h(self):
         return c_lib.texture_get_height(self.__id)
 
-    def __eq__(a, b):
-        return a.__id == b.__id
+    def __eq__(self, other):
+        return self.__id == other.__id
 
     def __del__(self):
         c_lib.texture_remove(self.__id)

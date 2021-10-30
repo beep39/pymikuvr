@@ -1,6 +1,5 @@
 import ctypes
 from api.capi import c_lib
-from api.sound import sound
 
 c_lib.animation_set_speed.argtypes = (ctypes.c_int, ctypes.c_float)
 c_lib.animation_set_weight.argtypes = (ctypes.c_int, ctypes.c_float)

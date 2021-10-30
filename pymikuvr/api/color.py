@@ -59,23 +59,23 @@ class color:
     def hex(self, value):
         self.__init__(value)
 
-    def __eq__(a, b):
-        return a.r == b.r and a.g == b.g and a.b == b.b and a.a == b.a
+    def __eq__(self, other):
+        return self.r == other.r and self.g == other.g and self.b == other.b and self.a == other.a
 
-    def __add__(a, b):
-        return color(a.r + b.r, a.g + b.g, a.b + b.b, a.a + b.a)
+    def __add__(self, other):
+        return color(self.r + other.r, self.g + other.g, self.b + other.b, self.a + other.a)
 
-    def __sub__(a, b):
-        return color(a.r - b.r, a.g - b.g, a.b - b.b, a.a - b.a)
+    def __sub__(self, other):
+        return color(self.r - other.r, self.g - other.g, self.b - other.b, self.a - other.a)
 
-    def __mul__(a, b):
-        if type(a) is type(b):
-            return color(a.r * b.r, a.g * b.g, a.b * b.b, a.a * b.a)
+    def __mul__(self, other):
+        if isinstance(other, color):
+            return color(self.r * other.r, self.g * other.g, self.b * other.b, self.a * other.a)
         else:
-            return color(a.r * b, a.g * b, a.b * b, a.a * b)
+            return color(self.r * other, self.g * other, self.b * other, self.a * other)
 
-    def __rmul__(a, b):
-        return a * b
+    def __rmul__(self, other):
+        return self * other
 
     @classproperty
     def black(self):

@@ -17,7 +17,7 @@ class ui_updater_class:
         self.list = {}
         self.last_id = -1
 
-    def update():
+    def update(self):
         count = c_lib.ui_events()
         for i in range(count):
             id = c_lib.ui_event()

@@ -194,23 +194,23 @@ class quat:
             return target
         return quat.slerp(value, target, speed / angle)
 
-    def __eq__(a, b):
-        return a.x == b.x and a.y == b.y and a.z == b.z and a.w == b.w
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y and self.z == other.z and self.w == other.w
 
-    def __mul__(a, b):
-        if isinstance(b, quat):
-            x = a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y
-            y = a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x
-            z = a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w
-            w = a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
+    def __mul__(self, other):
+        if isinstance(other, quat):
+            x = self.w * other.x + self.x * other.w + self.y * other.z - self.z * other.y
+            y = self.w * other.y - self.x * other.z + self.y * other.w + self.z * other.x
+            z = self.w * other.z + self.x * other.y - self.y * other.x + self.z * other.w
+            w = self.w * other.w - self.x * other.x - self.y * other.y - self.z * other.z
             return quat(x, y, z, w)
 
-        if isinstance(b, api.vec3.vec3):
+        if isinstance(other, api.vec3.vec3):
             vec3 = api.vec3.vec3
-            t = vec3(a.x, a.y, a.z)
-            return b + vec3.cross(t, vec3.cross(t, b) + b * a.w) * 2.0
+            t = vec3(self.x, self.y, self.z)
+            return other + vec3.cross(t, vec3.cross(t, other) + other * self.w) * 2.0
 
-        raise ValueError("unable to multiply quat by " + type(b))
+        raise ValueError("unable to multiply quat by " + type(other))
 
     @static_or_instance
     def normalize(a):

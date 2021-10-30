@@ -1,5 +1,4 @@
 from api.base import updater
-from api.transform import transform
 from api.vec2 import vec2
 from api.vec3 import vec3
 from api.system import system
