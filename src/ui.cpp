@@ -197,16 +197,59 @@ void ui::update_pre(int dt)
         switch (w.type)
         {
             case widget_label: ImGui::Text("%s", w.label.c_str()); break; //ToDo: TextColored(ImVec4(), "")
-            case widget_btn: w.boolean = ImGui::Button(w.label.c_str()); break;
-            case widget_checkbox: ImGui::Checkbox(w.label.c_str(), &w.boolean); break;
-            case widget_radio: w.boolean = ImGui::RadioButton(w.label.c_str(), w.boolean); break;
-            case widget_slider: ImGui::SliderFloat(w.label.c_str(), &w.slider.v, w.slider.f, w.slider.t); break;
+            case widget_btn:
+            {
+                if (ImGui::Button(w.label.c_str()))
+                {
+                    if (!w.boolean)
+                    {
+                        w.boolean = true;
+                        sys::push_callback(w.callback);
+                    }
+                }
+                else
+                    w.boolean = false;
+                break;
+            }
+            case widget_checkbox:
+            {
+                bool value = w.boolean;
+                ImGui::Checkbox(w.label.c_str(), &value);
+                if (w.boolean != value)
+                {
+                    w.boolean = value;
+                    sys::push_callback(w.callback, value);
+                }
+                break;
+            }
+            case widget_radio:
+            {
+                const bool value = ImGui::RadioButton(w.label.c_str(), w.boolean);
+                if (w.boolean != value)
+                {
+                    w.boolean = value;
+                    sys::push_callback(w.callback, value);
+                }
+                break;
+            }
+            case widget_slider:
+            {
+                float value = w.slider.v;
+                ImGui::SliderFloat(w.label.c_str(), &value, w.slider.f, w.slider.t);
+                if (w.slider.v != value)
+                {
+                    w.slider.v = value;
+                    sys::push_callback(w.callback, value);
+                }
+                break;
+            }
             case widget_coloredit3: ImGui::ColorEdit3(w.label.c_str(), w.color); break;
             case widget_coloredit4: ImGui::ColorEdit4(w.label.c_str(), w.color); break;
             case widget_separator: ImGui::Separator(); break;
             case widget_spacing: ImGui::Dummy(ImVec2(16,16)); break;
             case widget_hlayout: hlayout = w.count; hlayout_started = false; break;
             case widget_dropdown:
+            {
                 if (ImGui::BeginCombo(w.label.c_str(), w.list[w.selected].c_str()))
                 {
                     for (int i = 0; i < (int)w.list.size(); ++i)
@@ -218,6 +261,7 @@ void ui::update_pre(int dt)
                     ImGui::EndCombo();
                 }
                 break;
+            }
             case widget_listbox:
             {
                 const auto p = ImGui::GetCursorPos();
@@ -244,10 +288,13 @@ void ui::update_pre(int dt)
                 break;
             }
             case widget_scroll:
+            {
                 scroll = w.count;
                 ImGui::BeginChild(("scroll" + std::to_string(idx)).c_str());
                 break;
+            }
             case widget_tab:
+            {
                 if (!tab)
                 {
                     ImGui::BeginTabBar(("tab" + std::to_string(idx)).c_str());
@@ -257,6 +304,7 @@ void ui::update_pre(int dt)
                     ImGui::EndTabItem();
                 skip_tab = !ImGui::BeginTabItem(w.label.c_str());
                 break;
+            }
         }
 
         if (scroll > 0 && --scroll == 0)

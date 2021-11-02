@@ -1,5 +1,5 @@
 import ctypes
-from api.capi import c_lib
+from api.capi import c_lib, c_callback
 from api.color import color
 from api.base import base
 
@@ -11,28 +11,6 @@ c_lib.ui_set_slider.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.c_float)
 c_lib.ui_get_slider.restype = ctypes.c_float
 c_lib.ui_get_list_value.restype = ctypes.c_char_p
 c_lib.ui_set_color.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float)
-
-class ui_updater_class:
-    def __init__(self):
-        self.list = {}
-        self.last_id = -1
-
-    def update(self):
-        count = c_lib.ui_events()
-        for i in range(count):
-            id = c_lib.ui_event()
-            self.list[id](id)
-
-    def register(self, func):
-        self.last_id += 1
-        self.list[self.last_id] = func
-        return self.last_id
-
-    def unregister(self, ids):
-        for id in ids:
-            self.list.popitem(id)
-
-ui_updater = ui_updater_class()
 
 class ui_label:
     __slots__ = ('__id','__p','__text')
@@ -180,7 +158,6 @@ class ui(base):
         super().__init__(c_lib.ui_get_origin(self.__id), enable_callback)
 
     def __del__(self):
-        ui_updater.unregister(self.__callbacks)
         c_lib.ui_remove(self.__id)
         super().__del__()
 
@@ -233,89 +210,33 @@ class ui(base):
         return ui_label(self, id, text)
 
     def add_btn(self, text, callback = None):
-        c = -1
-        if callback is not None:
-            raise NotImplementedError
-        
-            def wrap_callback(id):
-                nonlocal callback
-                callback()
-            c = ui_updater.register(wrap_callback)
-            self.__callbacks.append(c)
-        id = c_lib.ui_add_btn(self.__id, text.encode(), c)
+        id = c_lib.ui_add_btn(self.__id, text.encode(), self._add_callback(callback))
         return ui_btn(self, id, text)
 
     def add_checkbox(self, text, callback = None, radio = False):
-        c = -1
-        if callback is not None:
-            raise NotImplementedError
-
-            def wrap_callback(id):
-                nonlocal callback
-                callback()
-            c = ui_updater.register(wrap_callback)
-            self.__callbacks.append(c)
-        id = c_lib.ui_add_checkbox(self.__id, text.encode(), c, radio)
+        id = c_lib.ui_add_checkbox(self.__id, text.encode(), self._add_callback(callback), radio)
         return ui_checkbox(self, id, text)
 
     def add_slider(self, text, callback = None, f = 0.0, t = 1.0):
-        c = -1
-        if callback is not None:
-            raise NotImplementedError
-
-            def wrap_callback(id):
-                nonlocal callback
-                callback(c_lib.ui_event_float(id))
-            c = ui_updater.register(wrap_callback)
-            self.__callbacks.append(c)
-        id = c_lib.ui_add_slider(self.__id, text.encode(), c, f, t)
+        id = c_lib.ui_add_slider(self.__id, text.encode(), self._add_callback(callback), f, t)
         return ui_slider(self, id, text)
 
     def add_coloredit(self, text, callback = None, alpha = False):
-        c = -1
-        if callback is not None:
-            raise NotImplementedError
-
-            def wrap_callback(id):
-                nonlocal callback
-                callback(c_lib.ui_event_color(id))
-            c = ui_updater.register(wrap_callback)
-            self.__callbacks.append(c)
-        id = c_lib.ui_add_coloredit(self.__id, text.encode(), c, alpha)
+        id = c_lib.ui_add_coloredit(self.__id, text.encode(), self._add_callback(callback), alpha)
         return ui_coloredit(self, id, text)
 
     def add_dropdown(self, items, callback = None):
-        c = -1
-        if callback is not None:
-            raise NotImplementedError
-
-            def wrap_callback(id):
-                nonlocal callback
-                callback(c_lib.ui_event_str(id))
-            c = ui_updater.register(wrap_callback)
-            self.__callbacks.append(c)
-
         items_encoded = [itm.encode() for itm in items]
         arr = (ctypes.c_char_p * len(items_encoded))()
         arr[:] = items_encoded
-        id = c_lib.ui_add_dropdown(self.__id, c, arr, len(items_encoded))
+        id = c_lib.ui_add_dropdown(self.__id, self._add_callback(callback), arr, len(items_encoded))
         return ui_list(self, id, items)
-    
+
     def add_listbox(self, items, callback = None):
-        c = -1
-        if callback is not None:
-            raise NotImplementedError
-
-            def wrap_callback(id):
-                nonlocal callback
-                callback(c_lib.ui_event_str(id))
-            c = ui_updater.register(wrap_callback)
-            self.__callbacks.append(c)
-
         items_encoded = [itm.encode() for itm in items]
         arr = (ctypes.c_char_p * len(items_encoded))()
         arr[:] = items_encoded
-        id = c_lib.ui_add_listbox(self.__id, c, arr, len(items_encoded))
+        id = c_lib.ui_add_listbox(self.__id, self._add_callback(callback), arr, len(items_encoded))
         return ui_list(self, id, items)
 
     def add_tab(self, text):
@@ -329,3 +250,10 @@ class ui(base):
 
     def add_scroll(self, count = -1):
         c_lib.ui_add_scroll(self.__id, count)
+
+    def _add_callback(self, callback):
+        if callback is None:
+            return -1
+        c = c_callback(callback)
+        self.__callbacks.append(c)
+        return c.id
