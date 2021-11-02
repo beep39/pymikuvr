@@ -316,6 +316,16 @@ void sys::exit()
 #endif
 }
 
+const char *sys::pop_callback()
+{
+    if (m_callback_events.empty())
+        return 0;
+
+    m_callback_event = m_callback_events.front();
+    m_callback_events.pop_front();
+    return m_callback_event.c_str();
+}
+
 void sys::block_input(bool right, bool block) { m_input_blocked[right ? 1 : 0] = block; }
 
 uint32_t sys::get_ctrl(bool right, float *jx, float *jy, float *trigger)

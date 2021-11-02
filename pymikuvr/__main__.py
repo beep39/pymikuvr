@@ -8,6 +8,7 @@ from api.script import scene_script
 from api.system import system, system_internal
 from api.base import updater
 from api.ui import ui
+from api.capi import callbacks
 
 if len(argv) < 2:
     exit("please specify game script to load, e.g.: python3 pymikuvr test.py")
@@ -42,6 +43,7 @@ while native_update():
     system.dt = t - prev_time
     system.time += system.dt
     prev_time = t
+    callbacks.update(system.error)
     player_update()
     scripts_update()
 

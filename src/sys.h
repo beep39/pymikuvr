@@ -9,6 +9,8 @@
 #include "math/matrix.h"
 #include "math/vector.h"
 #include "memory/mutex.h"
+#include <deque>
+#include <vector>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -39,6 +41,13 @@ public:
     void block_input(bool right, bool block);
     uint32_t get_ctrl(bool right, float *ax, float *ay, float *triger);
 
+    const char *pop_callback();
+    template<typename... TT> static void push_callback(int id, TT... args)
+    {
+        if (id >= 0)
+            instance().m_callback_events.push_back('[' + process_args(id, args...)  + ']');
+    }
+
     void reg_desktop_texture(int idx);
 
     void reset_resources();
@@ -66,6 +75,9 @@ private:
     bool m_input_blocked[2];
     float m_mposx = 0, m_mposy = 0;
     unsigned long m_script_time = 0;
+
+    std::deque<std::string> m_callback_events;
+    std::string m_callback_event;
 
     nya_resources::composite_resources_provider *m_cprov = 0;
     std::vector<nya_resources::resources_provider *> m_providers;
@@ -127,4 +139,14 @@ private:
         nya_memory::mutex m;
     };
     external_window m_external_window;
+
+private:
+    template<typename T, typename... TT> static std::string process_args(T a, TT... args)
+    {
+        return process_args(a) + ',' + process_args(args...);
+    }
+    template<typename T> static std::string process_args(T a) { return std::to_string(a); }
+    static std::string process_args(const char *a) { return process_args(std::string(a ? a : "")); }
+    static std::string process_args(std::string a) { return '"' + a + '"'; }
+    static std::string process_args(bool a) { return (a ? "true" : "false"); }
 };

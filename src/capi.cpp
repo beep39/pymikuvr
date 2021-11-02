@@ -233,6 +233,7 @@ EX  bool sys_start_window(int width, int height, const char *title)
     {
         return sys::instance().start_window(width, height, title);
     }
+EX  const char *sys_pop_callback() { return sys::instance().pop_callback(); }
 EX  bool sys_update() { return sys::instance().update(); }
 EX  void sys_reset_dt() { sys::instance().reset_dt(); }
 EX  void sys_exit() { sys::instance().exit(); }
