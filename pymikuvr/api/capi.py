@@ -18,6 +18,8 @@ def load_lib():
         os.chdir(path)
         return lib
 
+    ctypes.CDLL("libglfw.so", mode = ctypes.RTLD_GLOBAL)
+    ctypes.CDLL("libvlc.so", mode = ctypes.RTLD_GLOBAL)
     return ctypes.CDLL(os.path.join(lib_path, "libpymikuvr.so"))
 
 c_lib = load_lib()

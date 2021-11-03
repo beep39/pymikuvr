@@ -1,0 +1,38 @@
+project(pymikuvr)
+cmake_minimum_required(VERSION 3.0)
+set(CMAKE_CXX_FLAGS "-fPIC -fpermissive -std=c++0x -Wno-multichar")
+set(CMAKE_BUILD_TYPE Release)
+
+add_subdirectory(deps/nya-engine)
+include_directories(deps/nya-engine)
+include_directories(deps/recastnavigation/Detour/Include)
+include_directories(deps/recastnavigation/Recast/Include)
+include_directories(deps/imgui)
+
+define_source_files(src)
+define_source_files(deps/nya-engine/tests/shared)
+list(APPEND src_files deps/nya-engine/extensions/texture_il.cpp)
+define_source_files(deps/recastnavigation/Detour/Source)
+define_source_files(deps/recastnavigation/Recast/Source)
+list(APPEND src_files deps/imgui/imgui.cpp)
+list(APPEND src_files deps/imgui/imgui_draw.cpp)
+list(APPEND src_files deps/imgui/imgui_widgets.cpp)
+add_library(pymikuvr SHARED ${src_files})
+target_link_libraries(pymikuvr nya_engine)
+
+find_package(Bullet REQUIRED)
+include_directories(${BULLET_INCLUDE_DIRS})
+target_link_libraries(pymikuvr ${BULLET_LIBRARIES})
+
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIRS})
+target_link_libraries(pymikuvr ${OPENGL_LIBRARIES})
+
+find_package(OpenAL REQUIRED)
+include_directories(${OPENAL_INCLUDE_DIR})
+target_link_libraries(pymikuvr ${OPENAL_LIBRARY})
+
+find_package(DevIL REQUIRED)
+include_directories(${IL_INCLUDE_DIR})
+target_link_libraries(pymikuvr ${IL_LIBRARIES})
