@@ -15,11 +15,11 @@
 #ifdef _WIN32
     #include <windows.h>
     #include <thread>
-    #define USE_VR
 #endif
 
-#ifdef USE_VR
+#ifndef __APPLE__
     #include <openvr.h>
+    #define USE_VR
 #endif
 
 struct GLFWwindow;

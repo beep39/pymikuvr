@@ -63,7 +63,7 @@ bool sys::start_vr()
         return false;
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-#ifndef _WIN32
+#ifdef __APPLE__
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -103,10 +103,10 @@ bool sys::start_window(int width, int height, const char *title)
     if (!glfwInit())
         return false;
 
-    //glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-#ifndef _WIN32
+#ifdef __APPLE__
+    //glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
