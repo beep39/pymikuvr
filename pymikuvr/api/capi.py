@@ -27,6 +27,11 @@ c_lib.sys_pop_callback.restype = ctypes.c_char_p
 class callbacks_class:
     __slots__ = ('callbacks', 'free')
     def __init__(self):
+        self.reset()
+
+    def reset(self):
+        while c_lib.sys_pop_callback() is not None:
+            pass
         self.callbacks = []
         self.free = []
 
@@ -67,5 +72,5 @@ class c_callback:
         self.call = callback
         callbacks.register(self)
 
-    def __del__():
+    def __del__(self):
         callbacks.unregister(self)

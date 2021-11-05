@@ -20,7 +20,7 @@ from api.vec2 import vec2
 from api.vec3 import vec3
 from api.video import video
 
-from api.capi import c_lib
+from api.capi import c_lib, callbacks
 
 import gc
 import random
@@ -143,6 +143,7 @@ class script:
         self.__watch_paths = []
 
         self.__vars = None
+        callbacks.reset()
         updater.reset()
         render.reset()
         player.reset()
@@ -219,7 +220,7 @@ class script:
         meta_path.remove(importer)
         importer.cleanup()
 
-        cache = None
+        del cache
         gc.collect()
         c_lib.sys_reset_dt()
 
