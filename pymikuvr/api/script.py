@@ -143,10 +143,10 @@ class script:
         self.__watch_paths = []
 
         self.__vars = None
-        callbacks.reset()
-        updater.reset()
         render.reset()
         player.reset()
+        callbacks.reset()
+        updater.reset()
 
         if cache is None:
             gc.collect()
