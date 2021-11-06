@@ -18,11 +18,12 @@ class locomotion:
             o._walk_update()
             o._turn_update()
         self.update = update
-        updater.register(self)
 
     def walk(self, source, speed=3, area=None):
         if area is not None:
             raise NotImplementedError
+
+        updater.register(self)
 
         pos = self._target.pos
         head = self._target.head
@@ -41,6 +42,8 @@ class locomotion:
         if area is not None:
             raise NotImplementedError
 
+        updater.register(self)
+
         t = self._target
         head = self._target.head
         def update():
@@ -52,6 +55,8 @@ class locomotion:
         self._walk_update = update
 
     def turn(self, source, speed=1, fixed_angle=None):
+        updater.register(self)
+
         speed *= 360
         t = self._target
         if fixed_angle is None:
