@@ -94,6 +94,8 @@ private:
 
 #ifdef USE_VR
     vr::IVRSystem *m_vr = NULL;
+    vr::IVRInput *m_vri = NULL;
+    vr::VRActionSetHandle_t m_vr_input_action_handle = vr::k_ulInvalidActionHandle;
 #else
     const static int m_vr = 0;
 #endif
@@ -114,6 +116,11 @@ private:
 
         uint32_t buttons = 0;
         transform *origin = 0;
+
+#ifdef USE_VR
+        vr::VRInputValueHandle_t input_handle = vr::k_ulInvalidActionHandle;
+        std::vector<vr::VRBoneTransform_t> bones_buf;
+#endif
     };
     std::map<int, controller> m_controllers;
 

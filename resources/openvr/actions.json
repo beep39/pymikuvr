@@ -1,0 +1,26 @@
+{
+  "actions": [
+    {
+      "name": "/actions/default/in/SkeletonLeftHand",
+      "type": "skeleton",
+      "skeleton": "/skeleton/hand/left"
+    },
+    {
+      "name": "/actions/default/in/SkeletonRightHand",
+      "type": "skeleton",
+      "skeleton": "/skeleton/hand/right"
+    }
+  ],
+  "action_sets": [
+    {
+      "name": "/actions/default"
+    }
+  ],
+  "default_bindings":[
+    {
+      "controller_type" : "generic",
+      "binding_url" : "bindings_generic.json"
+    }
+  ],
+  "localization" : []
+}

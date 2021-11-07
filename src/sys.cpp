@@ -42,12 +42,23 @@ bool sys::start_vr()
 #ifdef USE_VR
     auto eError = vr::VRInitError_None;
     m_vr = vr::VR_Init(&eError, vr::VRApplication_Scene);
-
     if (eError != vr::VRInitError_None || !vr::VRCompositor())
     {
         m_vr = NULL;
         printf("Unable to init VR runtime: %s\n", vr::VR_GetVRInitErrorAsEnglishDescription(eError));
         return false;
+    }
+
+    for (auto &folder: m_folders)
+    {
+        const auto path = folder + "openvr/actions.json";
+        if (!nya_resources::file_resources_provider().has(path.c_str()))
+            continue;
+
+        m_vri = vr::VRInput();
+        m_vri->SetActionManifestPath(path.c_str());
+        m_vri->GetActionSetHandle("/actions/default", &m_vr_input_action_handle);
+        break;
     }
 
     uint32_t w, h;
@@ -194,6 +205,15 @@ bool sys::update()
     if (m_vr)
     {
 #ifdef USE_VR
+        if (m_vr_input_action_handle != vr::k_ulInvalidActionHandle)
+        {
+            vr::VRActiveActionSet_t t;
+            t.ulActionSet = m_vr_input_action_handle;
+            t.ulRestrictedToDevice = vr::k_ulInvalidInputValueHandle;
+            t.nPriority = 0;
+            m_vri->UpdateActionState(&t,sizeof(t),1);
+        }
+
         for (int i = 1; i < vr::k_unMaxTrackedDeviceCount; ++i)
         {
             const auto tdc = m_vr->GetTrackedDeviceClass(i);
@@ -225,12 +245,30 @@ bool sys::update()
                     const bool right = vr::VRSystem()->GetControllerRoleForTrackedDeviceIndex(i) == vr::ETrackedControllerRole::TrackedControllerRole_RightHand;
                     c.origin = right ? player::instance().rhand() : player::instance().lhand();
                     if (right)
+                    {
+                        if (m_vri)
+                            m_vri->GetInputSourceHandle("/actions/default/in/SkeletonRightHand", &c.input_handle);
                         m_controller_right = &c;
+                    }
                     else
+                    {
+                        if (m_vri)
+                            m_vri->GetInputSourceHandle("/actions/default/in/SkeletonLeftHand", &c.input_handle);
                         m_controller_left = &c;
+                    }
                     c.axes.resize(5);
 
-                    nya_log::log()<<"controller: "<<tmp<<"\n";
+                    if (m_vri)
+                    {
+                        uint32_t bone_count = 0;
+                        auto bc_error = m_vri->GetBoneCount(c.input_handle, &bone_count);
+                        if (bc_error == vr::VRInputError_None)
+                            c.bones_buf.resize(bone_count);
+                        else
+                            nya_log::log()<<"OpenVR GetBoneCount error: "<<bc_error<<"\n";
+                    }
+
+                    nya_log::log()<<"controller: "<<tmp<<" bones: "<<c.bones_buf.size()<<"\n";
                 }
             }
 
@@ -251,10 +289,11 @@ bool sys::update()
             uint32_t buttons = 0;
             vr::VRControllerState_t state;
             m_vr->GetControllerState(d.first, &state, sizeof(state));
-            for (int i = 0, to = (int)d.second.axes.size(); i < to; ++i)
+            auto &c = d.second;
+            for (int i = 0, to = (int)c.axes.size(); i < to; ++i)
             {
-                d.second.axes[i].x = state.rAxis[i].x;
-                d.second.axes[i].y = state.rAxis[i].y;
+                c.axes[i].x = state.rAxis[i].x;
+                c.axes[i].y = state.rAxis[i].y;
                 if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::EVRButtonId(vr::k_EButton_Axis0 + i)))
                     buttons |= (1 << (controller::btn_axis0 + i));
             }
@@ -268,7 +307,31 @@ bool sys::update()
                 buttons |= (1 << controller::btn_axis0);
             if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Axis1))
                 buttons |= (1 << controller::btn_axis1);
-            d.second.buttons = buttons;
+            c.buttons = buttons;
+
+            if (c.input_handle == vr::k_ulInvalidActionHandle || c.bones_buf.empty())
+                continue;
+ 
+            vr::InputSkeletalActionData_t action_data;
+            const auto sd_error = m_vri->GetSkeletalActionData(c.input_handle, &action_data, sizeof(action_data));
+            if (sd_error != vr::VRInputError_None)
+            {
+                if (sd_error == vr::VRInputError_NoData)
+                    continue;
+
+                nya_log::log()<<"OpenVR GetSkeletalActionData error: "<<sd_error<<"\n";
+                c.bones_buf.clear();
+                continue;
+            }
+
+            if (!action_data.bActive)
+                continue;
+
+            if (m_vri->GetSkeletalBoneData(c.input_handle, vr::VRSkeletalTransformSpace_Parent, vr::VRSkeletalMotionRange_WithoutController,
+                                           c.bones_buf.data(), (uint32_t)c.bones_buf.size()) != vr::VRInputError_None)
+                continue;
+
+            //ToDo
         }
 #endif
     }
