@@ -49,6 +49,7 @@ bool sys::start_vr()
         return false;
     }
 
+    /*
     for (auto &folder: m_folders)
     {
         const auto path = folder + "openvr/actions.json";
@@ -60,6 +61,7 @@ bool sys::start_vr()
         m_vri->GetActionSetHandle("/actions/default", &m_vr_input_action_handle);
         break;
     }
+    */
 
     uint32_t w, h;
     m_vr->GetRecommendedRenderTargetSize(&w, &h);
@@ -258,6 +260,7 @@ bool sys::update()
                         m_controller_left = &c;
                         c.pose = m_controller_pose[0];
                     }
+                    c.right = right;
                     c.axes.resize(5);
 
                     if (m_vri)
@@ -265,7 +268,13 @@ bool sys::update()
                         uint32_t bone_count = 0;
                         auto bc_error = m_vri->GetBoneCount(c.input_handle, &bone_count);
                         if (bc_error == vr::VRInputError_None)
-                            c.bones_buf.resize(bone_count);
+                        {
+                            const int anim_bones_count = c.pose->anim->get_shared_data()->anim.get_bones_count();
+                            if (bone_count >= anim_bones_count)
+                                c.bones_buf.resize(bone_count);
+                            else
+                                nya_log::log()<<"bone count "<<bone_count<<" is less than expected "<<anim_bones_count<<"\n";
+                        }
                         else
                             nya_log::log()<<"OpenVR GetBoneCount error: "<<bc_error<<"\n";
                     }
@@ -311,7 +320,7 @@ bool sys::update()
                 buttons |= (1 << controller::btn_axis1);
             c.buttons = buttons;
 
-            if (c.input_handle == vr::k_ulInvalidActionHandle || c.bones_buf.empty())
+            if (c.bones_buf.empty())
                 continue;
  
             vr::InputSkeletalActionData_t action_data;
@@ -333,7 +342,16 @@ bool sys::update()
                                            c.bones_buf.data(), (uint32_t)c.bones_buf.size()) != vr::VRInputError_None)
                 continue;
 
-            //ToDo
+            auto &anim = *(nya_render::animation *)&(c.pose->anim->get_shared_data()->anim);
+            for (int i = 0, count = anim.get_bones_count(); i < count; ++i)
+            {
+                const auto r = c.bones_buf[i].orientation;
+
+                if (c.right)
+                    anim.add_bone_rot_frame(i, 0, nya_math::quat(-r.x, r.y, r.z, r.w));
+                else
+                    anim.add_bone_rot_frame(i, 0, nya_math::quat(r.x, r.y, -r.z, r.w));
+            }
         }
 #endif
     }
@@ -431,7 +449,7 @@ void sys::set_ctrl_pose(bool right, int anim_id)
 
     const std::string bones[] =
     {
-        "Root", "手首",
+        "Root", "Wrist",
         "親指０", "親指１", "親指２", "親指先",
         "人指０", "人指１", "人指２", "人指３", "人指先",
         "中指０", "中指１", "中指２", "中指３", "中指先",
@@ -635,7 +653,8 @@ void sys::emulate_vr_input()
         m_controller_right = &m_controllers[1];
         m_controller_left->axes.resize(2);
         m_controller_right->axes.resize(2);
-        
+        m_controller_right->right = true;
+
         m_controller_left->pose = m_controller_pose[0];
         m_controller_right->pose = m_controller_pose[1];
 

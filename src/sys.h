@@ -106,6 +106,7 @@ private:
     {
         std::string serial;
         bool tracker = false;
+        bool right = false;
         std::vector<nya_math::vec2> axes;
         enum btn
         {
