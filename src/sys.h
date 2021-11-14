@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "singleton.h"
+#include "animation.h"
 
 #include "scene/texture.h"
 #include "render/fbo.h"
@@ -40,6 +40,7 @@ public:
 
     void block_input(bool right, bool block);
     uint32_t get_ctrl(bool right, float *ax, float *ay, float *triger);
+    void set_ctrl_pose(bool right, int anim_id);
 
     const char *pop_callback();
     template<typename... TT> static void push_callback(int id, TT... args)
@@ -72,7 +73,8 @@ private:
     int m_width = 0, m_height = 0;
     unsigned long m_time = 0;
     int m_dt = 0;
-    bool m_input_blocked[2];
+    bool m_input_blocked[2] = {false, false};
+    animation *m_controller_pose[2] = {0};
     float m_mposx = 0, m_mposy = 0;
     unsigned long m_script_time = 0;
 
@@ -116,6 +118,7 @@ private:
 
         uint32_t buttons = 0;
         transform *origin = 0;
+        animation *pose = 0;
 
 #ifdef USE_VR
         vr::VRInputValueHandle_t input_handle = vr::k_ulInvalidActionHandle;

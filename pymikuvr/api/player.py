@@ -1,6 +1,7 @@
 import ctypes
 from api.capi import c_lib
 from api.base import base
+from api.animation import animation
 from api.locomotion import locomotion
 from api.transform import transform
 from api.vec2 import vec2
@@ -54,11 +55,13 @@ class transform_ro(transform):
         return
 
 class controller(transform_ro):
-    __slots__ = ('__right','__btn','axis','trigger')
+    __slots__ = ('__right','__btn','__pose','axis','trigger')
     def __init__(self, id, parent, right):
         super().__init__(id, parent)
         self.__right = right
         self.__btn = 0
+        self.__pose = animation()
+        c_lib.sys_set_ctrl_pose(right, self.__pose._animation__id)
         self.axis = vec2()
         self.trigger = 0
 
@@ -67,6 +70,10 @@ class controller(transform_ro):
         self.axis.x = tmp_ax.value
         self.axis.y = tmp_ay.value
         self.trigger = tmp_trigger.value
+
+    @property
+    def pose(self):
+        return animation(self.__pose)
 
     @property
     def hold(self):

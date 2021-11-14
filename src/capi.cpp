@@ -241,6 +241,7 @@ EX  unsigned int sys_get_ctrl(bool right, float *jx, float *jy, float *trigger)
     {
         return sys::instance().get_ctrl(right, jx, jy, trigger);
     }
+EX  void sys_set_ctrl_pose(bool right, int anim_id) { sys::instance().set_ctrl_pose(right, anim_id); }
 EX  int sys_get_trackers_count() { return player::instance().get_trackers_count(); }
 EX  const char *sys_get_tracker(int idx, int *transform)
     {

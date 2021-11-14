@@ -249,12 +249,14 @@ bool sys::update()
                         if (m_vri)
                             m_vri->GetInputSourceHandle("/actions/default/in/SkeletonRightHand", &c.input_handle);
                         m_controller_right = &c;
+                        c.pose = m_controller_pose[1];
                     }
                     else
                     {
                         if (m_vri)
                             m_vri->GetInputSourceHandle("/actions/default/in/SkeletonLeftHand", &c.input_handle);
                         m_controller_left = &c;
+                        c.pose = m_controller_pose[0];
                     }
                     c.axes.resize(5);
 
@@ -417,6 +419,36 @@ uint32_t sys::get_ctrl(bool right, float *jx, float *jy, float *trigger)
         *trigger = 0;
 
     return ctrl->buttons;
+}
+
+void sys::set_ctrl_pose(bool right, int anim_id)
+{
+    auto &pose = m_controller_pose[right ? 1 : 0];
+    pose = animation::get(anim_id);
+    pose->anim.create();
+
+    //Reference: https://github.com/ValveSoftware/openvr/wiki/Hand-Skeleton#bone-structure
+
+    const std::string bones[] =
+    {
+        "Root", "手首",
+        "親指０", "親指１", "親指２", "親指先",
+        "人指０", "人指１", "人指２", "人指３", "人指先",
+        "中指０", "中指１", "中指２", "中指３", "中指先",
+        "薬指０", "薬指１", "薬指２", "薬指３", "薬指先",
+        "小指０", "小指１", "小指２", "小指３", "小指先",
+    };
+    const std::string lr = right ? "右" : "左";
+
+    nya_scene::shared_animation a;
+    for (auto &b: bones)
+        a.anim.add_bone((lr + b).c_str());
+    pose->anim->create(a);
+
+    if (right && m_controller_right)
+        m_controller_right->pose = pose;
+    else if (m_controller_left)
+        m_controller_left->pose = pose;
 }
 
 void sys::reg_desktop_texture(int idx)
@@ -603,6 +635,9 @@ void sys::emulate_vr_input()
         m_controller_right = &m_controllers[1];
         m_controller_left->axes.resize(2);
         m_controller_right->axes.resize(2);
+        
+        m_controller_left->pose = m_controller_pose[0];
+        m_controller_right->pose = m_controller_pose[1];
 
         player::instance().add_tracker("TR_TEST");
     }
@@ -637,6 +672,26 @@ void sys::emulate_vr_input()
     if(m_controller_right->axes[1].x>0.5f)
         buttons |= (1 << controller::btn_axis1);
     m_controller_right->buttons = buttons;
+
+    auto &anim = *(nya_render::animation *)&m_controller_right->pose->anim->get_shared_data()->anim;
+    if (buttons | controller::btn_hold)
+    {
+        nya_math::quat q1(-0.10f, 0.05f, 0.68f, 0.72f),
+                       q2(0.0f, 0.0f, 0.77f, 0.64f),
+                       q3(0.0f, 0.0f, 0.75f, 0.66f);
+        for (int i = 7; i < 23; i += 5)
+        {
+            anim.add_bone_rot_frame(i, 0, q1);
+            anim.add_bone_rot_frame(i + 1, 0, q2);
+            anim.add_bone_rot_frame(i + 2, 0, q3);
+        }
+    }
+    else
+    {
+        nya_math::quat identity;
+        for (int i = 0; i < anim.get_bones_count(); ++i)
+            anim.add_bone_rot_frame(i, 0, identity);
+    }
 }
 
 bool sys::open_desktop()
