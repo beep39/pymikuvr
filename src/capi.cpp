@@ -237,9 +237,9 @@ EX  const char *sys_pop_callback() { return sys::instance().pop_callback(); }
 EX  bool sys_update() { return sys::instance().update(); }
 EX  void sys_reset_dt() { sys::instance().reset_dt(); }
 EX  void sys_exit() { sys::instance().exit(); }
-EX  unsigned int sys_get_ctrl(bool right, float *jx, float *jy, float *trigger)
+EX  unsigned int sys_get_ctrl(bool right, float *sx, float *sy, float *tx, float *ty, float *trigger, float *grip)
     {
-        return sys::instance().get_ctrl(right, jx, jy, trigger);
+        return sys::instance().get_ctrl(right, sx, sy, tx, ty, trigger, grip);
     }
 EX  void sys_set_ctrl_pose(bool right, int anim_id) { sys::instance().set_ctrl_pose(right, anim_id); }
 EX  int sys_get_trackers_count() { return player::instance().get_trackers_count(); }

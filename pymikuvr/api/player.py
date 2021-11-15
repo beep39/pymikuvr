@@ -13,11 +13,18 @@ c_lib.sys_get_tracker.restype = ctypes.c_char_p
 
 tmp_ax = ctypes.c_float(0)
 tmp_ay = ctypes.c_float(0)
+tmp_a2x = ctypes.c_float(0)
+tmp_a2y = ctypes.c_float(0)
 tmp_trigger = ctypes.c_float(0)
+tmp_grip = ctypes.c_float(0)
 tmp_i = ctypes.c_int(0)
+
 tmp_pax = ctypes.byref(tmp_ax)
 tmp_pay = ctypes.byref(tmp_ay)
+tmp_pa2x = ctypes.byref(tmp_a2x)
+tmp_pa2y = ctypes.byref(tmp_a2y)
 tmp_ptrigger = ctypes.byref(tmp_trigger)
+tmp_pgrip = ctypes.byref(tmp_grip)
 tmp_pi = ctypes.byref(tmp_i)
 
 class transform_ro(transform):
@@ -54,46 +61,85 @@ class transform_ro(transform):
     def __del__(self):
         return
 
+class controller_buttons:
+    __slots__ = ('_btn')
+    def __init__(self):
+        self._btn = 0
+
+    @property
+    def a(self):
+        return self._btn & (1 << 0) > 0
+
+    @property
+    def b(self):
+        return self._btn & (1 << 2) > 0
+
+    @property
+    def trigger(self):
+        return self._btn & (1 << 4) > 0
+
+    @property
+    def grip(self):
+        return self._btn & (1 << 6) > 0
+
+    @property
+    def axis(self):
+        return self._btn & (1 << 8) > 0
+
+    @property
+    def axis2(self):
+        return self._btn & (1 << 10) > 0
+
+class controller_touches:
+    __slots__ = ('_btn')
+    def __init__(self):
+        self._btn = 0
+
+    @property
+    def trigger(self):
+        return self._btn & (1 << 5) > 0
+
+    @property
+    def grip(self):
+        return self._btn & (1 << 7) > 0
+
+    @property
+    def axis(self):
+        return self._btn & (1 << 9) > 0
+
+    @property
+    def axis2(self):
+        return self._btn & (1 << 11) > 0
+
 class controller(transform_ro):
-    __slots__ = ('__right','__btn','__pose','axis','trigger')
+    __slots__ = ('__right','btn','touch','__pose','axis','axis2','trigger','grip')
     def __init__(self, id, parent, right):
         super().__init__(id, parent)
         self.__right = right
-        self.__btn = 0
+        self.btn = controller_buttons()
+        self.touch = controller_touches()
         self.__pose = animation()
         c_lib.sys_set_ctrl_pose(right, self.__pose._animation__id)
         self.axis = vec2()
+        self.axis2 = vec2()
         self.trigger = 0
+        self.grip = 0
 
     def _update(self):
-        self.__btn = c_lib.sys_get_ctrl(self.__right, tmp_pax, tmp_pay, tmp_ptrigger)
+        btn = c_lib.sys_get_ctrl(self.__right, tmp_pax, tmp_pay, tmp_pa2x, tmp_pa2y, tmp_ptrigger, tmp_pgrip)
+        self.btn._btn = btn
+        self.touch._btn = btn
+
         self.axis.x = tmp_ax.value
         self.axis.y = tmp_ay.value
+        self.axis2.x = tmp_a2x.value
+        self.axis2.y = tmp_a2y.value
         self.trigger = tmp_trigger.value
+        self.grip = tmp_grip.value
 
     @property
     def pose(self):
         return animation(self.__pose)
-
-    @property
-    def hold(self):
-        return self.__btn & (1 << 0) > 0
-
-    @property
-    def grip(self):
-        return self.__btn & (1 << 1) > 0
-
-    @property
-    def menu(self):
-        return self.__btn & (1 << 2) > 0
-
-    @property
-    def axis_btn(self):
-        return self.__btn & (1 << 16) > 0
-
-    @property
-    def trigger_btn(self):
-        return self.__btn & (1 << 17) > 0
 
 class named_transform(transform_ro):
     __slots__ = ('__name')

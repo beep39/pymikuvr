@@ -39,7 +39,7 @@ public:
     void reset_dt();
 
     void block_input(bool right, bool block);
-    uint32_t get_ctrl(bool right, float *ax, float *ay, float *triger);
+    uint32_t get_ctrl(bool right, float *sx, float *sy, float *tx, float *ty, float *trigger, float *grip);
     void set_ctrl_pose(bool right, int anim_id);
 
     const char *pop_callback();
@@ -98,6 +98,25 @@ private:
     vr::IVRSystem *m_vr = NULL;
     vr::IVRInput *m_vri = NULL;
     vr::VRActionSetHandle_t m_vr_input_action_handle = vr::k_ulInvalidActionHandle;
+
+    struct
+    {
+        vr::VRActionHandle_t a_button = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t b_button = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t trigger = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t trigger_button = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t trigger_touch = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t grip = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t grip_button = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t grip_touch = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t axis = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t axis_button = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t axis_touch = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t axis2 = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t axis2_button = vr::k_ulInvalidActionHandle;
+        vr::VRActionHandle_t axis2_touch = vr::k_ulInvalidActionHandle;
+    }
+    m_handles;
 #else
     const static int m_vr = 0;
 #endif
@@ -107,14 +126,24 @@ private:
         std::string serial;
         bool tracker = false;
         bool right = false;
-        std::vector<nya_math::vec2> axes;
+
+        float trigger = 0.0f;
+        float grip = 0.0f;
+        nya_math::vec2 axis;
+        nya_math::vec2 axis2;
+
         enum btn
         {
-            btn_hold,
-            btn_grip,
-            btn_menu,
-            btn_axis0 = 16,
-            btn_axis1,
+            btn_a = 0,
+            btn_b = 2,
+            btn_trigger = 4,
+            btn_trigger_touch = 5,
+            btn_grip = 6,
+            btn_grip_touch = 7,
+            btn_axis = 8,
+            btn_axis_touch = 9,
+            btn_axis2 = 10,
+            btn_axis2_touch = 11,
         };
 
         uint32_t buttons = 0;
@@ -123,6 +152,7 @@ private:
 
 #ifdef USE_VR
         vr::VRInputValueHandle_t input_handle = vr::k_ulInvalidActionHandle;
+        vr::VRInputValueHandle_t skeleton_handle = vr::k_ulInvalidActionHandle;
         std::vector<vr::VRBoneTransform_t> bones_buf;
 #endif
     };

@@ -49,7 +49,6 @@ bool sys::start_vr()
         return false;
     }
 
-    /*
     for (auto &folder: m_folders)
     {
         const auto path = folder + "openvr/actions.json";
@@ -59,9 +58,24 @@ bool sys::start_vr()
         m_vri = vr::VRInput();
         m_vri->SetActionManifestPath(path.c_str());
         m_vri->GetActionSetHandle("/actions/default", &m_vr_input_action_handle);
+
+        m_vri->GetActionHandle("/actions/default/in/A_Button", &m_handles.a_button);
+        m_vri->GetActionHandle("/actions/default/in/B_Button", &m_handles.b_button);
+        m_vri->GetActionHandle("/actions/default/in/Trigger_Axis", &m_handles.trigger);
+        m_vri->GetActionHandle("/actions/default/in/Trigger_Button", &m_handles.trigger_button);
+        m_vri->GetActionHandle("/actions/default/in/Trigger_Touch", &m_handles.trigger_touch);
+        m_vri->GetActionHandle("/actions/default/in/Grip_Squeeze", &m_handles.grip);
+        m_vri->GetActionHandle("/actions/default/in/Grip_Button", &m_handles.grip_button);
+        m_vri->GetActionHandle("/actions/default/in/Grip_Touch", &m_handles.grip_touch);
+        m_vri->GetActionHandle("/actions/default/in/Primary2Axis_Axes", &m_handles.axis);
+        m_vri->GetActionHandle("/actions/default/in/Primary2Axis_Button", &m_handles.axis_button);
+        m_vri->GetActionHandle("/actions/default/in/Primary2Axis_Button", &m_handles.axis_touch);
+        m_vri->GetActionHandle("/actions/default/in/Secondary2Axis_Axes", &m_handles.axis2);
+        m_vri->GetActionHandle("/actions/default/in/Secondary2Axis_Button", &m_handles.axis2_button);
+        m_vri->GetActionHandle("/actions/default/in/Secondary2Axis_Touch", &m_handles.axis2_touch);
+
         break;
     }
-    */
 
     uint32_t w, h;
     m_vr->GetRecommendedRenderTargetSize(&w, &h);
@@ -248,25 +262,24 @@ bool sys::update()
                     c.origin = right ? player::instance().rhand() : player::instance().lhand();
                     if (right)
                     {
-                        if (m_vri)
-                            m_vri->GetInputSourceHandle("/actions/default/in/SkeletonRightHand", &c.input_handle);
+                        m_vri->GetInputSourceHandle("/user/hand/right", &c.input_handle);
+                        m_vri->GetInputSourceHandle("/actions/default/in/SkeletonRightHand", &c.skeleton_handle);
                         m_controller_right = &c;
                         c.pose = m_controller_pose[1];
                     }
                     else
                     {
-                        if (m_vri)
-                            m_vri->GetInputSourceHandle("/actions/default/in/SkeletonLeftHand", &c.input_handle);
+                        m_vri->GetInputSourceHandle("/user/hand/left", &c.input_handle);
+                        m_vri->GetInputSourceHandle("/actions/default/in/SkeletonLeftHand", &c.skeleton_handle);
                         m_controller_left = &c;
                         c.pose = m_controller_pose[0];
                     }
                     c.right = right;
-                    c.axes.resize(5);
 
                     if (m_vri)
                     {
                         uint32_t bone_count = 0;
-                        auto bc_error = m_vri->GetBoneCount(c.input_handle, &bone_count);
+                        auto bc_error = m_vri->GetBoneCount(c.skeleton_handle, &bone_count);
                         if (bc_error == vr::VRInputError_None)
                         {
                             const int anim_bones_count = c.pose->anim->get_shared_data()->anim.get_bones_count();
@@ -297,34 +310,62 @@ bool sys::update()
 
         for (auto &d: m_controllers)
         {
-            uint32_t buttons = 0;
-            vr::VRControllerState_t state;
-            m_vr->GetControllerState(d.first, &state, sizeof(state));
             auto &c = d.second;
-            for (int i = 0, to = (int)c.axes.size(); i < to; ++i)
+            if (c.tracker)
+                continue;
+
+            c.buttons = 0;
+            vr::InputDigitalActionData_t ddata;
+            vr::InputAnalogActionData_t adata;
+
+            if (m_vri->GetDigitalActionData(m_handles.a_button, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_a);
+            if (m_vri->GetDigitalActionData(m_handles.b_button, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_b);
+
+            c.trigger = 0.0f;
+            if (m_vri->GetAnalogActionData(m_handles.trigger, &adata, sizeof(adata), c.input_handle) == vr::VRInputError_None)
+                c.trigger = adata.x;
+            if (m_vri->GetDigitalActionData(m_handles.trigger_button, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
             {
-                c.axes[i].x = state.rAxis[i].x;
-                c.axes[i].y = state.rAxis[i].y;
-                if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::EVRButtonId(vr::k_EButton_Axis0 + i)))
-                    buttons |= (1 << (controller::btn_axis0 + i));
+                c.trigger = 1.0f;
+                c.buttons |= (1 << controller::btn_trigger);
             }
-            if (state.ulButtonTouched & vr::ButtonMaskFromId(vr::k_EButton_Grip))
-                buttons |= (1 << controller::btn_hold);
-            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip))
-                buttons |= (1 << controller::btn_grip);
-            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_ApplicationMenu))
-                buttons |= (1 << controller::btn_menu);
-            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Axis0))
-                buttons |= (1 << controller::btn_axis0);
-            if (state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Axis1))
-                buttons |= (1 << controller::btn_axis1);
-            c.buttons = buttons;
+            if (m_vri->GetDigitalActionData(m_handles.trigger_touch, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_trigger_touch);
+
+            if (m_vri->GetAnalogActionData(m_handles.grip, &adata, sizeof(adata), c.input_handle) == vr::VRInputError_None)
+                c.grip = adata.x;
+            if (m_vri->GetDigitalActionData(m_handles.grip_button, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_grip);
+            if (m_vri->GetDigitalActionData(m_handles.grip_touch, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_grip_touch);
+
+            if (m_vri->GetAnalogActionData(m_handles.axis, &adata, sizeof(adata), c.input_handle) == vr::VRInputError_None)
+            {
+                c.axis.x = adata.x;
+                c.axis.y = adata.y;
+            }
+            if (m_vri->GetDigitalActionData(m_handles.axis_button, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_axis);
+            if (m_vri->GetDigitalActionData(m_handles.axis_touch, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_axis_touch);
+
+            if (m_vri->GetAnalogActionData(m_handles.axis2, &adata, sizeof(adata), c.input_handle) == vr::VRInputError_None)
+            {
+                c.axis2.x = adata.x;
+                c.axis2.y = adata.y;
+            }
+            if (m_vri->GetDigitalActionData(m_handles.axis2_button, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_axis2);
+            if (m_vri->GetDigitalActionData(m_handles.axis2_touch, &ddata, sizeof(ddata), c.input_handle) == vr::VRInputError_None && ddata.bState)
+                c.buttons |= (1 << controller::btn_axis2_touch);
 
             if (c.bones_buf.empty())
                 continue;
  
             vr::InputSkeletalActionData_t action_data;
-            const auto sd_error = m_vri->GetSkeletalActionData(c.input_handle, &action_data, sizeof(action_data));
+            const auto sd_error = m_vri->GetSkeletalActionData(c.skeleton_handle, &action_data, sizeof(action_data));
             if (sd_error != vr::VRInputError_None)
             {
                 if (sd_error == vr::VRInputError_NoData)
@@ -338,7 +379,7 @@ bool sys::update()
             if (!action_data.bActive)
                 continue;
 
-            if (m_vri->GetSkeletalBoneData(c.input_handle, vr::VRSkeletalTransformSpace_Parent, vr::VRSkeletalMotionRange_WithoutController,
+            if (m_vri->GetSkeletalBoneData(c.skeleton_handle, vr::VRSkeletalTransformSpace_Parent, vr::VRSkeletalMotionRange_WithoutController,
                                            c.bones_buf.data(), (uint32_t)c.bones_buf.size()) != vr::VRInputError_None)
                 continue;
 
@@ -411,7 +452,7 @@ const char *sys::pop_callback()
 
 void sys::block_input(bool right, bool block) { m_input_blocked[right ? 1 : 0] = block; }
 
-uint32_t sys::get_ctrl(bool right, float *jx, float *jy, float *trigger)
+uint32_t sys::get_ctrl(bool right, float *sx, float *sy, float *tx, float *ty, float *trigger, float *grip)
 {
     controller *ctrl = 0;
     if (!m_input_blocked[right ? 1 : 0])
@@ -423,18 +464,14 @@ uint32_t sys::get_ctrl(bool right, float *jx, float *jy, float *trigger)
         ctrl = &invalid;
     }
 
-    if (ctrl->axes.size() > 0)
-    {
-        *jx = ctrl->axes[0].x;
-        *jy = ctrl->axes[0].y;
-    }
-    else
-        *jx = *jy = 0;
+    *sx = ctrl->axis.x;
+    *sy = ctrl->axis.y;
 
-    if (ctrl->axes.size() > 1)
-        *trigger = ctrl->axes[1].x;
-    else
-        *trigger = 0;
+    *tx = ctrl->axis2.x;
+    *ty = ctrl->axis2.y;
+
+    *trigger = ctrl->trigger;
+    *grip = ctrl->grip;
 
     return ctrl->buttons;
 }
@@ -651,9 +688,6 @@ void sys::emulate_vr_input()
         m_controllers[1] = controller();
         m_controller_left = &m_controllers[0];
         m_controller_right = &m_controllers[1];
-        m_controller_left->axes.resize(2);
-        m_controller_right->axes.resize(2);
-        m_controller_right->right = true;
 
         m_controller_left->pose = m_controller_pose[0];
         m_controller_right->pose = m_controller_pose[1];
@@ -666,8 +700,8 @@ void sys::emulate_vr_input()
     if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) ay -= 1.0f;
     if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) ax -= 1.0f;
     if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) ax += 1.0f;
-    m_controller_left->axes[0].x = ax;
-    m_controller_left->axes[0].y = ay;
+    m_controller_left->axis.x = ax;
+    m_controller_left->axis.y = ay;
 
     ax = 0, ay = 0, ax2 = 0;
     if (glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS) ay += 1.0f;
@@ -675,25 +709,25 @@ void sys::emulate_vr_input()
     if (glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS) ax -= 1.0f;
     if (glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS) ax += 1.0f;
     if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS) ax2 = 1.0f;
-    m_controller_right->axes[0].x = ax;
-    m_controller_right->axes[0].y = ay;
-    m_controller_right->axes[1].x = ax2;
+    m_controller_right->axis.x = ax;
+    m_controller_right->axis.y = ay;
+    m_controller_right->trigger = ax2;
 
     uint32_t buttons = 0;
     if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        buttons |= (1 << controller::btn_hold);
+        buttons |= (1 << controller::btn_grip_touch);
     if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
         buttons |= (1 << controller::btn_grip);
     if (glfwGetKey(m_window, GLFW_KEY_TAB) == GLFW_PRESS)
-        buttons |= (1 << controller::btn_menu);
+        buttons |= (1 << controller::btn_a);
     if (glfwGetKey(m_window, GLFW_KEY_ENTER) == GLFW_PRESS)
-        buttons |= (1 << controller::btn_axis0);
-    if(m_controller_right->axes[1].x>0.5f)
-        buttons |= (1 << controller::btn_axis1);
+        buttons |= (1 << controller::btn_axis);
+    if(m_controller_right->trigger > 0.5f)
+        buttons |= (1 << controller::btn_trigger);
     m_controller_right->buttons = buttons;
 
     auto &anim = *(nya_render::animation *)&m_controller_right->pose->anim->get_shared_data()->anim;
-    if (buttons | controller::btn_hold)
+    if (buttons & (1 << controller::btn_grip_touch))
     {
         nya_math::quat q1(-0.10f, 0.05f, 0.68f, 0.72f),
                        q2(0.0f, 0.0f, 0.77f, 0.64f),

@@ -384,8 +384,8 @@ void ui::update_post()
     io.MouseDrawCursor = true;
 
     sys::instance().block_input(true, false);
-    float ax, ay, trigger;
-    sys::instance().get_ctrl(true, &ax, &ay, &trigger);
+    float sx, sy, tx, ty, trigger, grip;
+    sys::instance().get_ctrl(true, &sx, &sy, &tx, &ty, &trigger, &grip);
     io.MouseDown[0] = trigger > 0.5f;
     sys::instance().block_input(true, true);
 
