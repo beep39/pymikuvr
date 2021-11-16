@@ -58,9 +58,14 @@ void ui::init()
 
 bool ui::set_font(const char *path, int size, float scale, const char *additional_gliphs)
 {
-    auto r = nya_resources::read_data(path);
-    if (!r.get_data())
+    auto r = nya_resources::get_resources_provider().access(path);
+    if (!r)
         return false;
+    
+    const auto font_size = (int)r->get_size();
+    const auto font_data = IM_ALLOC(font_size);
+    r->read_all(font_data);
+    r->release();
 
     ImGui::SetCurrentContext(m_main_context);
     auto& io = ImGui::GetIO();
@@ -73,8 +78,7 @@ bool ui::set_font(const char *path, int size, float scale, const char *additiona
     ImVector<ImWchar> ranges;
     builder.BuildRanges(&ranges);
 
-    auto font = io.Fonts->AddFontFromMemoryTTF(r.get_data(), (int)r.get_size() , size, NULL, ranges.begin());
-    r.free();
+    auto font = io.Fonts->AddFontFromMemoryTTF(font_data, font_size, size, NULL, ranges.begin());
     if (!font)
     {
         ImGui::SetCurrentContext(0);
