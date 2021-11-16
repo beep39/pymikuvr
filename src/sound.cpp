@@ -4,6 +4,7 @@
 #include "player.h"
 #include "sys.h"
 #include "memory/memory_reader.h"
+#include <limits.h>
 
 #include "AL/al.h"
 #include "AL/alc.h"
@@ -195,7 +196,7 @@ int sound::get_level()
         return 0;
 
     ALint pos;
-    alGetSourcei(m_source->sourceid, AL_SAMPLE_OFFSET, &pos);
+    alGetSourcei(m_source->sourceid, AL_BYTE_OFFSET, &pos);
     auto &b = m_source->buffer;
     auto &d = b->data;
 
@@ -208,29 +209,34 @@ int sound::get_level()
     switch (b->format)
     {
         case AL_FORMAT_MONO8:
-            break;
-
-        case AL_FORMAT_MONO16:
+        case AL_FORMAT_STEREO8:
         {
-            const int sum_len = b->samplerate * 2 / dt;
-            pos += sum_len; //latency mitigation
-
-            if ((pos + sum_len) * 2 > d.size())
+            const size_t sum_len = b->samplerate * (b->format == AL_FORMAT_STEREO8 ? 2 : 1) / dt;
+            if (pos + sum_len > d.size())
                 return 0;
 
-            const auto *buf = (const short *)(b->data.data()) + pos;
+            const auto *buf = (const char *)(b->data.data() + pos);
             const auto *to = buf + sum_len;
             while (buf < to)
                 level = (abs(*buf++) + level) / 2;
 
-            return level * 2000 / 0xffff;
+            return level * 1000 / SCHAR_MAX;
         }
 
-        case AL_FORMAT_STEREO8:
-            break;
-
+        case AL_FORMAT_MONO16:
         case AL_FORMAT_STEREO16:
-            break;
+        {
+            const size_t sum_len = b->samplerate * (b->format == AL_FORMAT_STEREO16 ? 2 : 1) / dt;
+            if (pos + sum_len * sizeof(short) > d.size())
+                return 0;
+
+            const auto *buf = (const short *)(b->data.data() + pos);
+            const auto *to = buf + sum_len;
+            while (buf < to)
+                level = (abs(*buf++) + level) / 2;
+
+            return level * 1000 / SHRT_MAX;
+        }
     }
 
     return 0;
