@@ -82,8 +82,19 @@ bool ui::set_font(const char *path_, int size, float scale, const char *addition
     font->Scale = scale;
     unsigned char* pixels;
     int width, height;
-    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-    m_font_texture.build_texture(pixels, width, height, nya_render::texture::color_rgba);
+    io.Fonts->GetTexDataAsAlpha8(&pixels, &width, &height);
+    if (!pixels || !width || !height)
+    {
+        ImGui::SetCurrentContext(0);
+        return false;
+    }
+
+    nya_memory::tmp_buffer_scoped buf(width * height * 4);
+    auto dst = (uint32_t* )buf.get_data(), dst_last = dst + width * height;
+    while(dst < dst_last)
+        *dst++ = 0xFFFFFF | ((*pixels++) << 24);
+
+    m_font_texture.build_texture(buf.get_data(), width, height, nya_render::texture::color_rgba);
     io.Fonts->TexID = &m_font_texture;
     ImGui::SetCurrentContext(0);
     return true;
@@ -536,6 +547,15 @@ int ui::add_listbox(int callback, const char ** values, int count)
 
 int ui::add_tab(const char *text)
 {
+    if (!text || !text[0])
+        return -1;
+
+    for (auto &w: m_widgets)
+    {
+        if (w.type == widget_tab && w.label == text)
+            return -1;
+    }
+
     return add_widget(widget(widget_tab, text));
 }
 
