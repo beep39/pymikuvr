@@ -56,6 +56,7 @@ static bool load_gdi_plus(nya_scene::shared_texture &res,nya_scene::resource_dat
 void texture::init()
 {
     nya_scene::texture::register_load_function(nya_scene::load_texture_bgra_bmp, false);
+    nya_scene::texture::register_load_function(nya_scene::texture::load_dds, false);
 #ifdef _WIN32
     Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
     nya_scene::texture::register_load_function(load_gdi_plus, false);
