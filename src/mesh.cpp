@@ -450,7 +450,41 @@ void mesh::set_group_visible(int idx, bool value)
     }
 }
 
-void mesh::mesh_init_texture(int idx, int tex_id)
+bool mesh::material_load(int idx, const char *name)
+{
+    nya_scene::material m;
+    if (!m.load(name))
+        return false;
+
+    const auto &om = m_mesh.get_material(idx);
+    for (int i = 0, count = om.get_textures_count(); i < count; ++i)
+    {
+        auto &t = om.get_texture(i);
+        if (t.is_valid())
+            m.set_texture(om.get_texture_semantics(i), t);
+    }
+
+    for (int i = 0, count = om.get_params_count(); i < count; ++i)
+    {
+        const char *pn = om.get_param_name(i);
+
+        auto &pa = om.get_param_array(i);
+        if (pa.is_valid())
+        {
+            m.set_param_array(pn, pa);
+            continue;
+        }
+
+        auto &p = om.get_param(i);
+        if (p.is_valid())
+            m.set_param(pn, p);
+    }
+
+    m_mesh.set_material(idx, m);
+    return true;
+}
+
+void mesh::init_texture(int idx, int tex_id)
 {
     auto &m = m_mesh.modify_material(idx);
     auto p = m.get_texture("diffuse");
@@ -460,7 +494,7 @@ void mesh::mesh_init_texture(int idx, int tex_id)
     m.set_texture("diffuse", n);
 }
 
-void mesh::mesh_set_texture(int idx, int tex_id)
+void mesh::set_texture(int idx, int tex_id)
 {
     m_mesh.modify_material(idx).set_texture("diffuse", texture::get(tex_id)->tex);
 }

@@ -98,8 +98,9 @@ EX  void mesh_set_morph(int id, const char *name, float value, bool override_ani
 EX  int mesh_get_materials_count(int id) { return mesh::get(id)->get_groups_count(); }
 EX  const char *mesh_get_material_name(int id, int idx) { return mesh::get(id)->get_group_name(idx); }
 EX  void mesh_material_visible(int id, int idx, bool visible) { mesh::get(id)->set_group_visible(idx, visible); }
-EX  void mesh_init_texture(int id, int idx, int tex_id) { mesh::get(id)->mesh_init_texture(idx, tex_id); }
-EX  void mesh_set_texture(int id, int idx, int tex_id) { mesh::get(id)->mesh_set_texture(idx, tex_id); }
+EX  bool mesh_material_load(int id, int idx, const char *name) { return mesh::get(id)->material_load(idx, name); }
+EX  void mesh_init_texture(int id, int idx, int tex_id) { mesh::get(id)->init_texture(idx, tex_id); }
+EX  void mesh_set_texture(int id, int idx, int tex_id) { mesh::get(id)->set_texture(idx, tex_id); }
 EX  void mesh_phys_enable(int id, bool enable) { mesh::get(id)->enable_phys(enable); }
 EX  void mesh_phys_reset(int id) { mesh::get(id)->enable_reset(); }
 EX  void mesh_remove(int id) { mesh::remove(id); }

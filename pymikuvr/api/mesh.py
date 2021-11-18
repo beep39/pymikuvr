@@ -3,6 +3,7 @@ from api.capi import c_lib
 from api.base import base
 from api.vec3 import vec3_o
 from api.quat import quat_o
+from api.texture import texture
 from api.transform import transform
 from api.animation import animation
 from collections.abc import Mapping
@@ -154,6 +155,12 @@ class mesh_material:
     def enabled(self, v):
         self.__visible = v
         c_lib.mesh_material_visible(self.__id, self.__idx, v)
+
+    def load(self, resname):
+        if not c_lib.mesh_material_load(self.__id, self.__idx, resname.encode()):
+            return False
+        self.__texture = None
+        return True
 
     @property
     def texture(self):

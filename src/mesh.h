@@ -41,8 +41,9 @@ public:
     int get_groups_count();
     const char *get_group_name(int idx);
     void set_group_visible(int idx, bool visible);
-    void mesh_init_texture(int idx, int tex_id);
-    void mesh_set_texture(int idx, int tex_id);
+    bool material_load(int idx, const char *name);
+    void init_texture(int idx, int tex_id);
+    void set_texture(int idx, int tex_id);
 
     void enable_phys(bool enable);
     void enable_reset();

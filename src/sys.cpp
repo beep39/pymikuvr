@@ -719,7 +719,7 @@ void sys::emulate_vr_input()
     if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
         buttons |= (1 << controller::btn_grip);
     if (glfwGetKey(m_window, GLFW_KEY_TAB) == GLFW_PRESS)
-        buttons |= (1 << controller::btn_a);
+        buttons |= (1 << controller::btn_b);
     if (glfwGetKey(m_window, GLFW_KEY_ENTER) == GLFW_PRESS)
         buttons |= (1 << controller::btn_axis);
     if(m_controller_right->trigger > 0.5f)
